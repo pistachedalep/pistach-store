@@ -539,26 +539,35 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   }
 
   function updateCategorySelectOptions() {
-    document.getElementById("pCategorySelect").innerHTML = categoriesList.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
+    const select = document.getElementById("pCategorySelect");
+    if(select) {
+      select.innerHTML = categoriesList.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
+    }
   }
 
-  // تم دمج دالة العرض والبحث والترتيب بشكل مباشر لضمان عدم حدوث أي تداخل
   window.renderProducts = function() {
     const c = document.getElementById("productsContainer");
     if(!c) return;
-    if(!products.length) return c.innerHTML = "<p>لا توجد منتجات.</p>";
+    if(!products || !products.length) {
+      c.innerHTML = "<p style='text-align:center; padding:20px; color:#64748b;'>لا توجد منتجات مضافة حالياً.</p>";
+      return;
+    }
 
     products.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-    const searchVal = (document.getElementById("productSearchInput")?.value || "").toLowerCase().trim();
+    const searchInput = document.getElementById("productSearchInput");
+    const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : "";
+
     const filteredProducts = products.filter(p => {
+      if (!searchVal) return true;
       const pName = (p.name || "").toLowerCase();
       const pCat = (p.category || "").toLowerCase();
       return pName.includes(searchVal) || pCat.includes(searchVal);
     });
 
     if(!filteredProducts.length) {
-      return c.innerHTML = "<p style='text-align:center; padding:20px; color:#64748b;'>لا توجد نتائج تطابق بحثك.</p>";
+      c.innerHTML = "<p style='text-align:center; padding:20px; color:#64748b;'>لا توجد نتائج تطابق بحثك.</p>";
+      return;
     }
 
     c.innerHTML = filteredProducts.map((p) => {
@@ -587,7 +596,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         </div>
       `;
     }).join("");
-  }
+  };
 
   window.moveProductById = async (id, direction) => {
     products.sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -614,6 +623,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   function renderOrders() {
     const c = document.getElementById("ordersContainer");
+    if(!c) return;
     if(!orders.length) return c.innerHTML = "<p>لا توجد طلبات.</p>";
     c.innerHTML = orders.sort((a,b)=>b.createdAt-a.createdAt).map(o => `
       <div class="order-box">
@@ -625,11 +635,14 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   }
 
   function renderReports() {
-    document.getElementById("reportsContainer").innerHTML = `
-      <p>📦 المنتجات: <strong>${products.length}</strong></p>
-      <p>📋 الطلبات: <strong>${orders.length}</strong></p>
-      <p>💰 المبيعات: <strong>${orders.reduce((sum,o)=>sum+(o.grandTotal||0),0)} جنيه</strong></p>
-    `;
+    const repContainer = document.getElementById("reportsContainer");
+    if(repContainer) {
+      repContainer.innerHTML = `
+        <p>📦 المنتجات: <strong>${products.length}</strong></p>
+        <p>📋 الطلبات: <strong>${orders.length}</strong></p>
+        <p>💰 المبيعات: <strong>${orders.reduce((sum,o)=>sum+(o.grandTotal||0),0)} جنيه</strong></p>
+      `;
+    }
   }
 
   window.switchTab = (tabId, btn) => {
@@ -706,6 +719,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   window.editProduct = (id) => {
     const p = products.find(i => i.id === id);
+    if(!p) return;
     openModal();
     document.getElementById("editId").value = id;
     document.getElementById("pName").value = p.name || "";
@@ -736,12 +750,15 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   });
 
   function renderZones(zones) {
-    document.getElementById("zonesContainer").innerHTML = zones.map((z, idx) => `
-      <div style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f9f9f9; padding:8px; border-radius:5px;">
-        <span>${z.name}: <strong>${z.fee} ج</strong></span>
-        <button class="btn btn-danger" style="padding:2px 8px;" onclick="window.deleteZone(${idx})">حذف</button>
-      </div>
-    `).join("");
+    const container = document.getElementById("zonesContainer");
+    if(container) {
+      container.innerHTML = zones.map((z, idx) => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f9f9f9; padding:8px; border-radius:5px;">
+          <span>${z.name}: <strong>${z.fee} ج</strong></span>
+          <button class="btn btn-danger" style="padding:2px 8px;" onclick="window.deleteZone(${idx})">حذف</button>
+        </div>
+      `).join("");
+    }
   }
 
   window.deleteZone = async (idx) => {

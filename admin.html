@@ -343,13 +343,13 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
   onAuthStateChanged(auth, async user => {
     if(user) {
-      // فحص إذا كان المستخدم مسجلاً في Firestore
+      // فحص بيانات المستخدم في Firestore
       const userSnap = await getDoc(doc(db, "users", user.uid));
 
       if (userSnap.exists()) {
         currentUserData = { id: userSnap.id, ...userSnap.data() };
       } else {
-        // إذا كان الحساب غير مسجل في جدول users (كحساب جوجل الرئيسي)، منحه صلاحيات أدمن كاملة فوراً
+        // الحسابات المسجلة عبر جوجل تلقائياً تحصل على صلاحيات الأدمن الرئيسي الشاملة
         currentUserData = { 
           role: "admin", 
           allowedTabs: ["pTab", "catTab", "themeTab", "oTab", "dTab", "sTab", "usersTab", "rTab"] 

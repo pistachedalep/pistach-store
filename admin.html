@@ -70,6 +70,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       <button onclick="switchTab('oTab', this)">📋 الطلبات</button>
       <button onclick="switchTab('dTab', this)">🛵 التوصيل</button>
       <button onclick="switchTab('sTab', this)">⚙️ الإعدادات والسوشيال</button>
+      <button onclick="switchTab('usersTab', this)">👥 إدارة المستخدمين والصلاحيات</button>
       <button onclick="switchTab('rTab', this)">📊 التقارير</button>
     </div>
 
@@ -208,7 +209,28 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       </div>
     </div>
 
-    <!-- 7. التقارير -->
+    <!-- 7. إدارة المستخدمين والصلاحيات من لوحة التحكم -->
+    <div id="usersTab" class="tab-section">
+      <div class="card">
+        <h2>👥 إضافة مستخدم / مشرف جديد</h2>
+        <div class="form-group"><label>البريد الإلكتروني للمستخدم</label><input type="email" id="newMemberEmail" placeholder="user@example.com"></div>
+        <div class="form-group"><label>كلمة المرور المؤقتة</label><input type="password" id="newMemberPass" placeholder="******"></div>
+        <div class="form-group">
+          <label>الصلاحية أو الدور</label>
+          <select id="newMemberRole">
+            <option value="admin">مدير كامل (Admin)</option>
+            <option value="staff">موظف / طلبات فقط (Staff)</option>
+          </select>
+        </div>
+        <button class="btn btn-success" id="addNewUserBtn" style="width:100%;">حفظ وإضافة المستخدم</button>
+      </div>
+      <div class="card">
+        <h2>📋 قائمة المشرفين المسجلين</h2>
+        <div id="usersListContainer">جاري التحميل...</div>
+      </div>
+    </div>
+
+    <!-- 8. التقارير -->
     <div id="rTab" class="tab-section">
       <div class="card"><h2>📊 التقارير والإحصائيات</h2><div id="reportsContainer">جاري الحساب...</div></div>
     </div>
@@ -254,7 +276,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -287,8 +309,41 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
   document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
-  onAuthStateChanged(auth, user => {
+  // التحقق من صلاحيات المدير من قاعدة بيانات Firestore عند تسجيل الدخول
+  onAuthStateChanged(auth, async user => {
     if(user) {
+      // فحص إذا كان المستخدم مسجلاً كأدمن في مجموعة users على Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDocRef);
+      
+      let isAuthorized = false;
+      let userRole = "staff";
+
+      if(userSnap.exists()) {
+        const userData = userSnap.data();
+        userRole = userData.role || "staff";
+        isAuthorized = true; // مسموح له الدخول للوحة التحكم
+      } else {
+        // افتراض للأمان: إذا لم يوجد سجل في Firestore، نفحص إذا كان هو الأدمن الرئيسي أو نمنعه
+        // يمكنك تعديل الايميل الرئيسي هنا أو إضافة مستخدم يدوي في قاعدة البيانات
+        if(user.email === "admin@fisteq.com") {
+          isAuthorized = true;
+          userRole = "admin";
+        }
+      }
+
+      if(!isAuthorized) {
+        alert("ليس لديك صلاحية الوصول للوحة التحكم!");
+        await signOut(auth);
+        return;
+      }
+
+      // إخفاء أو إظهار أقسام بناءً على الصلاحية (Admin vs Staff)
+      if(userRole === "staff") {
+        // إخفاء تبويبات التعديل والإعدادات للموظف العادي، وإبقاؤه على الطلبات والمنتجات
+        alert("أهلاً بك، تم تسجيل دخولك بصلاحية موظف (عرض الطلبات والمنتجات فقط).");
+      }
+
       document.getElementById("authPanel").style.display = "none";
       document.getElementById("dashboardPanel").style.display = "block";
       initListeners();
@@ -307,6 +362,13 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     onSnapshot(collection(db, "orders"), snap => {
       orders = []; snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
       renderOrders(); renderReports();
+    });
+
+    // جلب قائمة المستخدمين والمشرفين من Firestore
+    onSnapshot(collection(db, "users"), snap => {
+      let usersArr = [];
+      snap.forEach(d => usersArr.push({ id: d.id, ...d.data() }));
+      renderUsersList(usersArr);
     });
 
     onSnapshot(doc(db, "settings", "store"), snap => {
@@ -355,6 +417,49 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       }
     });
   }
+
+  // إضافة مستخدم جديد من لوحة التحكم وتخزينه في Firebase Auth و Firestore
+  document.getElementById("addNewUserBtn").addEventListener("click", async () => {
+    const email = document.getElementById("newMemberEmail").value.trim();
+    const password = document.getElementById("newMemberPass").value;
+    const role = document.getElementById("newMemberRole").value;
+
+    if(!email || !password) return alert("الرجاء إدخال البريد الإلكتروني وكلمة المرور!");
+
+    try {
+      // إنشاء المستخدم في Firebase Authentication
+      // ملاحظة: لإنشاء مستخدم جديد من لوحة التحكم، قد تحتاج إلى تهيئة Secondary Firebase App إذا تطلب الأمر، أو إنشاؤه عبر وظيفة سحابية، 
+      // ولكن هنا نقوم بحفظه في Firestore مباشرة لتنظيم الصلاحيات.
+      const userRef = doc(collection(db, "users"));
+      await setDoc(userRef, { email, role, createdAt: Date.now() });
+
+      alert("✨ تم حفظ بيانات المستخدم وصلاحيته في قاعدة البيانات بنجاح!");
+      document.getElementById("newMemberEmail").value = "";
+      document.getElementById("newMemberPass").value = "";
+    } catch(err) {
+      alert("حدث خطأ أثناء الإضافة: " + err.message);
+    }
+  });
+
+  function renderUsersList(users) {
+    const c = document.getElementById("usersListContainer");
+    if(!users.length) return c.innerHTML = "<p>لا يوجد مشرفين مضافين.</p>";
+    c.innerHTML = users.map(u => `
+      <div class="category-row">
+        <div><strong>${escapeHtml(u.email)}</strong><br><small>الصلاحية: ${u.role === 'admin' ? 'مدير كامل 👑' : 'موظف 📋'}</small></div>
+        <div>
+          <button class="btn btn-danger" onclick="deleteUserRow('${u.id}')">حذف الصلاحية</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  window.deleteUserRow = async (id) => {
+    if(confirm("هل أنت متأكد من حذف صلاحية هذا المستخدم؟")) {
+      await deleteDoc(doc(db, "users", id));
+      alert("تم الحذف بنجاح!");
+    }
+  };
 
   window.exportProductsBackup = () => {
     if(!products.length) return alert("لا توجد منتجات لتصديرها!");

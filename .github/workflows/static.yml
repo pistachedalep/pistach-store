@@ -2,7 +2,7 @@ YAML
 
 name: Deploy static site to GitHub Pages
 
-on:
+'on':
   push:
     branches:
       - main

@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة التحكم - المتجر</title>
-<!-- استدعاء خط عربي احترافي يعمل فوراً من الويب -->
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root { 
@@ -317,7 +316,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   });
 
   function initListeners() {
-    // تفعيل البحث الفوري
     const searchInput = document.getElementById("productSearchInput");
     if(searchInput) {
       searchInput.oninput = renderProducts;
@@ -549,7 +547,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     document.getElementById("pCategorySelect").innerHTML = categoriesList.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
   }
 
-  // --- عرض المنتجات والبحث والترتيب ---
   function renderProducts() {
     const c = document.getElementById("productsContainer");
     if(!products.length) return c.innerHTML = "<p>لا توجد منتجات.</p>";
@@ -568,7 +565,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
 
     c.innerHTML = filteredProducts.map((p) => {
-      const realIdx = products.findIndex(item => item.id === p.id);
       let imgSrc = p.images?.[0] || p.image;
       if (!imgSrc || imgSrc.trim() === "" || imgSrc === "undefined") {
         imgSrc = currentDefaultImage;
@@ -583,8 +579,10 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
             <small>القسم: ${escapeHtml(p.category || 'عام')}</small>
           </div>
           <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">
-            <button class="btn btn-secondary" onclick="window.moveProductOrder(${realIdx}, -1)" title="رفع للأعلى">⬆️</button>
-            <button class="btn btn-secondary" onclick="window.moveProductOrder(${realIdx}, 1)" title="تنزيل للأسفل">⬇️</button>
+            <!-- تم تعديل الأزرار لتعتمد على معرّف المنتج id مباشرة دون التأثر بالبحث -->
+            <button class="btn btn-secondary" onclick="window.moveProductById('${p.id}', -1)" title="رفع للأعلى">⬆️</button>
+            <button class="btn btn-secondary" onclick="window.moveProductById('${p.id}', 1)" title="تنزيل للأسفل">⬇️</button>
+            
             <button class="btn ${isHidden ? 'btn-success' : 'btn-secondary'}" onclick="window.toggleProductVisibility('${p.id}', ${!isHidden})">
               ${isHidden ? 'إظهار' : 'إخفاء'}
             </button>
@@ -596,14 +594,18 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }).join("");
   }
 
-  window.moveProductOrder = async (index, direction) => {
-    const targetIndex = index + direction;
+  // الدالة الجديدة المعتمدة على الـ ID لضمان دقة الترتيب والصعود والنزول
+  window.moveProductById = async (id, direction) => {
+    products.sort((a, b) => (a.order || 0) - (b.order || 0));
+    const currentIndex = products.findIndex(p => p.id === id);
+    const targetIndex = currentIndex + direction;
+
     if (targetIndex < 0 || targetIndex >= products.length) return;
 
-    const currentProduct = products[index];
+    const currentProduct = products[currentIndex];
     const targetProduct = products[targetIndex];
 
-    const currentOrder = currentProduct.order !== undefined ? currentProduct.order : index;
+    const currentOrder = currentProduct.order !== undefined ? currentProduct.order : currentIndex;
     const targetOrder = targetProduct.order !== undefined ? targetProduct.order : targetIndex;
 
     const batch = writeBatch(db);

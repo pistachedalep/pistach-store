@@ -306,7 +306,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc, writeBatch, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw",
@@ -343,13 +343,19 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
   onAuthStateChanged(auth, async user => {
     if(user) {
-      // فحص بيانات المستخدم في Firestore
-      const userSnap = await getDoc(doc(db, "users", user.uid));
-
-      if (userSnap.exists()) {
-        currentUserData = { id: userSnap.id, ...userSnap.data() };
+      // التحقق الفوري: البريد الوهمي للموظفين المحليين ينتهي بـ fisteq.local
+      if (user.email && user.email.endsWith("@fisteq.local")) {
+        const uName = user.email.split("@")[0];
+        const q = query(collection(db, "users"), where("username", "==", uName));
+        const querySnap = await getDocs(q);
+        
+        if (!querySnap.empty) {
+          currentUserData = { id: querySnap.docs[0].id, ...querySnap.docs[0].data() };
+        } else {
+          currentUserData = { role: "staff", allowedTabs: ["oTab"] };
+        }
       } else {
-        // الحسابات المسجلة عبر جوجل تلقائياً تحصل على صلاحيات الأدمن الرئيسي الشاملة
+        // أي بريد حقيقي آخر (مثل حساب جوجل الرئيسي الأصلي) هو المدير الكامل الأدمن
         currentUserData = { 
           role: "admin", 
           allowedTabs: ["pTab", "catTab", "themeTab", "oTab", "dTab", "sTab", "usersTab", "rTab"] 

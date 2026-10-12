@@ -4,19 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة التحكم - المتجر</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root { --primary: #122b20; --border-color: #e2e8f0; --text-dark: #0f172a; }
-body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; padding: 0; color: var(--text-dark); }
+@font-face {
+  font-family: 'Alpads';
+  src: url('fonts/19306-alpads.woff2') format('woff2'), url('https://fonts.cdnfonts.com/s/19306/alpads.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root { --primary: #122b20; --border-color: #e2e8f0; --text-dark: #0f172a; --custom-font: 'Alpads', 'Tajawal', Tahoma, Arial, sans-serif; }
+body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding: 0; color: var(--text-dark); }
 .container { max-width: 980px; margin: 25px auto; padding: 0 16px; }
 .card { background: #ffffff; border-radius: 16px; padding: 22px; margin-bottom: 22px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
 .admin-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 22px; border-bottom: 2px solid var(--border-color); }
-.admin-tabs button { background: #f1f5f9; color: var(--text-dark); padding: 11px 20px; border-radius: 30px; font-weight: 800; white-space: nowrap; border: none; cursor: pointer; transition: all 0.2s; }
+.admin-tabs button { background: #f1f5f9; color: var(--text-dark); padding: 11px 20px; border-radius: 30px; font-weight: 800; white-space: nowrap; border: none; cursor: pointer; transition: all 0.2s; font-family: var(--custom-font); }
 .admin-tabs button.active { background: var(--primary); color: #ffffff; }
 .tab-section { display: none; }
 .tab-section.active { display: block; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media(max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
-.btn { padding: 10px 16px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; color: #fff; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn { padding: 10px 16px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; color: #fff; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--custom-font); }
 .btn-primary { background: var(--primary); }
 .btn-success { background: #10b981; }
 .btn-danger { background: #ef4444; }
@@ -24,7 +32,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 .btn-secondary { background: #64748b; }
 .form-group { margin-bottom: 16px; }
 .form-group label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 13.5px; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; font-family: var(--custom-font); }
 .color-picker-group { display: flex; align-items: center; gap: 12px; }
 .color-picker-group input[type="color"] { width: 48px; height: 42px; border: none; cursor: pointer; background: transparent; }
 .product-row, .category-row { display: flex; gap: 14px; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 14px 0; justify-content: space-between; }
@@ -41,6 +49,11 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 16px; backdrop-filter: blur(5px); }
 .modal-card { background: #fff; border-radius: 16px; padding: 22px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
 .order-box { border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 16px; background: #fff; }
+
+/* شريط البحث المضاف */
+.search-box-container { display: flex; gap: 10px; margin-bottom: 15px; }
+.search-box-container input { flex: 1; padding: 12px 16px; border: 2px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.search-box-container input:focus { border-color: var(--primary); }
 </style>
 </head>
 <body>
@@ -87,7 +100,15 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
           <button class="btn btn-danger" onclick="deleteAllProducts()">🗑️ حذف كافة المنتجات</button>
         </div>
       </div>
-      <div class="card"><h2>قائمة المنتجات</h2><div id="productsContainer">جاري التحميل...</div></div>
+      
+      <div class="card">
+        <h2>قائمة المنتجات (الترتيب والإدارة)</h2>
+        <!-- حقل البحث الفوري عن المنتجات -->
+        <div class="search-box-container">
+          <input type="text" id="productSearchInput" placeholder="🔍 ابحث باسم المنتج أو القسم..." oninput="renderProducts()">
+        </div>
+        <div id="productsContainer">جاري التحميل...</div>
+      </div>
     </div>
 
     <!-- 2. الأقسام -->
@@ -147,6 +168,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
           <div class="form-group"><label>خلفية المتجر العامة:</label><div class="color-picker-group"><input type="color" id="bgColorInput" value="#f8faf9"><span id="bgVal">#f8faf9</span></div></div>
           <div class="form-group"><label>نوع الخط:</label>
             <select id="fontFamilySelect">
+              <option value="Alpads">Alpads (الخط المخصص)</option>
               <option value="Tajawal">Tajawal</option>
               <option value="Cairo">Cairo</option>
               <option value="Almarai">Almarai</option>
@@ -348,7 +370,10 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
           document.getElementById("cardBgVal").innerText = data.theme.cardBgColor || '#ffffff';
           document.getElementById("cardTextColorInput").value = data.theme.cardTextColor || '#0f172a';
           document.getElementById("cardTextVal").innerText = data.theme.cardTextColor || '#0f172a';
-          document.getElementById("fontFamilySelect").value = data.theme.fontFamily || 'Tajawal';
+          document.getElementById("fontFamilySelect").value = data.theme.fontFamily || 'Alpads';
+          
+          const chosenFont = data.theme.fontFamily === 'Alpads' ? "'Alpads', Tahoma" : data.theme.fontFamily;
+          document.documentElement.style.setProperty('--custom-font', chosenFont);
         }
 
         renderProducts();
@@ -430,6 +455,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
   document.getElementById("saveThemeBtn").addEventListener("click", async () => {
     const storeName = document.getElementById("storeNameInput").value.trim() || "فستق حلب";
+    const selectedFont = document.getElementById("fontFamilySelect").value;
     const theme = {
       primaryColor: document.getElementById("primaryColorInput").value,
       accentColor: document.getElementById("accentColorInput").value,
@@ -437,10 +463,14 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       cardBgColor: document.getElementById("cardBgColorInput").value,
       cardTextColor: document.getElementById("cardTextColorInput").value,
       menuBgImage: uploadedBase64Image || "",
-      fontFamily: document.getElementById("fontFamilySelect").value
+      fontFamily: selectedFont
     };
     await setDoc(doc(db, "settings", "store"), { storeName, theme }, { merge: true });
-    alert("✨ تم الحفظ بنجاح!");
+    
+    const chosenFont = selectedFont === 'Alpads' ? "'Alpads', Tahoma" : selectedFont;
+    document.documentElement.style.setProperty('--custom-font', chosenFont);
+    
+    alert("✨ تم الحفظ وتطبيق الخط بنجاح!");
   });
 
   document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
@@ -522,26 +552,84 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     document.getElementById("pCategorySelect").innerHTML = categoriesList.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
   }
 
-  function renderProducts() {
+  // --- دوال ترتيب الأصناف والبحث والعرض ---
+  window.renderProducts = function() {
     const c = document.getElementById("productsContainer");
     if(!products.length) return c.innerHTML = "<p>لا توجد منتجات.</p>";
-    c.innerHTML = products.map(p => {
+
+    // الفرز أولاً حسب الترتيب المحفوظ
+    products.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    // الحصول على نص البحث
+    const searchVal = (document.getElementById("productSearchInput")?.value || "").toLowerCase().trim();
+
+    // فلترة المنتجات بحسب نص البحث
+    const filteredProducts = products.filter(p => {
+      const pName = (p.name || "").toLowerCase();
+      const pCat = (p.category || "").toLowerCase();
+      return pName.includes(searchVal) || pCat.includes(searchVal);
+    });
+
+    if(!filteredProducts.length) {
+      return c.innerHTML = "<p style='text-align:center; padding:20px; color:#64748b;'>لا توجد نتائج تطابق بحثك.</p>";
+    }
+
+    c.innerHTML = filteredProducts.map((p) => {
+      // إيجاد الفهرس الحقيقي للمنتج من مصفوفة المنتجات الأصلية لتطبيق الصعود والنزول بدقة
+      const realIdx = products.findIndex(item => item.id === p.id);
+
       let imgSrc = p.images?.[0] || p.image;
       if (!imgSrc || imgSrc.trim() === "" || imgSrc === "undefined") {
         imgSrc = currentDefaultImage;
       }
+      const isHidden = p.hidden === true;
+
       return `
-        <div class="product-row">
+        <div class="product-row" style="${isHidden ? 'opacity: 0.5; background: #fff5f5;' : ''}">
           <img src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null; this.src='${currentDefaultImage}';">
-          <div style="flex:1;"><strong>${escapeHtml(p.name)}</strong><br><small>القسم: ${escapeHtml(p.category || 'عام')}</small></div>
-          <div>
+          <div style="flex:1;">
+            <strong>${escapeHtml(p.name)}</strong> ${isHidden ? '<small style="color:red;">(مخفي من المنيو)</small>' : ''}<br>
+            <small>القسم: ${escapeHtml(p.category || 'عام')}</small>
+          </div>
+          <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">
+            <!-- أزرار الترتيب (رفع ونزول) -->
+            <button class="btn btn-secondary" onclick="moveProductOrder(${realIdx}, -1)" title="رفع للأعلى">⬆️</button>
+            <button class="btn btn-secondary" onclick="moveProductOrder(${realIdx}, 1)" title="تنزيل للأسفل">⬇️</button>
+            
+            <!-- زر إخفاء / إظهار المنتج -->
+            <button class="btn ${isHidden ? 'btn-success' : 'btn-secondary'}" onclick="toggleProductVisibility('${p.id}', ${!isHidden})">
+              ${isHidden ? 'إظهار' : 'إخفاء'}
+            </button>
+            
             <button class="btn btn-warning" onclick="editProduct('${p.id}')">تعديل</button>
             <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف</button>
           </div>
         </div>
       `;
     }).join("");
-  }
+  };
+
+  window.moveProductOrder = async (index, direction) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= products.length) return;
+
+    const currentProduct = products[index];
+    const targetProduct = products[targetIndex];
+
+    const currentOrder = currentProduct.order !== undefined ? currentProduct.order : index;
+    const targetOrder = targetProduct.order !== undefined ? targetProduct.order : targetIndex;
+
+    const batch = writeBatch(db);
+    batch.update(doc(db, "products", currentProduct.id), { order: targetOrder });
+    batch.update(doc(db, "products", targetProduct.id), { order: currentOrder });
+
+    await batch.commit();
+  };
+
+  window.toggleProductVisibility = async (id, makeHidden) => {
+    await updateDoc(doc(db, "products", id), { hidden: makeHidden });
+  };
+  // ---------------------------------
 
   function renderOrders() {
     const c = document.getElementById("ordersContainer");
@@ -629,6 +717,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       await updateDoc(doc(db, "products", id), payload); 
     } else { 
       payload.hidden = false; 
+      payload.order = products.length;
       payload.createdAt = Date.now(); 
       await addDoc(collection(db, "products"), payload); 
     }

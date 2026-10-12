@@ -29,18 +29,14 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 .color-picker-group input[type="color"] { width: 48px; height: 42px; border: none; cursor: pointer; background: transparent; }
 .product-row, .category-row, .user-row { display: flex; gap: 14px; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 14px 0; justify-content: space-between; flex-wrap: wrap; }
 .product-row img { width: 75px; height: 75px; object-fit: cover; border-radius: 12px; background: #f1f5f9; }
-
 .checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 6px; }
 .checkbox-group label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: normal; cursor: pointer; }
-
 .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 22px; }
 .preset-card { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.25s; background: #fff; }
 .preset-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
 .preset-colors { display: flex; height: 18px; border-radius: 10px; overflow: hidden; margin-top: 8px; }
 .preset-colors div { flex: 1; height: 100%; }
-
 .backup-tools { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
-
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 16px; backdrop-filter: blur(5px); }
 .modal-card { background: #fff; border-radius: 16px; padding: 22px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
 .order-box { border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 16px; background: #fff; }
@@ -343,7 +339,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
   onAuthStateChanged(auth, async user => {
     if(user) {
-      // التحقق الفوري والحيادي: البريد المحلي المخصص للموظفين فقط ينتهي بـ @fisteq.local ولا يبدأ بـ admin@
+      // إجبار ظهور صلاحيات الأدمن لكافة الحسابات الإدارية
       if (user.email && user.email.endsWith("@fisteq.local") && !user.email.startsWith("admin@")) {
         const uName = user.email.split("@")[0];
         const q = query(collection(db, "users"), where("username", "==", uName));
@@ -355,7 +351,6 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
           currentUserData = { role: "staff", allowedTabs: ["oTab"] };
         }
       } else {
-        // أي حساب آخر (حساب Google الرئيسي أو اسم admin) يُمنح صلاحية المدير الكاملة مطلقاً
         currentUserData = { 
           role: "admin", 
           allowedTabs: ["pTab", "catTab", "themeTab", "oTab", "dTab", "sTab", "usersTab", "rTab"] 
@@ -439,7 +434,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     });
   }
 
-  // === النسخ الاحتياطي الشامل واستعادة النظام ===
+  // النسخ الاحتياطي الشامل
   window.exportFullSystemBackup = async () => {
     try {
       const storeSnap = await getDoc(doc(db, "settings", "store"));
@@ -511,7 +506,6 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     reader.readAsText(file);
   };
 
-  // حفظ وإضافة أو تعديل الحسابات والصلاحيات
   document.getElementById("saveUserBtn").addEventListener("click", async () => {
     const editId = document.getElementById("editUserId").value;
     const username = document.getElementById("newMemberUsername").value.trim().toLowerCase();

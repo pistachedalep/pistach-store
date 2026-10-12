@@ -53,7 +53,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
   <!-- Auth Panel -->
   <div id="authPanel" class="card" style="max-width: 400px; margin: 80px auto;">
     <h2 style="text-align: center; margin-bottom: 12px; font-weight:800;">🔐 تسجيل الدخول للإدارة</h2>
-    <div class="form-group"><label>اسم المستخدم</label><input type="text" id="adminUsername" placeholder="مثال: admin"></div>
+    <div class="form-group"><label>اسم المستخدم / البريد الإلكتروني</label><input type="text" id="adminUsername" placeholder="مثال: admin"></div>
     <div class="form-group"><label>كلمة المرور</label><input type="password" id="adminPassword" placeholder="******"></div>
     <button class="btn btn-primary" style="width: 100%;" id="loginBtn">تسجيل الدخول</button>
     <p id="authError" style="color: #ef4444; font-size: 13px; text-align: center; margin-top: 10px; display: none; font-weight:700;"></p>
@@ -64,6 +64,19 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
       <h1 style="margin: 0; color: var(--primary); font-size: 22px; font-weight:900;" id="dashboardTitle">🍰 لوحة التحكم</h1>
       <button class="btn btn-danger" id="logoutBtn">تسجيل الخروج</button>
+    </div>
+
+    <!-- قسم النسخ الاحتياطي الشامل -->
+    <div class="card" style="border: 2px dashed var(--primary); background: #f0fdf4;">
+      <h2 style="margin-top:0;">💾 النسخ الاحتياطي الكامل وإدارة البيانات</h2>
+      <p style="font-size: 13px; color: #475569;">تنزيل نسخة احتياطية شاملة لجميع بيانات المتجر، المنتجات، الإعدادات، المستخدمين والتقارير واستعادتها بضغطة زر.</p>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="exportFullSystemBackup()">📥 تنزيل نسخة احتياطية شاملة (.json)</button>
+        <label class="btn btn-secondary" style="cursor:pointer; margin:0;">
+          📤 استعادة نسخة احتياطية شاملة
+          <input type="file" id="importFullBackupFile" accept=".json" style="display:none;" onchange="importFullSystemBackup(event)">
+        </label>
+      </div>
     </div>
 
     <div class="admin-tabs" id="mainTabsHeader">
@@ -82,12 +95,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       <div class="card">
         <button class="btn btn-success" onclick="openModal()">➕ إضافة منتج جديد</button>
         <div class="backup-tools" style="margin-top: 15px;">
-          <strong style="width:100%; font-size:13px; margin-bottom:5px;">💾 النسخ الاحتياطي وإدارة المنتجات:</strong>
-          <button class="btn btn-primary" onclick="exportProductsBackup()">📥 تنزيل نسخة احتياطية</button>
-          <label class="btn btn-secondary" style="cursor:pointer; margin:0;">
-            📤 استعادة نسخة
-            <input type="file" id="importProductsFile" accept=".json" style="display:none;" onchange="importProductsBackup(event)">
-          </label>
+          <strong style="width:100%; font-size:13px; margin-bottom:5px;">💾 إجراءات سريعة للمنتجات:</strong>
           <button class="btn btn-danger" onclick="deleteAllProducts()">🗑️ حذف كافة المنتجات</button>
         </div>
       </div>
@@ -168,7 +176,6 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
           <h2 style="margin:0;">الطلبات الواردة</h2>
           <div style="display:flex; gap:8px;">
-            <button class="btn btn-primary" onclick="exportOrdersBackup()">📥 تنزيل السجل</button>
             <button class="btn btn-danger" onclick="deleteAllOrders()">🗑️ تفريغ الطلبات</button>
           </div>
         </div>
@@ -318,7 +325,6 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
   let products = [], orders = [], categoriesList = [], usersList = [], uploadedBase64Image = "";
   let currentUserData = null;
 
-  // تسجيل الدخول باسم المستخدم تحويلاً لإيميل افتراضي
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const username = document.getElementById("adminUsername").value.trim().toLowerCase();
     const pass = document.getElementById("adminPassword").value;
@@ -337,13 +343,12 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
   onAuthStateChanged(auth, async user => {
     if(user) {
-      // جلب بيانات الحساب والصلاحيات من Firestore
       const userSnap = await getDoc(doc(db, "users", user.uid));
       
+      // التمييز المباشر للأدمن الرئيسي (سواء دخل بحساب جوجل أو اسم المستخدم)
       if(userSnap.exists()) {
         currentUserData = { id: userSnap.id, ...userSnap.data() };
       } else {
-        // حساب الأدمن الرئيسي الافتراضي
         currentUserData = { role: "admin", allowedTabs: ["pTab", "catTab", "themeTab", "oTab", "dTab", "sTab", "usersTab", "rTab"] };
       }
 
@@ -358,7 +363,6 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     }
   });
 
-  // تطبيق إخفاء وإظهار التبويبات بناءً على صلاحية المستخدم
   function applyUserPermissionsUI(userData) {
     const allTabs = ["pTab", "catTab", "themeTab", "oTab", "dTab", "sTab", "usersTab", "rTab"];
     let firstVisibleTab = null;
@@ -424,6 +428,78 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       }
     });
   }
+
+  // === النسخ الاحتياطي الشامل واستعادة النظام ===
+  window.exportFullSystemBackup = async () => {
+    try {
+      const storeSnap = await getDoc(doc(db, "settings", "store"));
+      const storeSettings = storeSnap.exists() ? storeSnap.data() : {};
+
+      const fullBackup = {
+        backupDate: new Date().toISOString(),
+        storeSettings: storeSettings,
+        products: products,
+        orders: orders,
+        categoriesList: categoriesList,
+        usersList: usersList
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullBackup, null, 2));
+      const dl = document.createElement('a');
+      dl.setAttribute("href", dataStr);
+      dl.setAttribute("download", `full_store_backup_${new Date().toISOString().slice(0,10)}.json`);
+      dl.click();
+
+      alert("✨ تم تنزيل النسخة الاحتياطية الشاملة بنجاح!");
+    } catch(err) {
+      alert("حدث خطأ أثناء تنزيل النسخة الاحتياطية: " + err.message);
+    }
+  };
+
+  window.importFullSystemBackup = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+      try {
+        const backupData = JSON.parse(event.target.result);
+
+        if(!confirm("⚠️ هل أنت متأكد من استعادة النسخة الاحتياطية الشاملة؟ سيتم تحديث وتعبئة كافة البيانات والإعدادات والمستخدمين.")) return;
+
+        if(backupData.storeSettings) {
+          await setDoc(doc(db, "settings", "store"), backupData.storeSettings, { merge: true });
+        }
+
+        if(backupData.products && Array.isArray(backupData.products)) {
+          for(const item of backupData.products) {
+            const itemData = { ...item }; delete itemData.id;
+            await addDoc(collection(db, "products"), itemData);
+          }
+        }
+
+        if(backupData.orders && Array.isArray(backupData.orders)) {
+          for(const order of backupData.orders) {
+            const orderData = { ...order }; delete orderData.id;
+            await addDoc(collection(db, "orders"), orderData);
+          }
+        }
+
+        if(backupData.usersList && Array.isArray(backupData.usersList)) {
+          for(const u of backupData.usersList) {
+            const uData = { ...u }; delete uData.id;
+            await addDoc(collection(db, "users"), uData);
+          }
+        }
+
+        alert("🎉 تمت استعادة النسخة الاحتياطية الشاملة بنجاح وإعادة بناء النظام!");
+        location.reload();
+      } catch(err) {
+        alert("خطأ في قراءة ملف النسخة الاحتياطية: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
 
   // حفظ وإضافة أو تعديل الحسابات والصلاحيات
   document.getElementById("saveUserBtn").addEventListener("click", async () => {
@@ -515,41 +591,12 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     document.getElementById("customPermissionsBox").style.display = role === 'staff' ? 'block' : 'none';
   };
 
-  window.exportProductsBackup = () => {
-    if(!products.length) return alert("لا توجد منتجات لتصديرها!");
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
-    const dl = document.createElement('a'); dl.setAttribute("href", dataStr);
-    dl.setAttribute("download", `products_backup_${new Date().toISOString().slice(0,10)}.json`); dl.click();
-  };
-
-  window.importProductsBackup = (e) => {
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = async function(event) {
-      try {
-        const imported = JSON.parse(event.target.result);
-        if(confirm(`استعادة ${imported.length} منتج؟`)) {
-          for(const item of imported) { delete item.id; await addDoc(collection(db, "products"), item); }
-          alert("تمت الاستعادة بنجاح!");
-        }
-      } catch(err) { alert("خطأ في قراءة الملف!"); }
-    };
-    reader.readAsText(file);
-  };
-
   window.deleteAllProducts = async () => {
     if(confirm("⚠️ حذف كافة المنتجات؟")) {
       const snap = await getDocs(collection(db, "products"));
       const batch = writeBatch(db); snap.forEach(d => batch.delete(d.ref));
       await batch.commit(); alert("تم الحذف بنجاح!");
     }
-  };
-
-  window.exportOrdersBackup = () => {
-    if(!orders.length) return alert("لا توجد طلبات!");
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orders, null, 2));
-    const dl = document.createElement('a'); dl.setAttribute("href", dataStr);
-    dl.setAttribute("download", `orders_backup_${new Date().toISOString().slice(0,10)}.json`); dl.click();
   };
 
   window.deleteAllOrders = async () => {

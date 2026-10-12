@@ -343,8 +343,8 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
   onAuthStateChanged(auth, async user => {
     if(user) {
-      // التحقق الفوري: البريد الوهمي للموظفين المحليين ينتهي بـ fisteq.local
-      if (user.email && user.email.endsWith("@fisteq.local")) {
+      // التحقق الفوري والحيادي: البريد المحلي المخصص للموظفين فقط ينتهي بـ @fisteq.local ولا يبدأ بـ admin@
+      if (user.email && user.email.endsWith("@fisteq.local") && !user.email.startsWith("admin@")) {
         const uName = user.email.split("@")[0];
         const q = query(collection(db, "users"), where("username", "==", uName));
         const querySnap = await getDocs(q);
@@ -355,7 +355,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
           currentUserData = { role: "staff", allowedTabs: ["oTab"] };
         }
       } else {
-        // أي بريد حقيقي آخر (مثل حساب جوجل الرئيسي الأصلي) هو المدير الكامل الأدمن
+        // أي حساب آخر (حساب Google الرئيسي أو اسم admin) يُمنح صلاحية المدير الكاملة مطلقاً
         currentUserData = { 
           role: "admin", 
           allowedTabs: ["pTab", "catTab", "themeTab", "oTab", "dTab", "sTab", "usersTab", "rTab"] 

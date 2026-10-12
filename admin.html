@@ -27,8 +27,11 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; }
 .color-picker-group { display: flex; align-items: center; gap: 12px; }
 .color-picker-group input[type="color"] { width: 48px; height: 42px; border: none; cursor: pointer; background: transparent; }
-.product-row, .category-row { display: flex; gap: 14px; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 14px 0; justify-content: space-between; }
+.product-row, .category-row, .user-row { display: flex; gap: 14px; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 14px 0; justify-content: space-between; flex-wrap: wrap; }
 .product-row img { width: 75px; height: 75px; object-fit: cover; border-radius: 12px; background: #f1f5f9; }
+
+.checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 6px; }
+.checkbox-group label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: normal; cursor: pointer; }
 
 .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 22px; }
 .preset-card { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.25s; background: #fff; }
@@ -50,8 +53,8 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
   <!-- Auth Panel -->
   <div id="authPanel" class="card" style="max-width: 400px; margin: 80px auto;">
     <h2 style="text-align: center; margin-bottom: 12px; font-weight:800;">🔐 تسجيل الدخول للإدارة</h2>
-    <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="adminEmail"></div>
-    <div class="form-group"><label>كلمة المرور</label><input type="password" id="adminPassword"></div>
+    <div class="form-group"><label>اسم المستخدم</label><input type="text" id="adminUsername" placeholder="مثال: admin"></div>
+    <div class="form-group"><label>كلمة المرور</label><input type="password" id="adminPassword" placeholder="******"></div>
     <button class="btn btn-primary" style="width: 100%;" id="loginBtn">تسجيل الدخول</button>
     <p id="authError" style="color: #ef4444; font-size: 13px; text-align: center; margin-top: 10px; display: none; font-weight:700;"></p>
   </div>
@@ -63,15 +66,15 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       <button class="btn btn-danger" id="logoutBtn">تسجيل الخروج</button>
     </div>
 
-    <div class="admin-tabs">
-      <button class="active" onclick="switchTab('pTab', this)">📦 المنتجات</button>
-      <button onclick="switchTab('catTab', this)">🏷️ الأقسام</button>
-      <button onclick="switchTab('themeTab', this)">🎨 الأبعاد والألوان</button>
-      <button onclick="switchTab('oTab', this)">📋 الطلبات</button>
-      <button onclick="switchTab('dTab', this)">🛵 التوصيل</button>
-      <button onclick="switchTab('sTab', this)">⚙️ الإعدادات والسوشيال</button>
-      <button onclick="switchTab('usersTab', this)">👥 إدارة المستخدمين والصلاحيات</button>
-      <button onclick="switchTab('rTab', this)">📊 التقارير</button>
+    <div class="admin-tabs" id="mainTabsHeader">
+      <button id="tab_pTab" class="active" onclick="switchTab('pTab', this)">📦 المنتجات</button>
+      <button id="tab_catTab" onclick="switchTab('catTab', this)">🏷️ الأقسام</button>
+      <button id="tab_themeTab" onclick="switchTab('themeTab', this)">🎨 الأبعاد والألوان</button>
+      <button id="tab_oTab" onclick="switchTab('oTab', this)">📋 الطلبات</button>
+      <button id="tab_dTab" onclick="switchTab('dTab', this)">🛵 التوصيل</button>
+      <button id="tab_sTab" onclick="switchTab('sTab', this)">⚙️ الإعدادات والسوشيال</button>
+      <button id="tab_usersTab" onclick="switchTab('usersTab', this)">👥 إدارة المستخدمين والصلاحيات</button>
+      <button id="tab_rTab" onclick="switchTab('rTab', this)">📊 التقارير</button>
     </div>
 
     <!-- 1. المنتجات -->
@@ -209,23 +212,42 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       </div>
     </div>
 
-    <!-- 7. إدارة المستخدمين والصلاحيات من لوحة التحكم -->
+    <!-- 7. إدارة المستخدمين والصلاحيات المخصصة -->
     <div id="usersTab" class="tab-section">
       <div class="card">
-        <h2>👥 إضافة مستخدم / مشرف جديد</h2>
-        <div class="form-group"><label>البريد الإلكتروني للمستخدم</label><input type="email" id="newMemberEmail" placeholder="user@example.com"></div>
-        <div class="form-group"><label>كلمة المرور المؤقتة</label><input type="password" id="newMemberPass" placeholder="******"></div>
+        <h2>👥 إضافة مستخدم / موظف جديد</h2>
+        <input type="hidden" id="editUserId">
+        <div class="grid-2">
+          <div class="form-group"><label>اسم المستخدم (Username)</label><input type="text" id="newMemberUsername" placeholder="مثال: khaled"></div>
+          <div class="form-group"><label>كلمة المرور</label><input type="password" id="newMemberPass" placeholder="******"></div>
+        </div>
+        
         <div class="form-group">
-          <label>الصلاحية أو الدور</label>
-          <select id="newMemberRole">
-            <option value="admin">مدير كامل (Admin)</option>
-            <option value="staff">موظف / طلبات فقط (Staff)</option>
+          <label>نوع الحساب:</label>
+          <select id="newMemberRoleType" onchange="togglePermissionsSelect()">
+            <option value="staff">موظف (صلاحيات مخصصة)</option>
+            <option value="admin">مدير كامل (كل الصلاحيات)</option>
           </select>
         </div>
-        <button class="btn btn-success" id="addNewUserBtn" style="width:100%;">حفظ وإضافة المستخدم</button>
+
+        <div class="form-group" id="customPermissionsBox">
+          <label>حدد الأقسام المسموح بدخولها لهذا الموظف:</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" class="perm-check" value="pTab"> 📦 المنتجات</label>
+            <label><input type="checkbox" class="perm-check" value="catTab"> 🏷️ الأقسام</label>
+            <label><input type="checkbox" class="perm-check" value="themeTab"> 🎨 الأبعاد والألوان</label>
+            <label><input type="checkbox" class="perm-check" value="oTab"> 📋 الطلبات</label>
+            <label><input type="checkbox" class="perm-check" value="dTab"> 🛵 التوصيل</label>
+            <label><input type="checkbox" class="perm-check" value="sTab"> ⚙️ الإعدادات</label>
+            <label><input type="checkbox" class="perm-check" value="rTab"> 📊 التقارير</label>
+          </div>
+        </div>
+
+        <button class="btn btn-success" id="saveUserBtn" style="width:100%;">💾 حفظ الحساب والصلاحيات</button>
       </div>
+
       <div class="card">
-        <h2>📋 قائمة المشرفين المسجلين</h2>
+        <h2>📋 قائمة المستخدمين المسجلين</h2>
         <div id="usersListContainer">جاري التحميل...</div>
       </div>
     </div>
@@ -276,7 +298,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -293,56 +315,39 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
   const db = getFirestore(app);
 
   let currentDefaultImage = "";
-  let products = [], orders = [], categoriesList = [], uploadedBase64Image = "";
+  let products = [], orders = [], categoriesList = [], usersList = [], uploadedBase64Image = "";
+  let currentUserData = null;
 
+  // تسجيل الدخول باسم المستخدم تحويلاً لإيميل افتراضي
   document.getElementById("loginBtn").addEventListener("click", async () => {
-    const email = document.getElementById("adminEmail").value.trim();
+    const username = document.getElementById("adminUsername").value.trim().toLowerCase();
     const pass = document.getElementById("adminPassword").value;
+    const email = username.includes("@") ? username : `${username}@fisteq.local`;
+
     try {
       await signInWithEmailAndPassword(auth, email, pass);
       document.getElementById("authError").style.display = "none";
     } catch(e) {
-      document.getElementById("authError").innerText = "خطأ في بيانات الدخول";
+      document.getElementById("authError").innerText = "خطأ في اسم المستخدم أو كلمة المرور";
       document.getElementById("authError").style.display = "block";
     }
   });
 
   document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
-  // التحقق من صلاحيات المدير من قاعدة بيانات Firestore عند تسجيل الدخول
   onAuthStateChanged(auth, async user => {
     if(user) {
-      // فحص إذا كان المستخدم مسجلاً كأدمن في مجموعة users على Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userDocRef);
+      // جلب بيانات الحساب والصلاحيات من Firestore
+      const userSnap = await getDoc(doc(db, "users", user.uid));
       
-      let isAuthorized = false;
-      let userRole = "staff";
-
       if(userSnap.exists()) {
-        const userData = userSnap.data();
-        userRole = userData.role || "staff";
-        isAuthorized = true; // مسموح له الدخول للوحة التحكم
+        currentUserData = { id: userSnap.id, ...userSnap.data() };
       } else {
-        // افتراض للأمان: إذا لم يوجد سجل في Firestore، نفحص إذا كان هو الأدمن الرئيسي أو نمنعه
-        // يمكنك تعديل الايميل الرئيسي هنا أو إضافة مستخدم يدوي في قاعدة البيانات
-        if(user.email === "admin@fisteq.com") {
-          isAuthorized = true;
-          userRole = "admin";
-        }
+        // حساب الأدمن الرئيسي الافتراضي
+        currentUserData = { role: "admin", allowedTabs: ["pTab", "catTab", "themeTab", "oTab", "dTab", "sTab", "usersTab", "rTab"] };
       }
 
-      if(!isAuthorized) {
-        alert("ليس لديك صلاحية الوصول للوحة التحكم!");
-        await signOut(auth);
-        return;
-      }
-
-      // إخفاء أو إظهار أقسام بناءً على الصلاحية (Admin vs Staff)
-      if(userRole === "staff") {
-        // إخفاء تبويبات التعديل والإعدادات للموظف العادي، وإبقاؤه على الطلبات والمنتجات
-        alert("أهلاً بك، تم تسجيل دخولك بصلاحية موظف (عرض الطلبات والمنتجات فقط).");
-      }
+      applyUserPermissionsUI(currentUserData);
 
       document.getElementById("authPanel").style.display = "none";
       document.getElementById("dashboardPanel").style.display = "block";
@@ -352,6 +357,29 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       document.getElementById("dashboardPanel").style.display = "none";
     }
   });
+
+  // تطبيق إخفاء وإظهار التبويبات بناءً على صلاحية المستخدم
+  function applyUserPermissionsUI(userData) {
+    const allTabs = ["pTab", "catTab", "themeTab", "oTab", "dTab", "sTab", "usersTab", "rTab"];
+    let firstVisibleTab = null;
+
+    allTabs.forEach(tabId => {
+      const tabBtn = document.getElementById(`tab_${tabId}`);
+      if (!tabBtn) return;
+
+      if (userData.role === 'admin' || (userData.allowedTabs && userData.allowedTabs.includes(tabId))) {
+        tabBtn.style.display = "inline-block";
+        if (!firstVisibleTab) firstVisibleTab = tabId;
+      } else {
+        tabBtn.style.display = "none";
+      }
+    });
+
+    if (firstVisibleTab) {
+      const btn = document.getElementById(`tab_${firstVisibleTab}`);
+      switchTab(firstVisibleTab, btn);
+    }
+  }
 
   function initListeners() {
     onSnapshot(collection(db, "products"), snap => {
@@ -364,18 +392,16 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       renderOrders(); renderReports();
     });
 
-    // جلب قائمة المستخدمين والمشرفين من Firestore
     onSnapshot(collection(db, "users"), snap => {
-      let usersArr = [];
-      snap.forEach(d => usersArr.push({ id: d.id, ...d.data() }));
-      renderUsersList(usersArr);
+      usersList = [];
+      snap.forEach(d => usersList.push({ id: d.id, ...d.data() }));
+      renderUsersList();
     });
 
     onSnapshot(doc(db, "settings", "store"), snap => {
       if(snap.exists()){
         const data = snap.data();
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
-        
         currentDefaultImage = data.defaultImage || "";
         document.getElementById("defaultImageInput").value = currentDefaultImage;
 
@@ -390,89 +416,114 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
           document.getElementById("storeNameInput").value = data.storeName;
           document.getElementById("dashboardTitle").innerText = "🍰 " + data.storeName;
         }
-        if(data.categoriesList) {
-          categoriesList = data.categoriesList;
-        } else if(data.categories) {
-          categoriesList = Array.isArray(data.categories) ? data.categories.map(c=>({ name: c, hidden: false })) : [];
-        }
+        if(data.categoriesList) categoriesList = data.categoriesList;
         renderCategoriesAdmin();
         updateCategorySelectOptions();
         if(data.deliveryZones) renderZones(data.deliveryZones);
-
-        if(data.theme) {
-          document.getElementById("primaryColorInput").value = data.theme.primaryColor || '#122b20';
-          document.getElementById("primaryVal").innerText = data.theme.primaryColor || '#122b20';
-          document.getElementById("accentColorInput").value = data.theme.accentColor || '#d4af37';
-          document.getElementById("accentVal").innerText = data.theme.accentColor || '#d4af37';
-          document.getElementById("bgColorInput").value = data.theme.bgColor || '#f8faf9';
-          document.getElementById("bgVal").innerText = data.theme.bgColor || '#f8faf9';
-          document.getElementById("cardBgColorInput").value = data.theme.cardBgColor || '#ffffff';
-          document.getElementById("cardBgVal").innerText = data.theme.cardBgColor || '#ffffff';
-          document.getElementById("cardTextColorInput").value = data.theme.cardTextColor || '#0f172a';
-          document.getElementById("cardTextVal").innerText = data.theme.cardTextColor || '#0f172a';
-          document.getElementById("fontFamilySelect").value = data.theme.fontFamily || 'Tajawal';
-        }
-
         renderProducts();
       }
     });
   }
 
-  // إضافة مستخدم جديد من لوحة التحكم وتخزينه في Firebase Auth و Firestore
-  document.getElementById("addNewUserBtn").addEventListener("click", async () => {
-    const email = document.getElementById("newMemberEmail").value.trim();
+  // حفظ وإضافة أو تعديل الحسابات والصلاحيات
+  document.getElementById("saveUserBtn").addEventListener("click", async () => {
+    const editId = document.getElementById("editUserId").value;
+    const username = document.getElementById("newMemberUsername").value.trim().toLowerCase();
     const password = document.getElementById("newMemberPass").value;
-    const role = document.getElementById("newMemberRole").value;
+    const roleType = document.getElementById("newMemberRoleType").value;
 
-    if(!email || !password) return alert("الرجاء إدخال البريد الإلكتروني وكلمة المرور!");
-
-    try {
-      // إنشاء المستخدم في Firebase Authentication
-      // ملاحظة: لإنشاء مستخدم جديد من لوحة التحكم، قد تحتاج إلى تهيئة Secondary Firebase App إذا تطلب الأمر، أو إنشاؤه عبر وظيفة سحابية، 
-      // ولكن هنا نقوم بحفظه في Firestore مباشرة لتنظيم الصلاحيات.
-      const userRef = doc(collection(db, "users"));
-      await setDoc(userRef, { email, role, createdAt: Date.now() });
-
-      alert("✨ تم حفظ بيانات المستخدم وصلاحيته في قاعدة البيانات بنجاح!");
-      document.getElementById("newMemberEmail").value = "";
-      document.getElementById("newMemberPass").value = "";
-    } catch(err) {
-      alert("حدث خطأ أثناء الإضافة: " + err.message);
+    let allowedTabs = [];
+    if(roleType === 'admin') {
+      allowedTabs = ["pTab", "catTab", "themeTab", "oTab", "dTab", "sTab", "usersTab", "rTab"];
+    } else {
+      document.querySelectorAll(".perm-check:checked").forEach(ch => allowedTabs.push(ch.value));
     }
+
+    if(!username) return alert("الرجاء كتابة اسم المستخدم!");
+
+    const payload = {
+      username: username,
+      role: roleType,
+      allowedTabs: allowedTabs,
+      updatedAt: Date.now()
+    };
+    if(password) payload.password = password;
+
+    if(editId) {
+      await updateDoc(doc(db, "users", editId), payload);
+      alert("✨ تم تحديث بيانات وصلاحيات المستخدم بنجاح!");
+    } else {
+      payload.createdAt = Date.now();
+      await addDoc(collection(db, "users"), payload);
+      alert("✨ تم إضافة المستخدم والصلاحيات بنجاح!");
+    }
+
+    resetUserForm();
   });
 
-  function renderUsersList(users) {
+  function renderUsersList() {
     const c = document.getElementById("usersListContainer");
-    if(!users.length) return c.innerHTML = "<p>لا يوجد مشرفين مضافين.</p>";
-    c.innerHTML = users.map(u => `
-      <div class="category-row">
-        <div><strong>${escapeHtml(u.email)}</strong><br><small>الصلاحية: ${u.role === 'admin' ? 'مدير كامل 👑' : 'موظف 📋'}</small></div>
+    if(!usersList.length) return c.innerHTML = "<p>لا يوجد مستخدمون مضافون حالياً.</p>";
+
+    c.innerHTML = usersList.map(u => `
+      <div class="user-row">
         <div>
-          <button class="btn btn-danger" onclick="deleteUserRow('${u.id}')">حذف الصلاحية</button>
+          <strong>👤 ${escapeHtml(u.username)}</strong> 
+          <small>(${u.role === 'admin' ? 'مدير كامل 👑' : 'موظف مخصص 📋'})</small><br>
+          <small style="color:#64748b;">الصلاحيات: ${u.role === 'admin' ? 'كل الأقسام' : (u.allowedTabs?.length || 0) + ' أقسام'}</small>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-warning" onclick="editUser('${u.id}')">✏️ تعديل</button>
+          <button class="btn btn-danger" onclick="deleteUserRow('${u.id}')">🗑️ حذف</button>
         </div>
       </div>
     `).join("");
   }
 
+  window.editUser = (id) => {
+    const u = usersList.find(x => x.id === id);
+    if(!u) return;
+    document.getElementById("editUserId").value = u.id;
+    document.getElementById("newMemberUsername").value = u.username || "";
+    document.getElementById("newMemberRoleType").value = u.role || "staff";
+    
+    document.querySelectorAll(".perm-check").forEach(ch => {
+      ch.checked = u.allowedTabs ? u.allowedTabs.includes(ch.value) : false;
+    });
+
+    togglePermissionsSelect();
+  };
+
   window.deleteUserRow = async (id) => {
-    if(confirm("هل أنت متأكد من حذف صلاحية هذا المستخدم؟")) {
+    if(confirm("هل أنت متأكد من حذف هذا المستخدم نهائياً؟")) {
       await deleteDoc(doc(db, "users", id));
       alert("تم الحذف بنجاح!");
     }
   };
 
+  function resetUserForm() {
+    document.getElementById("editUserId").value = "";
+    document.getElementById("newMemberUsername").value = "";
+    document.getElementById("newMemberPass").value = "";
+    document.getElementById("newMemberRoleType").value = "staff";
+    document.querySelectorAll(".perm-check").forEach(ch => ch.checked = false);
+    togglePermissionsSelect();
+  }
+
+  window.togglePermissionsSelect = () => {
+    const role = document.getElementById("newMemberRoleType").value;
+    document.getElementById("customPermissionsBox").style.display = role === 'staff' ? 'block' : 'none';
+  };
+
   window.exportProductsBackup = () => {
     if(!products.length) return alert("لا توجد منتجات لتصديرها!");
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
-    const dl = document.createElement('a');
-    dl.setAttribute("href", dataStr);
-    dl.setAttribute("download", `products_backup_${new Date().toISOString().slice(0,10)}.json`);
-    dl.click();
+    const dl = document.createElement('a'); dl.setAttribute("href", dataStr);
+    dl.setAttribute("download", `products_backup_${new Date().toISOString().slice(0,10)}.json`); dl.click();
   };
 
   window.importProductsBackup = (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
+    const file = e.target.files[0]; if(!file) return;
     const reader = new FileReader();
     reader.onload = async function(event) {
       try {
@@ -489,10 +540,8 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
   window.deleteAllProducts = async () => {
     if(confirm("⚠️ حذف كافة المنتجات؟")) {
       const snap = await getDocs(collection(db, "products"));
-      const batch = writeBatch(db);
-      snap.forEach(d => batch.delete(d.ref));
-      await batch.commit();
-      alert("تم الحذف بنجاح!");
+      const batch = writeBatch(db); snap.forEach(d => batch.delete(d.ref));
+      await batch.commit(); alert("تم الحذف بنجاح!");
     }
   };
 
@@ -506,10 +555,8 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
   window.deleteAllOrders = async () => {
     if(confirm("⚠️ تفريغ كافة الطلبات؟")) {
       const snap = await getDocs(collection(db, "orders"));
-      const batch = writeBatch(db);
-      snap.forEach(d => batch.delete(d.ref));
-      await batch.commit();
-      alert("تم التفريغ بنجاح!");
+      const batch = writeBatch(db); snap.forEach(d => batch.delete(d.ref));
+      await batch.commit(); alert("تم التفريغ بنجاح!");
     }
   };
 
@@ -558,7 +605,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       tiktok: document.getElementById("tiktokInput").value.trim()
     };
     await setDoc(doc(db, "settings", "store"), { whatsappNumber, defaultImage, socialLinks }, { merge: true });
-    alert("✨ تم حفظ إعدادات المتجر والصورة الافتراضية بنجاح!");
+    alert("✨ تم حفظ الإعدادات بنجاح!");
   });
 
   window.addNewCategory = async () => {
@@ -598,13 +645,8 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
   window.saveCategoriesToFirebase = async () => {
     const catNamesOnly = categoriesList.filter(c => !c.hidden).map(c => c.name);
-    await setDoc(doc(db, "settings", "store"), { 
-      categoriesList: categoriesList, 
-      categories: catNamesOnly 
-    }, { merge: true });
-    
-    renderCategoriesAdmin();
-    updateCategorySelectOptions();
+    await setDoc(doc(db, "settings", "store"), { categoriesList: categoriesList, categories: catNamesOnly }, { merge: true });
+    renderCategoriesAdmin(); updateCategorySelectOptions();
   };
 
   function renderCategoriesAdmin() {
@@ -632,9 +674,7 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     if(!products.length) return c.innerHTML = "<p>لا توجد منتجات.</p>";
     c.innerHTML = products.map(p => {
       let imgSrc = p.images?.[0] || p.image;
-      if (!imgSrc || imgSrc.trim() === "" || imgSrc === "undefined") {
-        imgSrc = currentDefaultImage;
-      }
+      if (!imgSrc || imgSrc.trim() === "" || imgSrc === "undefined") imgSrc = currentDefaultImage;
       return `
         <div class="product-row">
           <img src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null; this.src='${currentDefaultImage}';">
@@ -671,8 +711,9 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
   window.switchTab = (tabId, btn) => {
     document.querySelectorAll(".admin-tabs button").forEach(b => b.classList.remove("active"));
     document.querySelectorAll(".tab-section").forEach(s => s.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById(tabId).classList.add("active");
+    if(btn) btn.classList.add("active");
+    const tabEl = document.getElementById(tabId);
+    if(tabEl) tabEl.classList.add("active");
   };
 
   window.togglePricing = () => {
@@ -704,19 +745,11 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     const saleType = document.getElementById("pSaleType").value;
     const description = document.getElementById("pDesc").value.trim();
     const imageInput = document.getElementById("pImage").value.trim();
-
     const finalImage = imageInput || currentDefaultImage;
 
     if(!name) return alert("أدخل اسم المنتج!");
 
-    let payload = { 
-      name, 
-      category, 
-      saleType, 
-      description, 
-      image: finalImage,
-      images: [finalImage] 
-    };
+    let payload = { name, category, saleType, description, image: finalImage, images: [finalImage] };
 
     if(saleType === 'weight') {
       const kilo = Number(document.getElementById("pKilo").value);
@@ -730,19 +763,13 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
       payload.price = uPrice;
     }
 
-    if(id) { 
-      await updateDoc(doc(db, "products", id), payload); 
-    } else { 
-      payload.hidden = false; 
-      payload.createdAt = Date.now(); 
-      await addDoc(collection(db, "products"), payload); 
-    }
+    if(id) { await updateDoc(doc(db, "products", id), payload); } 
+    else { payload.hidden = false; payload.createdAt = Date.now(); await addDoc(collection(db, "products"), payload); }
     closeModal();
   });
 
   window.editProduct = (id) => {
-    const p = products.find(i => i.id === id);
-    openModal();
+    const p = products.find(i => i.id === id); openModal();
     document.getElementById("editId").value = id;
     document.getElementById("pName").value = p.name || "";
     document.getElementById("pCategorySelect").value = p.category || "";

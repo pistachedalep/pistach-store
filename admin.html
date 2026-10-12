@@ -339,7 +339,6 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
 
   onAuthStateChanged(auth, async user => {
     if(user) {
-      // إجبار ظهور صلاحيات الأدمن لكافة الحسابات الإدارية
       if (user.email && user.email.endsWith("@fisteq.local") && !user.email.startsWith("admin@")) {
         const uName = user.email.split("@")[0];
         const q = query(collection(db, "users"), where("username", "==", uName));
@@ -434,7 +433,6 @@ body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; margin: 0; p
     });
   }
 
-  // النسخ الاحتياطي الشامل
   window.exportFullSystemBackup = async () => {
     try {
       const storeSnap = await getDoc(doc(db, "settings", "store"));

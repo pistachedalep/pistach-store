@@ -89,7 +89,7 @@
       color: var(--text-main); 
       direction: rtl; 
       height: 100vh;
-      overflow: hidden; /* تثبيت الصفحة لمنع السكرول العشوائي خارج المنطقة المخصصة */
+      overflow: hidden;
     }
 
     header {
@@ -143,7 +143,6 @@
     }
     .whatsapp-header-btn:hover { background: #25d366 !important; color: #fff; }
 
-    /* الحاوية الرئيسية */
     .main-layout {
       max-width: 1100px;
       margin: 0 auto;
@@ -153,7 +152,6 @@
       padding: 0 14px;
     }
 
-    /* شريط الأقسام: ثابت أفقياً (يمين ويسار فقط) دون أي صعود أو نزول */
     .categories-bar { 
       display: flex; 
       flex-direction: row;
@@ -184,7 +182,6 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); 
     }
 
-    /* منطقة الأصناف: تتحرك عمودياً مع الفواصل والمسافات */
     .products-scroll-area {
       flex: 1;
       overflow-y: auto;
@@ -211,7 +208,6 @@
       text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    /* الفاصل بين الأقسام */
     .section-divider {
       width: 100%;
       height: 2px;
@@ -356,12 +352,10 @@
   </header>
 
   <div class="main-layout">
-    <!-- شريط الأقسام (ثابت ويتحرك أفقياً يمين ويسار فقط دون صعود أو نزول) -->
     <div class="categories-bar" id="categoriesBar">
       <button class="cat-btn active" data-cat="الكل" onclick="window.selectCategory('الكل')">الكل</button>
     </div>
     
-    <!-- منطقة الأصناف (تتحرك عمودياً ويظهر بينها الفواصل) -->
     <div class="products-scroll-area" id="productsScrollArea">
       <div class="products-grid" id="productsGrid">
         <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #ffffff; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">جاري تحميل المنتجات...</div>
@@ -426,7 +420,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, addDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw",
@@ -469,40 +463,54 @@
       container.innerHTML = html;
     }
 
-    onSnapshot(collection(db, "products"), snap => {
-      allProducts = []; 
-      snap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
-      renderProducts();
-    });
+    // جلب البيانات لمرة واحدة عند تحميل الصفحة (توفير القراءات)
+    async function fetchStoreData() {
+      try {
+        const settingsSnap = await getDoc(doc(db, "settings", "store"));
+        if(settingsSnap.exists()){
+          storeSettings = settingsSnap.data();
+          
+          if(storeSettings.storeName) {
+            document.getElementById("storeTitleLogo").innerText = " " + storeSettings.storeName;
+            document.getElementById("pageTitle").innerText = storeSettings.storeName;
+            localStorage.setItem('cached_store_name', storeSettings.storeName);
+          }
 
-    onSnapshot(doc(db, "settings", "store"), dSnap => {
-      if(dSnap.exists()){
-        storeSettings = dSnap.data();
+          if(storeSettings.deliveryZones) {
+            deliveryZones = storeSettings.deliveryZones;
+            renderZonesSelect();
+          }
+          if(storeSettings.categoriesList) {
+            extractCategories(storeSettings.categoriesList.filter(c => !c.hidden).map(c => c.name));
+          } else if(storeSettings.categories) {
+            extractCategories(storeSettings.categories);
+          }
+
+          if(storeSettings.theme) {
+            applyDynamicTheme(storeSettings.theme);
+            localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
+          }
+        }
+
+        const productsSnap = await getDocs(collection(db, "products"));
+        allProducts = []; 
+        productsSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
         
-        if(storeSettings.storeName) {
-          document.getElementById("storeTitleLogo").innerText = " " + storeSettings.storeName;
-          document.getElementById("pageTitle").innerText = storeSettings.storeName;
-          localStorage.setItem('cached_store_name', storeSettings.storeName);
-        }
-
-        if(storeSettings.deliveryZones) {
-          deliveryZones = storeSettings.deliveryZones;
-          renderZonesSelect();
-        }
-        if(storeSettings.categoriesList) {
-          extractCategories(storeSettings.categoriesList.filter(c => !c.hidden).map(c => c.name));
-        } else if(storeSettings.categories) {
-          extractCategories(storeSettings.categories);
-        }
-
-        if(storeSettings.theme) {
-          applyDynamicTheme(storeSettings.theme);
-          localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
+        if(storeSettings.categoriesList || storeSettings.categories) {
+          extractCategories(storeSettings.categoriesList ? storeSettings.categoriesList.filter(c => !c.hidden).map(c => c.name) : storeSettings.categories);
+        } else {
+          extractCategories([]);
         }
 
         renderProducts();
+
+      } catch(error) {
+        console.error("خطأ في جلب البيانات:", error);
+        document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات.</div>';
       }
-    });
+    }
+
+    fetchStoreData();
 
     function applyDynamicTheme(theme) {
       const root = document.documentElement;
@@ -545,7 +553,6 @@
       
       dynamicCategories = orderedList;
       renderCategories(dynamicCategories);
-      renderProducts();
     }
 
     function renderCategories(cats) {
@@ -581,11 +588,9 @@
       let categoriesToDisplay = [];
       if(selectedCat === "الكل") {
         categoriesToDisplay = [...dynamicCategories];
-        // إضافة أي تصنيفات أخرى غير موجودة في القائمة الرئيسية
         allProducts.forEach(p => {
-          const cat = p.category ? p.category.trim() : "أخرى";
-          if(!categoriesToDisplay.includes(cat) && !categoriesToDisplay.includes(p.category?.trim())) {
-            if(p.category && !categoriesToDisplay.includes(p.category.trim())) categoriesToDisplay.push(p.category.trim());
+          if(p.category && !categoriesToDisplay.includes(p.category.trim())) {
+            categoriesToDisplay.push(p.category.trim());
           }
         });
       } else {
@@ -607,7 +612,6 @@
           catProds.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
           totalFilteredCount += catProds.length;
 
-          // عنوان القسم داخل قائمة الأصناف المتحركة
           finalHtml += `<div class="category-section-group">`;
           if(selectedCat === "الكل") {
             finalHtml += `<div class="category-title-heading">${escapeHtml(catName)}</div>`;
@@ -654,7 +658,6 @@
 
           finalHtml += `</div></div>`;
 
-          // إضافة فاصل أنيق بين الأقسام إذا لم يكن القسم الأخير
           if(selectedCat === "الكل" && index < categoriesToDisplay.length - 1) {
             finalHtml += `<div class="section-divider"></div>`;
           }

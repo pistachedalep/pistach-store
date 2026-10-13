@@ -463,51 +463,78 @@
       container.innerHTML = html;
     }
 
-    // جلب البيانات لمرة واحدة عند تحميل الصفحة (توفير القراءات)
+    // جلب البيانات مع التخزين المؤقت المحلي (localStorage Cache) لتوفير القراءات بنسبة 100%
     async function fetchStoreData() {
       try {
+        const CACHE_DURATION = 60 * 60 * 1000; // ساعة كاملة
+        const cachedProducts = localStorage.getItem('pista_products_cache');
+        const cachedSettings = localStorage.getItem('pista_settings_cache');
+        const cacheTime = localStorage.getItem('pista_cache_time');
+        const now = Date.now();
+
+        // 1. استخدام الكاش المحلي إن لمשي المدة (لتوفير القراءات تماماً)
+        if (cachedProducts && cachedSettings && cacheTime && (now - cacheTime < CACHE_DURATION)) {
+          allProducts = JSON.parse(cachedProducts);
+          storeSettings = JSON.parse(cachedSettings);
+          
+          processLoadedData();
+          return;
+        }
+
+        // 2. إذا انتهت المدة أو لم يوجد كاش، نسحب من Firebase مرة واحدة
         const settingsSnap = await getDoc(doc(db, "settings", "store"));
         if(settingsSnap.exists()){
           storeSettings = settingsSnap.data();
-          
-          if(storeSettings.storeName) {
-            document.getElementById("storeTitleLogo").innerText = " " + storeSettings.storeName;
-            document.getElementById("pageTitle").innerText = storeSettings.storeName;
-            localStorage.setItem('cached_store_name', storeSettings.storeName);
-          }
-
-          if(storeSettings.deliveryZones) {
-            deliveryZones = storeSettings.deliveryZones;
-            renderZonesSelect();
-          }
-          if(storeSettings.categoriesList) {
-            extractCategories(storeSettings.categoriesList.filter(c => !c.hidden).map(c => c.name));
-          } else if(storeSettings.categories) {
-            extractCategories(storeSettings.categories);
-          }
-
-          if(storeSettings.theme) {
-            applyDynamicTheme(storeSettings.theme);
-            localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
-          }
+          localStorage.setItem('pista_settings_cache', JSON.stringify(storeSettings));
         }
 
         const productsSnap = await getDocs(collection(db, "products"));
         allProducts = []; 
         productsSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
+        localStorage.setItem('pista_products_cache', JSON.stringify(allProducts));
         
-        if(storeSettings.categoriesList || storeSettings.categories) {
-          extractCategories(storeSettings.categoriesList ? storeSettings.categoriesList.filter(c => !c.hidden).map(c => c.name) : storeSettings.categories);
-        } else {
-          extractCategories([]);
-        }
+        localStorage.setItem('pista_cache_time', now);
 
-        renderProducts();
+        processLoadedData();
 
       } catch(error) {
         console.error("خطأ في جلب البيانات:", error);
-        document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات.</div>';
+        // محاولة التحميل من الكاش القديم إن حدث خطأ في الاتصال
+        const fallbackProducts = localStorage.getItem('pista_products_cache');
+        if(fallbackProducts) {
+          allProducts = JSON.parse(fallbackProducts);
+          storeSettings = JSON.parse(localStorage.getItem('pista_settings_cache') || "{}");
+          processLoadedData();
+        } else {
+          document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
+        }
       }
+    }
+
+    function processLoadedData() {
+      if(storeSettings.storeName) {
+        document.getElementById("storeTitleLogo").innerText = " " + storeSettings.storeName;
+        document.getElementById("pageTitle").innerText = storeSettings.storeName;
+        localStorage.setItem('cached_store_name', storeSettings.storeName);
+      }
+
+      if(storeSettings.deliveryZones) {
+        deliveryZones = storeSettings.deliveryZones;
+        renderZonesSelect();
+      }
+
+      if(storeSettings.theme) {
+        applyDynamicTheme(storeSettings.theme);
+        localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
+      }
+
+      if(storeSettings.categoriesList || storeSettings.categories) {
+        extractCategories(storeSettings.categoriesList ? storeSettings.categoriesList.filter(c => !c.hidden).map(c => c.name) : storeSettings.categories);
+      } else {
+        extractCategories([]);
+      }
+
+      renderProducts();
     }
 
     fetchStoreData();

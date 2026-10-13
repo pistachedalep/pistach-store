@@ -691,7 +691,7 @@
       selectedCat = cat;
       isScrollingProgrammatically = true;
 
-      // تحديث شكل الأزرار النشطة
+      // 1. تحديث الزر النشط في الشريط العلوي
       document.querySelectorAll(".cat-btn").forEach(b => {
         if(b.getAttribute("data-cat") === cat) {
           b.classList.add("active");
@@ -703,8 +703,8 @@
 
       const scrollArea = document.getElementById("productsScrollArea");
 
+      // 2. التمرير السلس للقسم دون إخفاء الأقسام الأخرى
       if (cat === "الكل") {
-        renderProducts();
         if(scrollArea) scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         const cleanId = encodeURIComponent(cat).replace(/%/g, '_');
@@ -713,8 +713,6 @@
         if (section && scrollArea) {
           const topPos = section.offsetTop - scrollArea.offsetTop;
           scrollArea.scrollTo({ top: topPos - 10, behavior: 'smooth' });
-        } else {
-          renderProducts();
         }
       }
 
@@ -728,17 +726,13 @@
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
       const curr = window.getCurrency();
 
-      let categoriesToDisplay = [];
-      if(selectedCat === "الكل") {
-        categoriesToDisplay = [...dynamicCategories];
-        allProducts.forEach(p => {
-          if(p.category && !categoriesToDisplay.includes(p.category.trim())) {
-            categoriesToDisplay.push(p.category.trim());
-          }
-        });
-      } else {
-        categoriesToDisplay = [selectedCat];
-      }
+      // عرض جميع الأقسام دائماً للحفاظ على هيكل التمرير
+      let categoriesToDisplay = [...dynamicCategories];
+      allProducts.forEach(p => {
+        if(p.category && !categoriesToDisplay.includes(p.category.trim())) {
+          categoriesToDisplay.push(p.category.trim());
+        }
+      });
 
       const fallbackImg = storeSettings.defaultImage || "";
       let finalHtml = "";
@@ -746,7 +740,7 @@
 
       categoriesToDisplay.forEach((catName, index) => {
         const catProds = allProducts.filter(p => {
-          const matchCat = selectedCat === "الكل" ? (p.category && p.category.trim() === catName) : (p.category && p.category.trim() === selectedCat);
+          const matchCat = p.category && p.category.trim() === catName;
           const matchSearch = p.name.toLowerCase().includes(query) || (p.description && p.description.toLowerCase().includes(query));
           return !p.hidden && matchCat && matchSearch;
         });
@@ -757,10 +751,7 @@
 
           const cleanCatId = encodeURIComponent(catName).replace(/%/g, '_');
           finalHtml += `<div class="category-section-group" id="cat-section-${cleanCatId}">`;
-          if(selectedCat === "الكل") {
-            finalHtml += `<div class="category-title-heading">${escapeHtml(catName)}</div>`;
-          }
-          
+          finalHtml += `<div class="category-title-heading">${escapeHtml(catName)}</div>`;
           finalHtml += `<div class="products-grid">`;
 
           catProds.forEach(p => {
@@ -802,7 +793,7 @@
 
           finalHtml += `</div></div>`;
 
-          if(selectedCat === "الكل" && index < categoriesToDisplay.length - 1) {
+          if(index < categoriesToDisplay.length - 1) {
             finalHtml += `<div class="section-divider"></div>`;
           }
         }
@@ -826,7 +817,7 @@
       if (!productsScrollArea) return;
 
       productsScrollArea.addEventListener('scroll', () => {
-        if (isScrollingProgrammatically || selectedCat !== "الكل") return;
+        if (isScrollingProgrammatically) return;
 
         const sections = document.querySelectorAll('.category-section-group');
         let currentActiveCat = "";

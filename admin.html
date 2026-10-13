@@ -218,6 +218,27 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     <div id="sTab" class="tab-section">
       <div class="card">
         <h2>⚙️ الإعدادات العامة وسائل التواصل</h2>
+
+        <!-- إضافة إعدادات النافذة المنبثقة هنا -->
+        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; margin-bottom: 20px;">
+          <h3 style="margin-top: 0; font-size: 15px; color: var(--primary);">📢 إعدادات النافذة المنبثقة للعملاء (الإعلان)</h3>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>نص الإعلان (اتركه فارغاً لإلغاء ظهور النافذة):</label>
+            <textarea id="adminAnnouncement" rows="3" placeholder="مثال: أهلاً بكم! يتوفر لدينا كعك العيد الطازج اليوم..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>طريقة إغلاق النافذة:</label>
+            <select id="adminAnnouncementCloseType" onchange="toggleSecondsInput()">
+              <option value="button">زر إغلاق يدوياً (حسناً)</option>
+              <option value="auto">إغلاق تلقائي بعد ثوانٍ</option>
+            </select>
+          </div>
+          <div id="secondsGroup" class="form-group" style="display:none;">
+            <label>مدة الظهور بالثواني:</label>
+            <input type="number" id="adminAnnouncementSeconds" value="5" min="1">
+          </div>
+        </div>
+
         <div class="form-group">
           <label>رقم الهاتف مع كود الدولة (مثال: 2010xxxxxxxx):</label>
           <input type="text" id="whatsappInput" placeholder="أدخل رقمك مع رمز الدولة">
@@ -342,6 +363,11 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
   });
 
+  window.toggleSecondsInput = () => {
+    const type = document.getElementById("adminAnnouncementCloseType").value;
+    document.getElementById("secondsGroup").style.display = (type === 'auto') ? 'block' : 'none';
+  };
+
   function initListeners() {
     onSnapshot(collection(db, "products"), snap => {
       products = []; snap.forEach(d => products.push({ id: d.id, ...d.data() }));
@@ -359,6 +385,12 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
         if(data.currencySymbol) document.getElementById("currencyInput").value = data.currencySymbol;
         
+        // تعبئة حقول الإعلان
+        document.getElementById("adminAnnouncement").value = data.announcement || "";
+        document.getElementById("adminAnnouncementCloseType").value = data.announcementCloseType || "button";
+        document.getElementById("adminAnnouncementSeconds").value = data.announcementSeconds || 5;
+        window.toggleSecondsInput();
+
         currentDefaultImage = data.defaultImage || "";
         document.getElementById("defaultImageInput").value = currentDefaultImage;
 
@@ -504,14 +536,31 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const whatsappNumber = document.getElementById("whatsappInput").value.trim();
     const currencySymbol = document.getElementById("currencyInput").value.trim() || "ج";
     const defaultImage = document.getElementById("defaultImageInput").value.trim();
+    
+    // بيانات النافذة المنبثقة
+    const announcement = document.getElementById("adminAnnouncement").value.trim();
+    const announcementCloseType = document.getElementById("adminAnnouncementCloseType").value;
+    const announcementSeconds = Number(document.getElementById("adminAnnouncementSeconds").value) || 5;
+
     const socialLinks = {
       facebook: document.getElementById("fbInput").value.trim(),
       instagram: document.getElementById("instaInput").value.trim(),
       telegram: document.getElementById("telegramInput").value.trim(),
       tiktok: document.getElementById("tiktokInput").value.trim()
     };
-    await setDoc(doc(db, "settings", "store"), { whatsappNumber, currencySymbol, defaultImage, socialLinks, lastUpdated: Date.now() }, { merge: true });
-    alert("✨ تم حفظ إعدادات المتجر والعملة بنجاح!");
+
+    await setDoc(doc(db, "settings", "store"), { 
+      whatsappNumber, 
+      currencySymbol, 
+      defaultImage, 
+      announcement,
+      announcementCloseType,
+      announcementSeconds,
+      socialLinks, 
+      lastUpdated: Date.now() 
+    }, { merge: true });
+    
+    alert("✨ تم حفظ الإعدادات وإعدادات النافذة المنبثقة بنجاح!");
   });
 
   window.addNewCategory = async () => {
@@ -576,7 +625,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     `).join("");
   }
 
-  // إدارة الفروع
   window.addNewBranch = async () => {
     const input = document.getElementById("newBranchName");
     const name = input.value.trim();

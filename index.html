@@ -111,7 +111,7 @@
       border-color: #334155 !important;
     }
 
-    /* شريط الهيدر المرن والسيّار */
+    /* شريط الهيدر السيّار أفقياً بمرونة وسرعة فائقة */
     header {
       background-color: transparent !important;
       backdrop-filter: blur(8px);
@@ -134,12 +134,13 @@
       white-space: nowrap; 
       scrollbar-width: none; 
       -webkit-overflow-scrolling: touch; 
+      padding-bottom: 2px;
     }
     .header-container::-webkit-scrollbar { display: none; }
     
     .logo-area { flex-shrink: 0; }
     .logo-area h1 { 
-      font-size: 18px; 
+      font-size: 17px; 
       font-weight: 900; 
       color: var(--accent); 
       cursor: pointer; 
@@ -148,12 +149,12 @@
       background: transparent !important;
     }
     
-    .search-bar { flex: 1; min-width: 140px; flex-shrink: 0; }
+    .search-bar { flex: 0 0 160px; flex-shrink: 0; }
     .search-bar input {
-      width: 100%; padding: 8px 14px; border-radius: 25px;
+      width: 100%; padding: 7px 12px; border-radius: 20px;
       border: 1.5px solid rgba(255, 255, 255, 0.4); 
       background: transparent !important;
-      color: #fff; font-size: 12.5px; font-weight: 700; outline: none; transition: all 0.3s ease;
+      color: #fff; font-size: 12px; font-weight: 700; outline: none; transition: all 0.3s ease;
     }
     .search-bar input::placeholder { color: rgba(255, 255, 255, 0.85); }
     .search-bar input:focus { background: rgba(0, 0, 0, 0.2) !important; border-color: var(--accent); }
@@ -165,14 +166,15 @@
       border: 1.5px solid rgba(255, 255, 255, 0.6);
       color: #fff;
       padding: 6px 10px;
-      border-radius: 16px;
-      font-size: 12px;
+      border-radius: 14px;
+      font-size: 11.5px;
       font-weight: 900;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 4px;
       white-space: nowrap;
+      flex-shrink: 0;
       transition: all 0.3s ease;
     }
     .control-btn:hover { background: rgba(255, 255, 255, 0.15) !important; border-color: var(--accent); }
@@ -182,14 +184,15 @@
       border: 1.5px solid #25d366; 
       color: #25d366; 
       padding: 6px 10px; 
-      border-radius: 16px;
-      font-size: 12px; 
+      border-radius: 14px;
+      font-size: 11.5px; 
       font-weight: 900; 
       cursor: pointer; 
-      display: flex; 
+      display: inline-flex; 
       align-items: center; 
       gap: 5px;
       white-space: nowrap; 
+      flex-shrink: 0;
       text-decoration: none;
       transition: all 0.3s ease;
     }
@@ -565,8 +568,6 @@
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
 
-    const translationCache = JSON.parse(localStorage.getItem('translation_cache') || '{}');
-
     window.getCurrency = () => storeSettings.currencySymbol || "ج";
 
     window.toggleDarkMode = () => {
@@ -584,23 +585,8 @@
       }
     });
 
-    async function translateText(text) {
-      if(!text || currentLang === 'ar') return text;
-      if(translationCache[text]) return translationCache[text];
-
-      try {
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=${encodeURIComponent(text)}`);
-        const result = await res.json();
-        const translated = result?.[0]?.[0]?.[0] || text;
-        translationCache[text] = translated;
-        localStorage.setItem('translation_cache', JSON.stringify(translationCache));
-        return translated;
-      } catch(e) {
-        return text;
-      }
-    }
-
-    window.toggleLanguage = async () => {
+    // تحويل لحظي دون الانتظار لطلبات الشبكة الخارجية
+    window.toggleLanguage = () => {
       currentLang = currentLang === "ar" ? "en" : "ar";
       localStorage.setItem("storeLang", currentLang);
       document.documentElement.setAttribute("dir", currentLang === "ar" ? "rtl" : "ltr");
@@ -608,6 +594,9 @@
       
       const langBtn = document.getElementById("langSwitchBtn");
       if(langBtn) langBtn.innerHTML = currentLang === "ar" ? "English 🌐" : "العربية 🌐";
+
+      const searchInput = document.getElementById("searchInput");
+      if(searchInput) searchInput.placeholder = currentLang === "en" ? "Search items..." : "ابحث عن حلوياتك...";
       
       renderCategories(dynamicCategories);
       renderProducts();
@@ -821,20 +810,14 @@
       renderCategories(dynamicCategories);
     }
 
-    async function renderCategories(cats) {
+    function renderCategories(cats) {
       const bar = document.getElementById("categoriesBar");
       let allText = currentLang === 'en' ? 'All' : 'الكل';
-      
-      const translatedCats = currentLang === 'en' 
-        ? await Promise.all(cats.map(c => translateText(c)))
-        : cats;
-
       let html = `<button class="cat-btn ${selectedCat === 'الكل' ? 'active':''}" data-cat="الكل" onclick="window.selectCategory('الكل')">${allText}</button>`;
       
-      cats.forEach((c, i) => {
-        const displayCat = translatedCats[i];
+      cats.forEach((c) => {
         const isActive = (selectedCat === c) ? 'active' : '';
-        html += `<button class="cat-btn ${isActive}" data-cat="${escapeHtml(c)}" onclick="window.selectCategory('${escapeHtml(c)}')">${escapeHtml(displayCat)}</button>`;
+        html += `<button class="cat-btn ${isActive}" data-cat="${escapeHtml(c)}" onclick="window.selectCategory('${escapeHtml(c)}')">${escapeHtml(c)}</button>`;
       });
 
       bar.innerHTML = html;
@@ -872,7 +855,7 @@
 
     window.filterProducts = () => renderProducts();
 
-    async function renderProducts() {
+    function renderProducts() {
       const scrollArea = document.getElementById("productsScrollArea");
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
       const curr = window.getCurrency();
@@ -888,12 +871,8 @@
       let finalHtml = "";
       let totalFilteredCount = 0;
 
-      const catTranslationPromises = categoriesToDisplay.map(c => currentLang === 'en' ? translateText(c) : Promise.resolve(c));
-      const translatedCatNames = await Promise.all(catTranslationPromises);
-
       for (let i = 0; i < categoriesToDisplay.length; i++) {
         const catName = categoriesToDisplay[i];
-        const displayCatName = translatedCatNames[i];
 
         const catProds = allProducts.filter(p => {
           const matchCat = p.category && p.category.trim() === catName;
@@ -908,16 +887,10 @@
           const cleanCatId = encodeURIComponent(catName).replace(/%/g, '_');
           
           finalHtml += `<div class="category-section-group" id="cat-section-${cleanCatId}">`;
-          finalHtml += `<div class="category-title-heading">${escapeHtml(displayCatName)}</div>`;
+          finalHtml += `<div class="category-title-heading">${escapeHtml(catName)}</div>`;
           finalHtml += `<div class="products-grid">`;
 
-          const prodNamesPromises = catProds.map(p => (currentLang === 'en' ? (p.nameEn ? Promise.resolve(p.nameEn) : translateText(p.name)) : Promise.resolve(p.name)));
-          const prodDescPromises = catProds.map(p => (currentLang === 'en' && p.description ? translateText(p.description) : Promise.resolve(p.description || '')));
-
-          const translatedNames = await Promise.all(prodNamesPromises);
-          const translatedDescs = await Promise.all(prodDescPromises);
-
-          catProds.forEach((p, idx) => {
+          catProds.forEach((p) => {
             let optionsHTML = '', defaultPrice = p.price || 0;
             if(p.saleType === 'weight') {
               const kiloText = currentLang === 'en' ? '1 Kilo' : 'كيلو';
@@ -942,8 +915,9 @@
               imgSrc = fallbackImg;
             }
 
-            const displayName = translatedNames[idx];
-            const displayDesc = translatedDescs[idx];
+            // الاستفادة من اسم المنتج باللغة الإنجليزية إن وجد أو الاسم الأصلي فوراً بدون ثقل
+            const displayName = (currentLang === 'en' && p.nameEn) ? p.nameEn : p.name;
+            const displayDesc = p.description || '';
 
             finalHtml += `
               <div class="product-card">
@@ -1025,7 +999,7 @@
       document.getElementById(`price-${id}`).innerText = price + " " + window.getCurrency();
     };
 
-    window.addToCart = async (pId) => {
+    window.addToCart = (pId) => {
       const p = allProducts.find(item => item.id === pId);
       if(!p) return;
       let optLabel = "وحدة", unitPrice = p.price;
@@ -1042,7 +1016,7 @@
       const cartKey = pId + "_" + optLabel;
       const exist = cart.find(c => c.key === cartKey);
 
-      const displayName = currentLang === 'en' ? (p.nameEn || await translateText(p.name)) : p.name;
+      const displayName = (currentLang === 'en' && p.nameEn) ? p.nameEn : p.name;
 
       if(exist) { exist.qty++; }
       else { cart.push({ key: cartKey, id: pId, name: displayName, option: optLabel, price: unitPrice, qty: 1, note: '' }); }

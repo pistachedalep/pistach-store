@@ -92,7 +92,6 @@
       overflow: hidden;
     }
 
-    /* تنسيقات الوضع الداكن للمنيو */
     body.dark-mode {
       background-color: #0f172a !important;
       color: #f8fafc !important;
@@ -112,21 +111,35 @@
       border-color: #334155 !important;
     }
 
+    /* شريط الهيدر المرن والسيّار */
     header {
       background-color: transparent !important;
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       color: #fff;
-      padding: 14px 16px;
+      padding: 10px 12px;
       position: sticky;
       top: 0;
       z-index: 100;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
     }
-    .header-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .header-container { 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      overflow-x: auto; 
+      white-space: nowrap; 
+      scrollbar-width: none; 
+      -webkit-overflow-scrolling: touch; 
+    }
+    .header-container::-webkit-scrollbar { display: none; }
     
+    .logo-area { flex-shrink: 0; }
     .logo-area h1 { 
-      font-size: 20px; 
+      font-size: 18px; 
       font-weight: 900; 
       color: var(--accent); 
       cursor: pointer; 
@@ -135,23 +148,23 @@
       background: transparent !important;
     }
     
-    .search-bar { flex: 1; max-width: 380px; }
+    .search-bar { flex: 1; min-width: 140px; flex-shrink: 0; }
     .search-bar input {
-      width: 100%; padding: 9px 15px; border-radius: 25px;
+      width: 100%; padding: 8px 14px; border-radius: 25px;
       border: 1.5px solid rgba(255, 255, 255, 0.4); 
       background: transparent !important;
-      color: #fff; font-size: 13px; font-weight: 700; outline: none; transition: all 0.3s ease;
+      color: #fff; font-size: 12.5px; font-weight: 700; outline: none; transition: all 0.3s ease;
     }
     .search-bar input::placeholder { color: rgba(255, 255, 255, 0.85); }
     .search-bar input:focus { background: rgba(0, 0, 0, 0.2) !important; border-color: var(--accent); }
     
-    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     
     .control-btn {
       background: transparent !important;
       border: 1.5px solid rgba(255, 255, 255, 0.6);
       color: #fff;
-      padding: 7px 10px;
+      padding: 6px 10px;
       border-radius: 16px;
       font-size: 12px;
       font-weight: 900;
@@ -168,7 +181,7 @@
       background: transparent !important;
       border: 1.5px solid #25d366; 
       color: #25d366; 
-      padding: 7px 12px; 
+      padding: 6px 10px; 
       border-radius: 16px;
       font-size: 12px; 
       font-weight: 900; 
@@ -337,7 +350,6 @@
       overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-weight: 600; 
     }
 
-    /* Skeleton Styles */
     @keyframes shimmer {
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
@@ -376,10 +388,6 @@
     .skeleton-line.medium { width: 80%; }
 
     @media (max-width: 480px) {
-      .header-container { gap: 6px; }
-      .logo-area h1 { font-size: 15px; }
-      .search-bar input { padding: 7px 10px; font-size: 11px; }
-      .control-btn, .whatsapp-header-btn { padding: 6px 8px; font-size: 11px; }
       .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .product-img-wrapper, .skeleton-img { height: 260px; }
       .product-info { padding: 8px 9px; gap: 5px; }
@@ -424,7 +432,6 @@
     .btn-telegram { background: #229ed9; }
     .btn-tiktok { background: #000000; border: 1px solid #333; }
 
-    /* Announcement Popup Styles */
     .announcement-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
     .announcement-card { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2.5px solid var(--accent); animation: popUp 0.35s ease; position: relative; color: #0f172a; }
   </style>
@@ -433,16 +440,13 @@
 
   <header>
     <div class="header-container">
-      <div class="logo-area"><h1 id="storeTitleLogo" onclick="window.location.reload()"> بيستاش دي ألب</h1></div>
+      <div class="logo-area"><h1 id="storeTitleLogo" onclick="window.location.reload()">بيستاش دي ألب</h1></div>
       <div class="search-bar">
         <input type="text" id="searchInput" placeholder="ابحث عن حلوياتك..." oninput="window.filterProducts()">
       </div>
       <div class="header-actions">
-        <!-- زر الوضع الداكن -->
         <button class="control-btn" onclick="window.toggleDarkMode()" id="darkModeBtn">🌙 الداكن</button>
-        <!-- زر تغيير اللغة والترجمة التلقائية -->
         <button class="control-btn" onclick="window.toggleLanguage()" id="langSwitchBtn">English 🌐</button>
-        <!-- زر التواصل -->
         <button class="whatsapp-header-btn" onclick="window.openSocialModal()">💬 تواصل معنا</button>
       </div>
     </div>
@@ -468,7 +472,6 @@
     <div class="cart-total-text" id="cartTotal">0</div>
   </div>
 
-  <!-- Announcement Popup Modal -->
   <div class="announcement-overlay" id="announcementModal">
     <div class="announcement-card" id="announcementCardContent">
       <div id="announcementText" style="font-size: 15px; font-weight: 800; line-height: 1.6; margin-bottom: 20px; white-space: pre-line;"></div>
@@ -562,9 +565,10 @@
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
 
+    const translationCache = JSON.parse(localStorage.getItem('translation_cache') || '{}');
+
     window.getCurrency = () => storeSettings.currencySymbol || "ج";
 
-    // --- Dark Mode Logic ---
     window.toggleDarkMode = () => {
       const isDark = document.body.classList.toggle("dark-mode");
       localStorage.setItem("storeDarkMode", isDark ? "enabled" : "disabled");
@@ -580,8 +584,23 @@
       }
     });
 
-    // --- Language & Auto Translation Logic ---
-    window.toggleLanguage = () => {
+    async function translateText(text) {
+      if(!text || currentLang === 'ar') return text;
+      if(translationCache[text]) return translationCache[text];
+
+      try {
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=${encodeURIComponent(text)}`);
+        const result = await res.json();
+        const translated = result?.[0]?.[0]?.[0] || text;
+        translationCache[text] = translated;
+        localStorage.setItem('translation_cache', JSON.stringify(translationCache));
+        return translated;
+      } catch(e) {
+        return text;
+      }
+    }
+
+    window.toggleLanguage = async () => {
       currentLang = currentLang === "ar" ? "en" : "ar";
       localStorage.setItem("storeLang", currentLang);
       document.documentElement.setAttribute("dir", currentLang === "ar" ? "rtl" : "ltr");
@@ -590,6 +609,7 @@
       const langBtn = document.getElementById("langSwitchBtn");
       if(langBtn) langBtn.innerHTML = currentLang === "ar" ? "English 🌐" : "العربية 🌐";
       
+      renderCategories(dynamicCategories);
       renderProducts();
     };
 
@@ -600,18 +620,6 @@
       if(langBtn) langBtn.innerHTML = currentLang === "ar" ? "English 🌐" : "العربية 🌐";
     });
 
-    async function translateText(text) {
-      if(!text || currentLang === 'ar') return text;
-      try {
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=${currentLang}&dt=t&q=${encodeURIComponent(text)}`);
-        const result = await res.json();
-        return result[0][0][0] || text;
-      } catch(e) {
-        return text;
-      }
-    }
-
-    // --- Announcement Popup Logic ---
     function checkAndShowAnnouncement() {
       if (storeSettings.announcement && storeSettings.announcement.trim() !== "") {
         const modal = document.getElementById("announcementModal");
@@ -816,13 +824,18 @@
     async function renderCategories(cats) {
       const bar = document.getElementById("categoriesBar");
       let allText = currentLang === 'en' ? 'All' : 'الكل';
+      
+      const translatedCats = currentLang === 'en' 
+        ? await Promise.all(cats.map(c => translateText(c)))
+        : cats;
+
       let html = `<button class="cat-btn ${selectedCat === 'الكل' ? 'active':''}" data-cat="الكل" onclick="window.selectCategory('الكل')">${allText}</button>`;
       
-      for(const c of cats) {
-        const displayCat = currentLang === 'en' ? await translateText(c) : c;
+      cats.forEach((c, i) => {
+        const displayCat = translatedCats[i];
         const isActive = (selectedCat === c) ? 'active' : '';
         html += `<button class="cat-btn ${isActive}" data-cat="${escapeHtml(c)}" onclick="window.selectCategory('${escapeHtml(c)}')">${escapeHtml(displayCat)}</button>`;
-      }
+      });
 
       bar.innerHTML = html;
     }
@@ -875,8 +888,13 @@
       let finalHtml = "";
       let totalFilteredCount = 0;
 
+      const catTranslationPromises = categoriesToDisplay.map(c => currentLang === 'en' ? translateText(c) : Promise.resolve(c));
+      const translatedCatNames = await Promise.all(catTranslationPromises);
+
       for (let i = 0; i < categoriesToDisplay.length; i++) {
         const catName = categoriesToDisplay[i];
+        const displayCatName = translatedCatNames[i];
+
         const catProds = allProducts.filter(p => {
           const matchCat = p.category && p.category.trim() === catName;
           const matchSearch = p.name.toLowerCase().includes(query) || (p.description && p.description.toLowerCase().includes(query));
@@ -887,14 +905,19 @@
           catProds.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
           totalFilteredCount += catProds.length;
 
-          const displayCatName = currentLang === 'en' ? await translateText(catName) : catName;
           const cleanCatId = encodeURIComponent(catName).replace(/%/g, '_');
           
           finalHtml += `<div class="category-section-group" id="cat-section-${cleanCatId}">`;
           finalHtml += `<div class="category-title-heading">${escapeHtml(displayCatName)}</div>`;
           finalHtml += `<div class="products-grid">`;
 
-          for(const p of catProds) {
+          const prodNamesPromises = catProds.map(p => (currentLang === 'en' ? (p.nameEn ? Promise.resolve(p.nameEn) : translateText(p.name)) : Promise.resolve(p.name)));
+          const prodDescPromises = catProds.map(p => (currentLang === 'en' && p.description ? translateText(p.description) : Promise.resolve(p.description || '')));
+
+          const translatedNames = await Promise.all(prodNamesPromises);
+          const translatedDescs = await Promise.all(prodDescPromises);
+
+          catProds.forEach((p, idx) => {
             let optionsHTML = '', defaultPrice = p.price || 0;
             if(p.saleType === 'weight') {
               const kiloText = currentLang === 'en' ? '1 Kilo' : 'كيلو';
@@ -910,8 +933,7 @@
               defaultPrice = p.pricing?.kilo || p.price;
             } else {
               const defaultUnitLabel = p.pricing?.unitLabel || 'علبة';
-              const displayUnitLabel = currentLang === 'en' ? await translateText(defaultUnitLabel) : defaultUnitLabel;
-              optionsHTML = `<span style="font-size:11px; color:#64748b; font-weight:800;">${displayUnitLabel}</span>`;
+              optionsHTML = `<span style="font-size:11px; color:#64748b; font-weight:800;">${defaultUnitLabel}</span>`;
               defaultPrice = p.pricing?.unitPrice || p.price;
             }
 
@@ -920,8 +942,8 @@
               imgSrc = fallbackImg;
             }
 
-            const displayName = currentLang === 'en' ? (p.nameEn || await translateText(p.name)) : p.name;
-            const displayDesc = currentLang === 'en' && p.description ? await translateText(p.description) : (p.description || '');
+            const displayName = translatedNames[idx];
+            const displayDesc = translatedDescs[idx];
 
             finalHtml += `
               <div class="product-card">
@@ -938,7 +960,7 @@
                   <div class="product-desc">${escapeHtml(displayDesc)}</div>
                 </div>
               </div>`;
-          }
+          });
 
           finalHtml += `</div></div>`;
 

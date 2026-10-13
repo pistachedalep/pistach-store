@@ -688,9 +688,11 @@
     }
 
     window.selectCategory = (cat) => {
+      const prevCat = selectedCat;
       selectedCat = cat;
       isScrollingProgrammatically = true;
 
+      // 1. تحديث شكل زر الأقسام النشط
       document.querySelectorAll(".cat-btn").forEach(b => {
         if(b.getAttribute("data-cat") === cat) {
           b.classList.add("active");
@@ -700,17 +702,22 @@
         }
       });
 
-      renderProducts();
+      const scrollArea = document.getElementById("productsScrollArea");
 
-      if (cat !== "الكل") {
-        const section = document.getElementById(`cat-section-${CSS.escape(cat)}`);
+      // 2. إذا كنا في وضع "الكل"، نستخدم السكرول السلس للوصول للقسم
+      if (prevCat === "الكل" && cat !== "الكل") {
+        const cleanId = encodeURIComponent(cat).replace(/%/g, '_');
+        const section = document.getElementById(`cat-section-${cleanId}`);
         if (section) {
           section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setTimeout(() => { isScrollingProgrammatically = false; }, 600);
+          return;
         }
-      } else {
-        const scrollArea = document.getElementById("productsScrollArea");
-        if(scrollArea) scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
       }
+
+      // 3. إعادة رسم القائمة في حال تصفية قسم معين أو العودة للكل
+      renderProducts();
+      if(scrollArea) scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
 
       setTimeout(() => { isScrollingProgrammatically = false; }, 600);
     };
@@ -749,7 +756,8 @@
           catProds.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
           totalFilteredCount += catProds.length;
 
-          finalHtml += `<div class="category-section-group" id="cat-section-${escapeHtml(catName)}">`;
+          const cleanCatId = encodeURIComponent(catName).replace(/%/g, '_');
+          finalHtml += `<div class="category-section-group" id="cat-section-${cleanCatId}">`;
           if(selectedCat === "الكل") {
             finalHtml += `<div class="category-title-heading">${escapeHtml(catName)}</div>`;
           }
@@ -828,8 +836,9 @@
           const rect = section.getBoundingClientRect();
           const containerRect = productsScrollArea.getBoundingClientRect();
           
-          if (rect.top - containerRect.top <= 120 && rect.bottom - containerRect.top >= 120) {
-            currentActiveCat = section.id.replace('cat-section-', '');
+          if (rect.top - containerRect.top <= 140 && rect.bottom - containerRect.top >= 60) {
+            const rawId = section.id.replace('cat-section-', '');
+            currentActiveCat = decodeURIComponent(rawId.replace(/_/g, '%'));
           }
         });
 

@@ -68,9 +68,12 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   <!-- Dashboard Panel -->
   <div id="dashboardPanel" style="display: none;">
-    <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
       <h1 style="margin: 0; color: var(--primary); font-size: 22px; font-weight:900;" id="dashboardTitle">لوحة التحكم</h1>
-      <button class="btn btn-danger" id="logoutBtn">تسجيل الخروج</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-warning" id="forceRefreshBtn" style="background: #f59e0b; color: #fff;">🔄 إجبار تحديث المنيو للزبائن</button>
+        <button class="btn btn-danger" id="logoutBtn">تسجيل الخروج</button>
+      </div>
     </div>
 
     <div class="admin-tabs">
@@ -304,6 +307,18 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
+  // زر إجبار تحديث المنيو لدى كافة الزبائن
+  document.getElementById("forceRefreshBtn").addEventListener("click", async () => {
+    if(confirm("هل تريد إجبار جميع الزبائن على جلب التحديثات فوراً عند فتحهم للمتجر؟")) {
+      try {
+        await setDoc(doc(db, "settings", "store"), { lastUpdated: Date.now() }, { merge: true });
+        alert("✨ تم إرسال أمر التحديث! سيشاهد الزبائن أحدث نسخة فور عمل Refresh.");
+      } catch(e) {
+        alert("حدث خطأ في تحديث البيانات.");
+      }
+    }
+  });
+
   onAuthStateChanged(auth, user => {
     if(user) {
       document.getElementById("authPanel").style.display = "none";
@@ -459,7 +474,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       menuBgImage: uploadedBase64Image || "",
       fontFamily: selectedFont
     };
-    await setDoc(doc(db, "settings", "store"), { storeName, theme }, { merge: true });
+    await setDoc(doc(db, "settings", "store"), { storeName, theme, lastUpdated: Date.now() }, { merge: true });
     document.documentElement.style.setProperty('--custom-font', selectedFont + ", Tahoma");
     alert("✨ تم الحفظ وتطبيق الخط بنجاح!");
   });
@@ -473,7 +488,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       telegram: document.getElementById("telegramInput").value.trim(),
       tiktok: document.getElementById("tiktokInput").value.trim()
     };
-    await setDoc(doc(db, "settings", "store"), { whatsappNumber, defaultImage, socialLinks }, { merge: true });
+    await setDoc(doc(db, "settings", "store"), { whatsappNumber, defaultImage, socialLinks, lastUpdated: Date.now() }, { merge: true });
     alert("✨ تم حفظ إعدادات المتجر والصورة الافتراضية بنجاح!");
   });
 
@@ -516,7 +531,8 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const catNamesOnly = categoriesList.filter(c => !c.hidden).map(c => c.name);
     await setDoc(doc(db, "settings", "store"), { 
       categoriesList: categoriesList, 
-      categories: catNamesOnly 
+      categories: catNamesOnly,
+      lastUpdated: Date.now() 
     }, { merge: true });
     renderCategoriesAdmin();
     updateCategorySelectOptions();

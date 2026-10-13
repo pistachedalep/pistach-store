@@ -463,16 +463,16 @@
       container.innerHTML = html;
     }
 
-    // جلب البيانات مع التخزين المؤقت المحلي لمدة أسبوع كامل (7 أيام)
+    // جلب البيانات مع التخزين المؤقت المحلي لمدة 24 ساعة لتقليل القراءات
     async function fetchStoreData() {
       try {
-        const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // أسبوع كامل (7 أيام)
+        const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 ساعة كاملة
         const cachedProducts = localStorage.getItem('pista_products_cache');
         const cachedSettings = localStorage.getItem('pista_settings_cache');
         const cacheTime = localStorage.getItem('pista_cache_time');
         const now = Date.now();
 
-        // 1. استخدام الكاش المحلي إن لم تنتهِ مدة الـ 7 أيام
+        // 1. استخدام الكاش المحلي إن لم تنتهِ مدة الـ 24 ساعة
         if (cachedProducts && cachedSettings && cacheTime && (now - cacheTime < CACHE_DURATION)) {
           allProducts = JSON.parse(cachedProducts);
           storeSettings = JSON.parse(cachedSettings);
@@ -481,7 +481,7 @@
           return;
         }
 
-        // 2. إذا انتهت الـ 7 أيام، نسحب البيانات من Firebase مرة واحدة ونحدث الكاش
+        // 2. إذا انتهت الـ 24 ساعة، نسحب البيانات من Firebase مرة واحدة فقط ونحدث الكاش
         const settingsSnap = await getDoc(doc(db, "settings", "store"));
         if(settingsSnap.exists()){
           storeSettings = settingsSnap.data();

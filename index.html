@@ -90,7 +90,13 @@
       direction: rtl; 
       height: 100vh;
       overflow: hidden;
+      top: 0 !important;
     }
+
+    /* إخفاء شريط جوجل الترجمة المزعج العلوي */
+    .goog-te-banner-frame { display: none !important; }
+    .goog-te-gadget { display: none !important; }
+    body { top: 0px !important; }
 
     body.dark-mode {
       background-color: #0f172a !important;
@@ -111,7 +117,6 @@
       border-color: #334155 !important;
     }
 
-    /* شريط الهيدر السيّار أفقياً بمرونة وسرعة فائقة */
     header {
       background-color: transparent !important;
       backdrop-filter: blur(8px);
@@ -438,6 +443,19 @@
     .announcement-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
     .announcement-card { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2.5px solid var(--accent); animation: popUp 0.35s ease; position: relative; color: #0f172a; }
   </style>
+  
+  <!-- موديول ترجمة فورية مدمج -->
+  <div id="google_translate_element" style="display:none;"></div>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'ar',
+        includedLanguages: 'en,ar',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 <body>
 
@@ -585,21 +603,22 @@
       }
     });
 
-    // تحويل لحظي دون الانتظار لطلبات الشبكة الخارجية
+    // ترجمة فورية ولحظية للصفحة بالكامل عبر المحرك المدمج
     window.toggleLanguage = () => {
       currentLang = currentLang === "ar" ? "en" : "ar";
       localStorage.setItem("storeLang", currentLang);
+
+      const selectElem = document.querySelector('.goog-te-combo');
+      if (selectElem) {
+        selectElem.value = currentLang;
+        selectElem.dispatchEvent(new Event('change'));
+      }
+
       document.documentElement.setAttribute("dir", currentLang === "ar" ? "rtl" : "ltr");
       document.documentElement.setAttribute("lang", currentLang);
       
       const langBtn = document.getElementById("langSwitchBtn");
       if(langBtn) langBtn.innerHTML = currentLang === "ar" ? "English 🌐" : "العربية 🌐";
-
-      const searchInput = document.getElementById("searchInput");
-      if(searchInput) searchInput.placeholder = currentLang === "en" ? "Search items..." : "ابحث عن حلوياتك...";
-      
-      renderCategories(dynamicCategories);
-      renderProducts();
     };
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -607,6 +626,16 @@
       document.documentElement.setAttribute("lang", currentLang);
       const langBtn = document.getElementById("langSwitchBtn");
       if(langBtn) langBtn.innerHTML = currentLang === "ar" ? "English 🌐" : "العربية 🌐";
+
+      if(currentLang === 'en') {
+        setTimeout(() => {
+          const selectElem = document.querySelector('.goog-te-combo');
+          if (selectElem) {
+            selectElem.value = 'en';
+            selectElem.dispatchEvent(new Event('change'));
+          }
+        }, 1000);
+      }
     });
 
     function checkAndShowAnnouncement() {
@@ -812,8 +841,7 @@
 
     function renderCategories(cats) {
       const bar = document.getElementById("categoriesBar");
-      let allText = currentLang === 'en' ? 'All' : 'الكل';
-      let html = `<button class="cat-btn ${selectedCat === 'الكل' ? 'active':''}" data-cat="الكل" onclick="window.selectCategory('الكل')">${allText}</button>`;
+      let html = `<button class="cat-btn ${selectedCat === 'الكل' ? 'active':''}" data-cat="الكل" onclick="window.selectCategory('الكل')">الكل</button>`;
       
       cats.forEach((c) => {
         const isActive = (selectedCat === c) ? 'active' : '';
@@ -893,15 +921,11 @@
           catProds.forEach((p) => {
             let optionsHTML = '', defaultPrice = p.price || 0;
             if(p.saleType === 'weight') {
-              const kiloText = currentLang === 'en' ? '1 Kilo' : 'كيلو';
-              const halfText = currentLang === 'en' ? 'Half Kilo' : 'نصف كيلو';
-              const quarterText = currentLang === 'en' ? 'Quarter Kilo' : 'ربع كيلو';
-
               optionsHTML = `
                 <select class="unit-select" id="opt-${p.id}" onchange="window.updateCardPrice('${p.id}')">
-                  <option value="kilo" data-price="${p.pricing?.kilo || p.price}">${kiloText}</option>
-                  <option value="half" data-price="${p.pricing?.half || p.price/2}">${halfText}</option>
-                  <option value="quarter" data-price="${p.pricing?.quarter || p.price/4}">${quarterText}</option>
+                  <option value="kilo" data-price="${p.pricing?.kilo || p.price}">كيلو</option>
+                  <option value="half" data-price="${p.pricing?.half || p.price/2}">نصف كيلو</option>
+                  <option value="quarter" data-price="${p.pricing?.quarter || p.price/4}">ربع كيلو</option>
                 </select>`;
               defaultPrice = p.pricing?.kilo || p.price;
             } else {
@@ -915,23 +939,19 @@
               imgSrc = fallbackImg;
             }
 
-            // الاستفادة من اسم المنتج باللغة الإنجليزية إن وجد أو الاسم الأصلي فوراً بدون ثقل
-            const displayName = (currentLang === 'en' && p.nameEn) ? p.nameEn : p.name;
-            const displayDesc = p.description || '';
-
             finalHtml += `
               <div class="product-card">
                 <div class="product-img-wrapper" onclick="window.addToCart('${p.id}')" title="اضغط لإضافة الصنف إلى السلة">
-                  <img src="${imgSrc}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null; this.src='${fallbackImg}';">
+                  <img src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null; this.src='${fallbackImg}';">
                   <div class="img-gradient-overlay"></div>
                 </div>
                 <div class="product-info">
-                  <div class="product-title">${escapeHtml(displayName)}</div>
+                  <div class="product-title">${escapeHtml(p.name)}</div>
                   <div class="product-controls">
                     ${optionsHTML}
                     <span class="price-tag" id="price-${p.id}">${defaultPrice} ${curr}</span>
                   </div>
-                  <div class="product-desc">${escapeHtml(displayDesc)}</div>
+                  <div class="product-desc">${escapeHtml(p.description || '')}</div>
                 </div>
               </div>`;
           });
@@ -945,8 +965,7 @@
       }
 
       if(totalFilteredCount === 0) {
-        const noMatchText = currentLang === 'en' ? 'No matching products found.' : 'لا توجد منتجات مطابقة.';
-        scrollArea.innerHTML = `<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800; text-shadow:0 2px 4px rgba(0,0,0,0.5);">${noMatchText}</div>`;
+        scrollArea.innerHTML = `<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800; text-shadow:0 2px 4px rgba(0,0,0,0.5);">لا توجد منتجات مطابقة.</div>`;
       } else {
         scrollArea.innerHTML = finalHtml;
         const cards = scrollArea.querySelectorAll('.product-card');
@@ -1016,10 +1035,8 @@
       const cartKey = pId + "_" + optLabel;
       const exist = cart.find(c => c.key === cartKey);
 
-      const displayName = (currentLang === 'en' && p.nameEn) ? p.nameEn : p.name;
-
       if(exist) { exist.qty++; }
-      else { cart.push({ key: cartKey, id: pId, name: displayName, option: optLabel, price: unitPrice, qty: 1, note: '' }); }
+      else { cart.push({ key: cartKey, id: pId, name: p.name, option: optLabel, price: unitPrice, qty: 1, note: '' }); }
 
       updateCartUI();
     };
@@ -1035,10 +1052,7 @@
       document.getElementById("grandTotalText").innerText = (subtotal + currentFee) + " " + curr;
 
       const container = document.getElementById("cartItemsContainer");
-      const emptyCartText = currentLang === 'en' ? 'Cart is empty' : 'السلة فارغة';
-      if(!cart.length) { container.innerHTML = `<p style='text-align:center; color:#94a3b8; padding:40px; font-weight:700;'>${emptyCartText}</p>`; return; }
-
-      const notePlaceholder = currentLang === 'en' ? 'Optional item note...' : 'ملاحظة لهذا الصنف (اختياري)...';
+      if(!cart.length) { container.innerHTML = `<p style='text-align:center; color:#94a3b8; padding:40px; font-weight:700;'>السلة فارغة</p>`; return; }
 
       container.innerHTML = cart.map((item, idx) => `
         <div class="cart-item">
@@ -1053,7 +1067,7 @@
               <button class="qty-btn" onclick="window.changeQty(${idx}, 1)">+</button>
             </div>
           </div>
-          <input type="text" placeholder="${notePlaceholder}" value="${item.note || ''}" oninput="window.updateItemNote(${idx}, this.value)" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background: #f8fafc;">
+          <input type="text" placeholder="ملاحظة لهذا الصنف (اختياري)..." value="${item.note || ''}" oninput="window.updateItemNote(${idx}, this.value)" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background: #f8fafc;">
         </div>
       `).join("");
     }
@@ -1068,14 +1082,13 @@
 
     window.openCartDrawer = () => { updateCartUI(); document.getElementById("cartModal").style.display = "flex"; };
     window.closeCartDrawer = () => document.getElementById("cartModal").style.display = "none";
-    window.openCheckoutDrawer = () => { if(!cart.length) return alert(currentLang === 'en' ? "Cart is empty!" : "السلة فارغة!"); window.closeCartDrawer(); document.getElementById("checkoutModal").style.display = "flex"; };
+    window.openCheckoutDrawer = () => { if(!cart.length) return alert("السلة فارغة!"); window.closeCartDrawer(); document.getElementById("checkoutModal").style.display = "flex"; };
     window.closeCheckoutDrawer = () => document.getElementById("checkoutModal").style.display = "none";
 
     function renderZonesSelect() {
       const curr = window.getCurrency();
       const sel = document.getElementById("custZone");
-      const defaultOptionText = currentLang === 'en' ? 'Select area...' : 'اختر المنطقة...';
-      sel.innerHTML = `<option value="">${defaultOptionText}</option>` + deliveryZones.map(z => `<option value="${z.name}" data-fee="${z.fee}">${z.name} (${z.fee} ${curr})</option>`).join("");
+      sel.innerHTML = `<option value="">اختر المنطقة...</option>` + deliveryZones.map(z => `<option value="${z.name}" data-fee="${z.fee}">${z.name} (${z.fee} ${curr})</option>`).join("");
     }
 
     function renderBranchesSelect(branchesArr) {
@@ -1125,12 +1138,12 @@
 
       let zone = "", address = "", selectedBranch = "";
 
-      if(!name || !phone) return alert(currentLang === 'en' ? "Please enter name and phone number!" : "يرجى إدخال الاسم ورقم الهاتف!");
+      if(!name || !phone) return alert("يرجى إدخال الاسم ورقم الهاتف!");
 
       if (orderType === 'delivery') {
         zone = document.getElementById("custZone").value;
         address = document.getElementById("custAddress").value.trim();
-        if(!zone || !address) return alert(currentLang === 'en' ? "Please select delivery zone and enter detailed address!" : "يرجى اختيار منطقة التوصيل وكتابة العنوان التفصيلي!");
+        if(!zone || !address) return alert("يرجى اختيار منطقة التوصيل وكتابة العنوان التفصيلي!");
       } else {
         selectedBranch = document.getElementById("pickupBranchSelect").value;
       }
@@ -1190,7 +1203,7 @@
         window.location.href = whatsappUrl;
 
       } catch(e) {
-        alert(currentLang === 'en' ? "Error submitting order, please try again." : "حدث خطأ في تقديم الطلب، يرجى المحاولة مرة أخرى.");
+        alert("حدث خطأ في تقديم الطلب، يرجى المحاولة مرة أخرى.");
       }
     };
 

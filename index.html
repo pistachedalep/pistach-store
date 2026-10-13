@@ -88,12 +88,12 @@
       background-repeat: no-repeat;
       color: var(--text-main); 
       direction: rtl; 
-      padding-bottom: 100px; 
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden; /* تثبيت الصفحة لمنع السكرول العشوائي خارج المنطقة المخصصة */
     }
 
     header {
-      background-color: transparent !important; /* جعل خلفية الهيدر بالكامل شفافة */
+      background-color: transparent !important;
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
       color: #fff;
@@ -105,7 +105,6 @@
     }
     .header-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
     
-    /* 1. اسم المتجر شفاف مع الحفاظ على تأثير الظل والنص المميز */
     .logo-area h1 { 
       font-size: 20px; 
       font-weight: 900; 
@@ -116,20 +115,18 @@
       background: transparent !important;
     }
     
-    /* 2. مستطيل البحث أصبح شفافاً تماماً مع إطار خفيف */
     .search-bar { flex: 1; max-width: 380px; }
     .search-bar input {
       width: 100%; padding: 9px 15px; border-radius: 25px;
       border: 1.5px solid rgba(255, 255, 255, 0.4); 
-      background: transparent !important; /* خلفية شفافة لمربع البحث */
+      background: transparent !important;
       color: #fff; font-size: 13px; font-weight: 700; outline: none; transition: all 0.3s ease;
     }
     .search-bar input::placeholder { color: rgba(255, 255, 255, 0.85); }
     .search-bar input:focus { background: rgba(0, 0, 0, 0.2) !important; border-color: var(--accent); }
     
-    /* 3. زر تواصل معنا أصبح شَفافاً مع إطار أخضر خفيف */
     .whatsapp-header-btn {
-      background: transparent !important; /* جعل خلفية زر التواصل شفافة */
+      background: transparent !important;
       border: 1.5px solid #25d366; 
       color: #25d366; 
       padding: 8px 14px; 
@@ -144,15 +141,35 @@
       text-decoration: none;
       transition: all 0.3s ease;
     }
-    .whatsapp-header-btn:hover {
-      background: #25d366 !important;
-      color: #fff;
+    .whatsapp-header-btn:hover { background: #25d366 !important; color: #fff; }
+
+    /* الحاوية الرئيسية */
+    .main-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      height: calc(100vh - 70px);
+      display: flex;
+      flex-direction: column;
+      padding: 0 14px;
     }
 
-    .container { max-width: 1100px; margin: 20px auto; padding: 0 14px; }
-
-    .categories-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
+    /* شريط الأقسام: ثابت أفقياً (يمين ويسار فقط) دون أي صعود أو نزول */
+    .categories-bar { 
+      display: flex; 
+      flex-direction: row;
+      overflow-x: auto; 
+      overflow-y: hidden;
+      white-space: nowrap;
+      padding: 12px 0; 
+      margin-bottom: 10px; 
+      scrollbar-width: none; 
+      position: sticky;
+      top: 0;
+      z-index: 99;
+      background-color: var(--menu-bg-color);
+    }
     .categories-bar::-webkit-scrollbar { display: none; }
+    
     .cat-btn {
       background: var(--cat-bg); 
       backdrop-filter: blur(8px);
@@ -160,10 +177,46 @@
       border: 1.5px solid rgba(255, 255, 255, 0.7); white-space: nowrap; font-size: var(--cat-font-size); font-weight: 800;
       cursor: pointer; color: var(--cat-text); transition: all 0.25s ease;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      display: inline-block;
     }
     .cat-btn.active, .cat-btn:hover { 
       background: var(--cat-active-bg); color: var(--cat-active-text); border-color: var(--accent); 
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); 
+    }
+
+    /* منطقة الأصناف: تتحرك عمودياً مع الفواصل والمسافات */
+    .products-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 100px;
+      scrollbar-width: thin;
+    }
+    .products-scroll-area::-webkit-scrollbar {
+      width: 5px;
+    }
+    .products-scroll-area::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.3);
+      border-radius: 10px;
+    }
+
+    .category-section-group {
+      margin-bottom: 20px;
+    }
+
+    .category-title-heading {
+      font-size: 16px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* الفاصل بين الأقسام */
+    .section-divider {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+      margin: 25px 0;
     }
 
     .products-grid { 
@@ -205,78 +258,39 @@
       transition: transform 0.3s ease;
     }
 
-    .product-img-wrapper:active img {
-      transform: scale(0.96);
-    }
-
-    .product-card:hover img {
-      transform: scale(1.03);
-    }
+    .product-img-wrapper:active img { transform: scale(0.96); }
+    .product-card:hover img { transform: scale(1.03); }
 
     .img-gradient-overlay {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       height: 60px;
       background: linear-gradient(to top, rgba(0,0,0,0.25), transparent);
       pointer-events: none;
     }
 
     .product-info { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 6px; 
-      padding: 10px 12px; 
-      width: 100%; 
-      background: var(--card-bg);
+      display: flex; flex-direction: column; gap: 6px; 
+      padding: 10px 12px; width: 100%; background: var(--card-bg);
     }
 
     .product-title { 
-      font-size: 13.5px; 
-      font-weight: 800; 
-      color: var(--card-text); 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
+      font-size: 13.5px; font-weight: 800; color: var(--card-text); 
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
     }
 
-    .product-controls { 
-      display: flex; 
-      align-items: center; 
-      justify-content: space-between; 
-      gap: 6px; 
-    }
+    .product-controls { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 
     .unit-select { 
-      padding: 4px 6px; 
-      border-radius: 7px; 
-      border: 1.5px solid #cbd5e1; 
-      font-size: 11px; 
-      background: #ffffff; 
-      font-weight: 800; 
-      color: #0f172a; 
-      outline: none; 
-      cursor: pointer; 
+      padding: 4px 6px; border-radius: 7px; border: 1.5px solid #cbd5e1; 
+      font-size: 11px; background: #ffffff; font-weight: 800; color: #0f172a; outline: none; cursor: pointer; 
     }
 
-    .price-tag { 
-      font-size: 14.5px; 
-      font-weight: 900; 
-      color: var(--primary); 
-      white-space: nowrap; 
-    }
+    .price-tag { font-size: 14.5px; font-weight: 900; color: var(--primary); white-space: nowrap; }
 
     .product-desc { 
-      font-size: 11px; 
-      color: var(--text-muted); 
-      line-height: 1.35; 
-      height: 30px; 
-      overflow: hidden; 
-      display: -webkit-box; 
-      -webkit-line-clamp: 2; 
-      -webkit-box-orient: vertical; 
-      font-weight: 600; 
+      font-size: 11px; color: var(--text-muted); line-height: 1.35; height: 30px; 
+      overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-weight: 600; 
     }
 
     @media (max-width: 480px) {
@@ -341,12 +355,17 @@
     </div>
   </header>
 
-  <div class="container">
+  <div class="main-layout">
+    <!-- شريط الأقسام (ثابت ويتحرك أفقياً يمين ويسار فقط دون صعود أو نزول) -->
     <div class="categories-bar" id="categoriesBar">
       <button class="cat-btn active" data-cat="الكل" onclick="window.selectCategory('الكل')">الكل</button>
     </div>
-    <div class="products-grid" id="productsGrid">
-      <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #ffffff; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">جاري تحميل المنتجات...</div>
+    
+    <!-- منطقة الأصناف (تتحرك عمودياً ويظهر بينها الفواصل) -->
+    <div class="products-scroll-area" id="productsScrollArea">
+      <div class="products-grid" id="productsGrid">
+        <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #ffffff; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">جاري تحميل المنتجات...</div>
+      </div>
     </div>
   </div>
 
@@ -556,74 +575,97 @@
     window.filterProducts = () => renderProducts();
 
     function renderProducts() {
-      const grid = document.getElementById("productsGrid");
+      const scrollArea = document.getElementById("productsScrollArea");
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
       
-      let sortedProducts = [];
-
+      let categoriesToDisplay = [];
       if(selectedCat === "الكل") {
-        dynamicCategories.forEach(catName => {
-          const catProds = allProducts.filter(p => p.category && p.category.trim() === catName);
-          catProds.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-          sortedProducts.push(...catProds);
+        categoriesToDisplay = [...dynamicCategories];
+        // إضافة أي تصنيفات أخرى غير موجودة في القائمة الرئيسية
+        allProducts.forEach(p => {
+          const cat = p.category ? p.category.trim() : "أخرى";
+          if(!categoriesToDisplay.includes(cat) && !categoriesToDisplay.includes(p.category?.trim())) {
+            if(p.category && !categoriesToDisplay.includes(p.category.trim())) categoriesToDisplay.push(p.category.trim());
+          }
         });
-
-        const otherProds = allProducts.filter(p => !p.category || !dynamicCategories.includes(p.category.trim()));
-        otherProds.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-        sortedProducts.push(...otherProds);
       } else {
-        sortedProducts = allProducts.filter(p => p.category && p.category.trim() === selectedCat);
-        sortedProducts.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-      }
-
-      const filtered = sortedProducts.filter(p => {
-        const matchSearch = p.name.toLowerCase().includes(query) || (p.description && p.description.toLowerCase().includes(query));
-        return !p.hidden && matchSearch;
-      });
-
-      if(!filtered.length) { 
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #ffffff; font-weight:800; text-shadow:0 2px 4px rgba(0,0,0,0.5);">لا توجد منتجات مطابقة.</div>'; 
-        return; 
+        categoriesToDisplay = [selectedCat];
       }
 
       const fallbackImg = storeSettings.defaultImage || "";
+      let finalHtml = "";
+      let totalFilteredCount = 0;
 
-      grid.innerHTML = filtered.map(p => {
-        let optionsHTML = '', defaultPrice = p.price || 0;
-        if(p.saleType === 'weight') {
-          optionsHTML = `
-            <select class="unit-select" id="opt-${p.id}" onchange="window.updateCardPrice('${p.id}')">
-              <option value="kilo" data-price="${p.pricing?.kilo || p.price}">كيلو</option>
-              <option value="half" data-price="${p.pricing?.half || p.price/2}">نصف كيلو</option>
-              <option value="quarter" data-price="${p.pricing?.quarter || p.price/4}">ربع كيلو</option>
-            </select>`;
-          defaultPrice = p.pricing?.kilo || p.price;
-        } else {
-          optionsHTML = `<span style="font-size:11px; color:#64748b; font-weight:800;">${p.pricing?.unitLabel || 'علبة'}</span>`;
-          defaultPrice = p.pricing?.unitPrice || p.price;
+      categoriesToDisplay.forEach((catName, index) => {
+        const catProds = allProducts.filter(p => {
+          const matchCat = selectedCat === "الكل" ? (p.category && p.category.trim() === catName) : (p.category && p.category.trim() === selectedCat);
+          const matchSearch = p.name.toLowerCase().includes(query) || (p.description && p.description.toLowerCase().includes(query));
+          return !p.hidden && matchCat && matchSearch;
+        });
+
+        if(catProds.length > 0) {
+          catProds.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+          totalFilteredCount += catProds.length;
+
+          // عنوان القسم داخل قائمة الأصناف المتحركة
+          finalHtml += `<div class="category-section-group">`;
+          if(selectedCat === "الكل") {
+            finalHtml += `<div class="category-title-heading">${escapeHtml(catName)}</div>`;
+          }
+          
+          finalHtml += `<div class="products-grid">`;
+
+          catProds.forEach(p => {
+            let optionsHTML = '', defaultPrice = p.price || 0;
+            if(p.saleType === 'weight') {
+              optionsHTML = `
+                <select class="unit-select" id="opt-${p.id}" onchange="window.updateCardPrice('${p.id}')">
+                  <option value="kilo" data-price="${p.pricing?.kilo || p.price}">كيلو</option>
+                  <option value="half" data-price="${p.pricing?.half || p.price/2}">نصف كيلو</option>
+                  <option value="quarter" data-price="${p.pricing?.quarter || p.price/4}">ربع كيلو</option>
+                </select>`;
+              defaultPrice = p.pricing?.kilo || p.price;
+            } else {
+              optionsHTML = `<span style="font-size:11px; color:#64748b; font-weight:800;">${p.pricing?.unitLabel || 'علبة'}</span>`;
+              defaultPrice = p.pricing?.unitPrice || p.price;
+            }
+
+            let imgSrc = p.images?.[0] || p.image;
+            if (!imgSrc || imgSrc.trim() === "" || imgSrc === "undefined") {
+              imgSrc = fallbackImg;
+            }
+
+            finalHtml += `
+              <div class="product-card">
+                <div class="product-img-wrapper" onclick="window.addToCart('${p.id}')" title="اضغط لإضافة الصنف إلى السلة">
+                  <img src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null; this.src='${fallbackImg}';">
+                  <div class="img-gradient-overlay"></div>
+                </div>
+                <div class="product-info">
+                  <div class="product-title">${escapeHtml(p.name)}</div>
+                  <div class="product-controls">
+                    ${optionsHTML}
+                    <span class="price-tag" id="price-${p.id}">${defaultPrice} ج</span>
+                  </div>
+                  <div class="product-desc">${escapeHtml(p.description || '')}</div>
+                </div>
+              </div>`;
+          });
+
+          finalHtml += `</div></div>`;
+
+          // إضافة فاصل أنيق بين الأقسام إذا لم يكن القسم الأخير
+          if(selectedCat === "الكل" && index < categoriesToDisplay.length - 1) {
+            finalHtml += `<div class="section-divider"></div>`;
+          }
         }
+      });
 
-        let imgSrc = p.images?.[0] || p.image;
-        if (!imgSrc || imgSrc.trim() === "" || imgSrc === "undefined") {
-          imgSrc = fallbackImg;
-        }
-
-        return `
-          <div class="product-card">
-            <div class="product-img-wrapper" onclick="window.addToCart('${p.id}')" title="اضغط لإضافة الصنف إلى السلة">
-              <img src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null; this.src='${fallbackImg}';">
-              <div class="img-gradient-overlay"></div>
-            </div>
-            <div class="product-info">
-              <div class="product-title">${escapeHtml(p.name)}</div>
-              <div class="product-controls">
-                ${optionsHTML}
-                <span class="price-tag" id="price-${p.id}">${defaultPrice} ج</span>
-              </div>
-              <div class="product-desc">${escapeHtml(p.description || '')}</div>
-            </div>
-          </div>`;
-      }).join("");
+      if(totalFilteredCount === 0) {
+        scrollArea.innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800; text-shadow:0 2px 4px rgba(0,0,0,0.5);">لا توجد منتجات مطابقة.</div>';
+      } else {
+        scrollArea.innerHTML = finalHtml;
+      }
     }
 
     window.updateCardPrice = (id) => {

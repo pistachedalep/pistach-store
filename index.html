@@ -463,16 +463,16 @@
       container.innerHTML = html;
     }
 
-    // جلب البيانات مع التخزين المؤقت المحلي (localStorage Cache) لتوفير القراءات بنسبة 100%
+    // جلب البيانات مع التخزين المؤقت المحلي لمدة أسبوع كامل (7 أيام)
     async function fetchStoreData() {
       try {
-        const CACHE_DURATION = 60 * 60 * 1000; // ساعة كاملة
+        const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // أسبوع كامل (7 أيام)
         const cachedProducts = localStorage.getItem('pista_products_cache');
         const cachedSettings = localStorage.getItem('pista_settings_cache');
         const cacheTime = localStorage.getItem('pista_cache_time');
         const now = Date.now();
 
-        // 1. استخدام الكاش المحلي إن لمשي المدة (لتوفير القراءات تماماً)
+        // 1. استخدام الكاش المحلي إن لم تنتهِ مدة الـ 7 أيام
         if (cachedProducts && cachedSettings && cacheTime && (now - cacheTime < CACHE_DURATION)) {
           allProducts = JSON.parse(cachedProducts);
           storeSettings = JSON.parse(cachedSettings);
@@ -481,7 +481,7 @@
           return;
         }
 
-        // 2. إذا انتهت المدة أو لم يوجد كاش، نسحب من Firebase مرة واحدة
+        // 2. إذا انتهت الـ 7 أيام، نسحب البيانات من Firebase مرة واحدة ونحدث الكاش
         const settingsSnap = await getDoc(doc(db, "settings", "store"));
         if(settingsSnap.exists()){
           storeSettings = settingsSnap.data();
@@ -499,7 +499,6 @@
 
       } catch(error) {
         console.error("خطأ في جلب البيانات:", error);
-        // محاولة التحميل من الكاش القديم إن حدث خطأ في الاتصال
         const fallbackProducts = localStorage.getItem('pista_products_cache');
         if(fallbackProducts) {
           allProducts = JSON.parse(fallbackProducts);

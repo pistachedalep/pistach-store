@@ -81,7 +81,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       <button onclick="switchTab('catTab', this)">🏷️ الأقسام</button>
       <button onclick="switchTab('themeTab', this)">🎨 الأبعاد والألوان</button>
       <button onclick="switchTab('oTab', this)">📋 الطلبات</button>
-      <button onclick="switchTab('dTab', this)">🛵 التوصيل</button>
+      <button onclick="switchTab('dTab', this)">🛵 التوصيل والفروع</button>
       <button onclick="switchTab('sTab', this)">⚙️ الإعدادات والسوشيال</button>
       <button onclick="switchTab('rTab', this)">📊 التقارير</button>
     </div>
@@ -192,16 +192,25 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       </div>
     </div>
 
-    <!-- 5. التوصيل -->
+    <!-- 5. التوصيل والفروع -->
     <div id="dTab" class="tab-section">
       <div class="card">
         <h2>🛵 مناطق التوصيل</h2>
         <div class="grid-2">
           <input type="text" id="zoneName" placeholder="اسم المنطقة">
-          <input type="number" id="zoneFee" placeholder="التكلفة (جنيه)">
+          <input type="number" id="zoneFee" placeholder="التكلفة">
         </div>
         <button class="btn btn-primary" style="margin-top: 10px;" id="addZoneBtn">إضافة المنطقة</button>
         <div id="zonesContainer" style="margin-top: 15px;"></div>
+      </div>
+
+      <div class="card" style="margin-top: 20px;">
+        <h2>🏪 إدارة الفروع (للاستلام من الفرع)</h2>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <input type="text" id="newBranchName" placeholder="اسم الفرع الجديد (مثال: فرع مدينة نصر)" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:8px;">
+          <button class="btn btn-success" type="button" onclick="window.addNewBranch()">إضافة الفرع</button>
+        </div>
+        <div id="branchesContainer" style="margin-top: 15px;"></div>
       </div>
     </div>
 
@@ -212,6 +221,10 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         <div class="form-group">
           <label>رقم الهاتف مع كود الدولة (مثال: 2010xxxxxxxx):</label>
           <input type="text" id="whatsappInput" placeholder="أدخل رقمك مع رمز الدولة">
+        </div>
+        <div class="form-group">
+          <label>💱 رمز العملة (مثال: ج, ج.م, $, ل.س, ر.س):</label>
+          <input type="text" id="currencyInput" placeholder="أدخل رمز العملة">
         </div>
         <div class="form-group">
           <label>🖼️ رابط الصورة الافتراضية للمتجر (Fallback Image):</label>
@@ -291,7 +304,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   const db = getFirestore(app);
 
   let currentDefaultImage = "";
-  let products = [], orders = [], categoriesList = [], uploadedBase64Image = "";
+  let products = [], orders = [], categoriesList = [], branchesList = [], uploadedBase64Image = "";
 
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = document.getElementById("adminEmail").value.trim();
@@ -307,7 +320,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
-  // زر إجبار تحديث المنيو لدى كافة الزبائن
   document.getElementById("forceRefreshBtn").addEventListener("click", async () => {
     if(confirm("هل تريد إجبار جميع الزبائن على جلب التحديثات فوراً عند فتحهم للمتجر؟")) {
       try {
@@ -345,6 +357,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       if(snap.exists()){
         const data = snap.data();
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
+        if(data.currencySymbol) document.getElementById("currencyInput").value = data.currencySymbol;
         
         currentDefaultImage = data.defaultImage || "";
         document.getElementById("defaultImageInput").value = currentDefaultImage;
@@ -365,9 +378,17 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         } else if(data.categories) {
           categoriesList = Array.isArray(data.categories) ? data.categories.map(c=>({ name: c, hidden: false })) : [];
         }
+
+        if(data.branches) {
+          branchesList = data.branches;
+        } else {
+          branchesList = ["الفرع الرئيسي"];
+        }
+
         renderCategoriesAdmin();
         updateCategorySelectOptions();
         if(data.deliveryZones) renderZones(data.deliveryZones);
+        renderBranchesAdmin(branchesList);
 
         if(data.theme) {
           document.getElementById("primaryColorInput").value = data.theme.primaryColor || '#122b20';
@@ -481,6 +502,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
     const whatsappNumber = document.getElementById("whatsappInput").value.trim();
+    const currencySymbol = document.getElementById("currencyInput").value.trim() || "ج";
     const defaultImage = document.getElementById("defaultImageInput").value.trim();
     const socialLinks = {
       facebook: document.getElementById("fbInput").value.trim(),
@@ -488,8 +510,8 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       telegram: document.getElementById("telegramInput").value.trim(),
       tiktok: document.getElementById("tiktokInput").value.trim()
     };
-    await setDoc(doc(db, "settings", "store"), { whatsappNumber, defaultImage, socialLinks, lastUpdated: Date.now() }, { merge: true });
-    alert("✨ تم حفظ إعدادات المتجر والصورة الافتراضية بنجاح!");
+    await setDoc(doc(db, "settings", "store"), { whatsappNumber, currencySymbol, defaultImage, socialLinks, lastUpdated: Date.now() }, { merge: true });
+    alert("✨ تم حفظ إعدادات المتجر والعملة بنجاح!");
   });
 
   window.addNewCategory = async () => {
@@ -550,6 +572,45 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
           <button class="btn btn-warning" type="button" onclick="window.editCategoryName(${idx})">تعديل</button>
           <button class="btn btn-danger" type="button" onclick="window.deleteCategory(${idx})">حذف</button>
         </div>
+      </div>
+    `).join("");
+  }
+
+  // إدارة الفروع
+  window.addNewBranch = async () => {
+    const input = document.getElementById("newBranchName");
+    const name = input.value.trim();
+    if(!name) return alert("أدخل اسم الفرع");
+    if(branchesList.includes(name)) return alert("الفرع موجود مسبقاً");
+    branchesList.push(name);
+    await window.saveBranchesToFirebase();
+    input.value = "";
+  };
+
+  window.deleteBranch = async (idx) => {
+    if(branchesList.length <= 1) return alert("يجب أن يكون هناك فرع واحد على الأقل!");
+    if(confirm("هل أنت متأكد من حذف هذا الفرع؟")) {
+      branchesList.splice(idx, 1);
+      await window.saveBranchesToFirebase();
+    }
+  };
+
+  window.saveBranchesToFirebase = async () => {
+    await setDoc(doc(db, "settings", "store"), { branches: branchesList, lastUpdated: Date.now() }, { merge: true });
+    renderBranchesAdmin(branchesList);
+  };
+
+  function renderBranchesAdmin(branches) {
+    const container = document.getElementById("branchesContainer");
+    if(!container) return;
+    if(!branches || !branches.length) {
+      container.innerHTML = "<p>لا توجد فروع مضافة.</p>";
+      return;
+    }
+    container.innerHTML = branches.map((b, idx) => `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+        <span><strong>${idx + 1}.</strong> ${escapeHtml(b)}</span>
+        <button class="btn btn-danger" style="padding:4px 10px;" onclick="window.deleteBranch(${idx})">حذف</button>
       </div>
     `).join("");
   }
@@ -645,7 +706,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       <div class="order-box">
         <div><strong>طلب #${o.id.substring(0,6)}</strong> - ${new Date(o.createdAt).toLocaleString('ar-EG')}</div>
         <p>👤 العميل: ${escapeHtml(o.customer?.name)} | 📞 ${o.customer?.phone}</p>
-        <strong>الإجمالي: ${o.grandTotal} جنيه</strong>
+        <strong>الإجمالي: ${o.grandTotal} ${o.currency || 'ج'}</strong>
       </div>
     `).join("");
   }
@@ -656,7 +717,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       repContainer.innerHTML = `
         <p>📦 المنتجات: <strong>${products.length}</strong></p>
         <p>📋 الطلبات: <strong>${orders.length}</strong></p>
-        <p>💰 المبيعات: <strong>${orders.reduce((sum,o)=>sum+(o.grandTotal||0),0)} جنيه</strong></p>
+        <p>💰 المبيعات: <strong>${orders.reduce((sum,o)=>sum+(o.grandTotal||0),0)}</strong></p>
       `;
     }
   }
@@ -770,7 +831,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     if(container) {
       container.innerHTML = zones.map((z, idx) => `
         <div style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f9f9f9; padding:8px; border-radius:5px;">
-          <span>${z.name}: <strong>${z.fee} ج</strong></span>
+          <span>${z.name}: <strong>${z.fee}</strong></span>
           <button class="btn btn-danger" style="padding:2px 8px;" onclick="window.deleteZone(${idx})">حذف</button>
         </div>
       `).join("");

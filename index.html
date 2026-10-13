@@ -368,7 +368,7 @@
       🛒
       <span class="cart-badge" id="cartCount">0</span>
     </div>
-    <div class="cart-total-text" id="cartTotal">0 ج</div>
+    <div class="cart-total-text" id="cartTotal">0</div>
   </div>
 
   <div class="social-modal-overlay" id="socialModal">
@@ -388,9 +388,9 @@
       </div>
       <div class="drawer-body" id="cartItemsContainer"></div>
       <div class="drawer-footer">
-        <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size: 13.5px;"><span>المجموع الفرعي:</span><strong id="subtotalText">0 جنيه</strong></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size: 13.5px;"><span>التوصيل:</span><strong id="deliveryText">0 جنيه</strong></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom: 16px; font-size: 17px; color: var(--primary);"><span>الإجمالي:</span><strong id="grandTotalText">0 جنيه</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size: 13.5px;"><span>المجموع الفرعي:</span><strong id="subtotalText">0</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size: 13.5px;"><span>التوصيل:</span><strong id="deliveryText">0</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 16px; font-size: 17px; color: var(--primary);"><span>الإجمالي:</span><strong id="grandTotalText">0</strong></div>
         <button class="btn-submit" onclick="window.openCheckoutDrawer()">إتمام الطلب ➔</button>
       </div>
     </div>
@@ -399,14 +399,31 @@
   <div class="modal-overlay" id="checkoutModal">
     <div class="modal-drawer">
       <div class="drawer-header">
-        <h3 style="font-weight: 900;">📝 بيانات التوصيل</h3>
+        <h3 style="font-weight: 900;">📝 بيانات الطلب</h3>
         <button onclick="window.closeCheckoutDrawer()" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">✕</button>
       </div>
       <div class="drawer-body">
         <div class="form-group"><label>الاسم بالكامل *</label><input type="text" id="custName" placeholder="أدخل اسمك بالكامل"></div>
         <div class="form-group"><label>رقم الهاتف *</label><input type="tel" id="custPhone" placeholder="01xxxxxxxxx"></div>
-        <div class="form-group"><label>منطقة التوصيل *</label><select id="custZone" onchange="window.updateDeliveryFee()"></select></div>
-        <div class="form-group"><label>العنوان التفصيلي *</label><textarea id="custAddress" rows="3" placeholder="اسم الشارع / العمارة / رقم الشقة"></textarea></div>
+        
+        <div class="form-group">
+          <label>طريقة الاستلام *</label>
+          <select id="orderTypeSelect" onchange="window.toggleOrderType()">
+            <option value="delivery">🛵 توصيل للمنزل (ديلفري)</option>
+            <option value="pickup">🏪 استلام من المحل / الفرع</option>
+          </select>
+        </div>
+
+        <div id="branchSelectGroup" class="form-group" style="display: none;">
+          <label>اختر الفرع للاستلام *</label>
+          <select id="pickupBranchSelect"></select>
+        </div>
+
+        <div id="deliveryFieldsGroup">
+          <div class="form-group"><label>منطقة التوصيل *</label><select id="custZone" onchange="window.updateDeliveryFee()"></select></div>
+          <div class="form-group"><label>العنوان التفصيلي *</label><textarea id="custAddress" rows="2" placeholder="اسم الشارع / العمارة / رقم الشقة"></textarea></div>
+        </div>
+
         <div class="form-group">
           <label>ملاحظات عامة على الطلب (اختياري)</label>
           <textarea id="orderGeneralNote" rows="2" placeholder="أي تعليمات خاصة للتوصيل أو التجهيز..."></textarea>
@@ -437,6 +454,8 @@
     let allProducts = [], cart = [], deliveryZones = [], storeSettings = {};
     let selectedCat = "الكل", currentFee = 0, dynamicCategories = [];
 
+    window.getCurrency = () => storeSettings.currencySymbol || "ج";
+
     window.openSocialModal = () => {
       renderSocialLinks();
       document.getElementById("socialModal").style.display = "flex";
@@ -463,14 +482,12 @@
       container.innerHTML = html;
     }
 
-    // جلب البيانات مع كاش دائم بجهاز الزبون مرتبط بزر التحديث في لوحة التحكم (لتوفير 100% من القراءات)
     async function fetchStoreData() {
       try {
         const cachedProducts = localStorage.getItem('pista_products_cache');
         const cachedSettings = localStorage.getItem('pista_settings_cache');
         const cachedLastUpdated = localStorage.getItem('pista_last_updated');
 
-        // 1. قراءة الإعدادات من Firebase (قراءة واحدة فقط) لمعرفة رقم آخر تحديث
         const settingsSnap = await getDoc(doc(db, "settings", "store"));
         let remoteLastUpdated = 0;
         
@@ -479,25 +496,19 @@
           remoteLastUpdated = storeSettings.lastUpdated || 0;
         }
 
-        // الشرط: وجود الكاش + عدم الضغط على زر إجبار التحديث من لوحة التحكم
         const isNotForcedRefresh = cachedLastUpdated && Number(cachedLastUpdated) >= remoteLastUpdated;
 
         if (cachedProducts && cachedSettings && isNotForcedRefresh) {
-          // استخدام البيانات المخزنة بهاتف الزبون فوراً (0 قراءات لمجموعة المنتجات)
           allProducts = JSON.parse(cachedProducts);
-          try {
-            storeSettings = JSON.parse(cachedSettings);
-          } catch(e) {}
+          try { storeSettings = JSON.parse(cachedSettings); } catch(e) {}
           processLoadedData();
           return;
         }
 
-        // 2. إذا لم يوجد كاش أو قمت بضغط زر التحديث من لوحة التحكم، نسحب أحدث المنتجات
         const productsSnap = await getDocs(collection(db, "products"));
         allProducts = []; 
         productsSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
         
-        // حفظ البيانات في جهاز الزبون بشكل دائم مع رقم التحديث الحالي
         localStorage.setItem('pista_products_cache', JSON.stringify(allProducts));
         localStorage.setItem('pista_settings_cache', JSON.stringify(storeSettings));
         localStorage.setItem('pista_last_updated', remoteLastUpdated.toString());
@@ -530,6 +541,8 @@
         deliveryZones = storeSettings.deliveryZones;
         renderZonesSelect();
       }
+
+      renderBranchesSelect(storeSettings.branches || []);
 
       if(storeSettings.theme) {
         applyDynamicTheme(storeSettings.theme);
@@ -619,7 +632,8 @@
     function renderProducts() {
       const scrollArea = document.getElementById("productsScrollArea");
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
-      
+      const curr = window.getCurrency();
+
       let categoriesToDisplay = [];
       if(selectedCat === "الكل") {
         categoriesToDisplay = [...dynamicCategories];
@@ -684,7 +698,7 @@
                   <div class="product-title">${escapeHtml(p.name)}</div>
                   <div class="product-controls">
                     ${optionsHTML}
-                    <span class="price-tag" id="price-${p.id}">${defaultPrice} ج</span>
+                    <span class="price-tag" id="price-${p.id}">${defaultPrice} ${curr}</span>
                   </div>
                   <div class="product-desc">${escapeHtml(p.description || '')}</div>
                 </div>
@@ -709,7 +723,7 @@
     window.updateCardPrice = (id) => {
       const sel = document.getElementById(`opt-${id}`);
       const price = sel.options[sel.selectedIndex].getAttribute("data-price");
-      document.getElementById(`price-${id}`).innerText = price + " ج";
+      document.getElementById(`price-${id}`).innerText = price + " " + window.getCurrency();
     };
 
     window.addToCart = (pId) => {
@@ -736,13 +750,14 @@
     };
 
     function updateCartUI() {
+      const curr = window.getCurrency();
       const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
       document.getElementById("cartCount").innerText = totalCount;
-      document.getElementById("cartTotal").innerText = subtotal + " ج";
-      document.getElementById("subtotalText").innerText = subtotal + " جنيه";
-      document.getElementById("deliveryText").innerText = currentFee + " جنيه";
-      document.getElementById("grandTotalText").innerText = (subtotal + currentFee) + " جنيه";
+      document.getElementById("cartTotal").innerText = subtotal + " " + curr;
+      document.getElementById("subtotalText").innerText = subtotal + " " + curr;
+      document.getElementById("deliveryText").innerText = currentFee + " " + curr;
+      document.getElementById("grandTotalText").innerText = (subtotal + currentFee) + " " + curr;
 
       const container = document.getElementById("cartItemsContainer");
       if(!cart.length) { container.innerHTML = "<p style='text-align:center; color:#94a3b8; padding:40px; font-weight:700;'>السلة فارغة</p>"; return; }
@@ -752,7 +767,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
               <strong style="font-size:14px;">${escapeHtml(item.name)}</strong><br>
-              <small style="color:#64748b; font-weight:600;">${item.option} | ${item.price} ج</small>
+              <small style="color:#64748b; font-weight:600;">${item.option} | ${item.price} ${curr}</small>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               <button class="qty-btn" onclick="window.changeQty(${idx}, -1)">-</button>
@@ -765,9 +780,7 @@
       `).join("");
     }
 
-    window.updateItemNote = (idx, val) => {
-      cart[idx].note = val;
-    };
+    window.updateItemNote = (idx, val) => { cart[idx].note = val; };
 
     window.changeQty = (idx, delta) => {
       cart[idx].qty += delta;
@@ -781,57 +794,110 @@
     window.closeCheckoutDrawer = () => document.getElementById("checkoutModal").style.display = "none";
 
     function renderZonesSelect() {
+      const curr = window.getCurrency();
       const sel = document.getElementById("custZone");
-      sel.innerHTML = `<option value="">اختر المنطقة...</option>` + deliveryZones.map(z => `<option value="${z.name}" data-fee="${z.fee}">${z.name} (${z.fee} ج)</option>`).join("");
+      sel.innerHTML = `<option value="">اختر المنطقة...</option>` + deliveryZones.map(z => `<option value="${z.name}" data-fee="${z.fee}">${z.name} (${z.fee} ${curr})</option>`).join("");
     }
 
+    function renderBranchesSelect(branchesArr) {
+      const sel = document.getElementById("pickupBranchSelect");
+      if(!sel) return;
+      if(branchesArr && branchesArr.length > 0) {
+        sel.innerHTML = branchesArr.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("");
+      } else {
+        sel.innerHTML = `<option value="الفرع الرئيسي">الفرع الرئيسي</option>`;
+      }
+    }
+
+    window.toggleOrderType = () => {
+      const orderType = document.getElementById("orderTypeSelect").value;
+      const deliveryGroup = document.getElementById("deliveryFieldsGroup");
+      const branchGroup = document.getElementById("branchSelectGroup");
+
+      if (orderType === 'pickup') {
+        deliveryGroup.style.display = 'none';
+        branchGroup.style.display = 'block';
+        currentFee = 0;
+      } else {
+        deliveryGroup.style.display = 'block';
+        branchGroup.style.display = 'none';
+        window.updateDeliveryFee();
+      }
+      updateCartUI();
+    };
+
     window.updateDeliveryFee = () => {
-      const sel = document.getElementById("custZone");
-      currentFee = Number(sel.options[sel.selectedIndex]?.getAttribute("data-fee") || 0);
+      const orderType = document.getElementById("orderTypeSelect").value;
+      if(orderType === 'pickup') {
+        currentFee = 0;
+      } else {
+        const sel = document.getElementById("custZone");
+        currentFee = Number(sel.options[sel.selectedIndex]?.getAttribute("data-fee") || 0);
+      }
       updateCartUI();
     };
 
     window.submitOrder = async () => {
+      const curr = window.getCurrency();
       const name = document.getElementById("custName").value.trim();
       const phone = document.getElementById("custPhone").value.trim();
-      const zone = document.getElementById("custZone").value;
-      const address = document.getElementById("custAddress").value.trim();
+      const orderType = document.getElementById("orderTypeSelect").value;
       const generalNote = document.getElementById("orderGeneralNote").value.trim();
 
-      if(!name || !phone || !zone || !address) return alert("يرجى ملء جميع الحقول المطلوبة!");
+      let zone = "", address = "", selectedBranch = "";
+
+      if(!name || !phone) return alert("يرجى إدخال الاسم ورقم الهاتف!");
+
+      if (orderType === 'delivery') {
+        zone = document.getElementById("custZone").value;
+        address = document.getElementById("custAddress").value.trim();
+        if(!zone || !address) return alert("يرجى اختيار منطقة التوصيل وكتابة العنوان التفصيلي!");
+      } else {
+        selectedBranch = document.getElementById("pickupBranchSelect").value;
+      }
 
       const subtotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
       const grandTotal = subtotal + currentFee;
 
       const orderData = {
-        customer: { name, phone, zone, address },
+        customer: { name, phone, orderType, branch: selectedBranch, zone, address },
         generalNote: generalNote,
-        items: cart, subtotal, deliveryFee: currentFee, grandTotal,
+        items: cart, subtotal, deliveryFee: currentFee, grandTotal, currency: curr,
         status: "new", createdAt: Date.now()
       };
 
       try {
         await addDoc(collection(db, "orders"), orderData);
 
-        let msg = "طلب جديد - بيستاش دي ألب\n\n";
-        msg += "العميل: " + name + "\n";
-        msg += "الهاتف: " + phone + "\n";
-        msg += "العنوان: " + zone + " - " + address + "\n";
+        let msg = "طلب جديد - " + (storeSettings.storeName || "بيستاش دي ألب") + "\n\n";
+        msg += "👤 العميل: " + name + "\n";
+        msg += "📞 الهاتف: " + phone + "\n";
+        
+        if (orderType === 'pickup') {
+          msg += "🏪 طريقة الاستلام: استلام من الفرع\n";
+          msg += "📍 الفرع المحدد: " + selectedBranch + "\n";
+        } else {
+          msg += "🛵 طريقة الاستلام: توصيل للمنزل\n";
+          msg += "📍 العنوان: " + zone + " - " + address + "\n";
+        }
         
         if(generalNote) {
-          msg += "ملاحظة عامة: " + generalNote + "\n";
+          msg += "📝 ملاحظة عامة: " + generalNote + "\n";
         }
 
-        msg += "\nالطلبات:\n";
+        msg += "\n🛒 الطلبات:\n";
         cart.forEach(i => {
-          msg += "▪️ " + i.name + " (" + i.option + ") × " + i.qty + " = " + (i.price * i.qty) + " ج\n";
+          msg += "▪️ " + i.name + " (" + i.option + ") × " + i.qty + " = " + (i.price * i.qty) + " " + curr + "\n";
           if(i.note) {
             msg += "   └ ملاحظة: " + i.note + "\n";
           }
         });
-        msg += "\nالمجموع: " + subtotal + " ج\n";
-        msg += "التوصيل: " + currentFee + " ج\n";
-        msg += "الإجمالي النهائي: " + grandTotal + " ج";
+        
+        msg += "\n💰 المجموع الفرعي: " + subtotal + " " + curr + "\n";
+        if(orderType === 'delivery') {
+          msg += "🚚 التوصيل: " + currentFee + " " + curr + "\n";
+        }
+        msg += "💵 الإجمالي النهائي: " + grandTotal + " " + curr;
 
         let whatsappNum = storeSettings.whatsappNumber || "201011406537";
         let cleanPhone = getCleanPhone(whatsappNum);

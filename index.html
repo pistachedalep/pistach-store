@@ -111,7 +111,6 @@
       border-color: #334155 !important;
     }
 
-    /* شريط الهيدر المرن وسريع التمرير */
     header {
       background-color: transparent !important;
       backdrop-filter: blur(8px);
@@ -568,7 +567,6 @@
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
 
-    // قاموس نصوص الواجهة المحلي المباشر لمنع البطء
     const dict = {
       ar: {
         searchPlaceholder: "ابحث عن حلوياتك...",
@@ -660,7 +658,6 @@
       }
     });
 
-    // تحويل اللغة بشكل فورى وبدون طلبات أوفلاين/أونلاين
     window.toggleLanguage = () => {
       currentLang = currentLang === "ar" ? "en" : "ar";
       localStorage.setItem("storeLang", currentLang);
@@ -924,6 +921,7 @@
       
       cats.forEach((c) => {
         const isActive = (selectedCat === c) ? 'active' : '';
+        // دمج الترجمة اللحظية للأقسام إن وجدت باللغة الإنجليزية في الخصائص
         html += `<button class="cat-btn ${isActive}" data-cat="${escapeHtml(c)}" onclick="window.selectCategory('${escapeHtml(c)}')">${escapeHtml(c)}</button>`;
       });
 
@@ -1019,8 +1017,8 @@
               imgSrc = fallbackImg;
             }
 
-            const displayName = (currentLang === 'en' && p.nameEn) ? p.nameEn : p.name;
-            const displayDesc = p.description || '';
+            const displayName = (currentLang === 'en' && p.nameEn && p.nameEn.trim() !== '') ? p.nameEn : p.name;
+            const displayDesc = (currentLang === 'en' && p.descriptionEn && p.descriptionEn.trim() !== '') ? p.descriptionEn : (p.description || '');
 
             finalHtml += `
               <div class="product-card">
@@ -1118,7 +1116,7 @@
       const cartKey = pId + "_" + optLabel;
       const exist = cart.find(c => c.key === cartKey);
 
-      const displayName = (currentLang === 'en' && p.nameEn) ? p.nameEn : p.name;
+      const displayName = (currentLang === 'en' && p.nameEn && p.nameEn.trim() !== '') ? p.nameEn : p.name;
 
       if(exist) { exist.qty++; }
       else { cart.push({ key: cartKey, id: pId, name: displayName, option: optLabel, price: unitPrice, qty: 1, note: '' }); }

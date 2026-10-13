@@ -90,13 +90,7 @@
       direction: rtl; 
       height: 100vh;
       overflow: hidden;
-      top: 0 !important;
     }
-
-    /* إخفاء شريط جوجل الترجمة المزعج العلوي */
-    .goog-te-banner-frame { display: none !important; }
-    .goog-te-gadget { display: none !important; }
-    body { top: 0px !important; }
 
     body.dark-mode {
       background-color: #0f172a !important;
@@ -117,6 +111,7 @@
       border-color: #334155 !important;
     }
 
+    /* شريط الهيدر المرن وسريع التمرير */
     header {
       background-color: transparent !important;
       backdrop-filter: blur(8px);
@@ -443,19 +438,6 @@
     .announcement-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
     .announcement-card { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2.5px solid var(--accent); animation: popUp 0.35s ease; position: relative; color: #0f172a; }
   </style>
-  
-  <!-- موديول ترجمة فورية مدمج -->
-  <div id="google_translate_element" style="display:none;"></div>
-  <script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'ar',
-        includedLanguages: 'en,ar',
-        autoDisplay: false
-      }, 'google_translate_element');
-    }
-  </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 <body>
 
@@ -468,7 +450,7 @@
       <div class="header-actions">
         <button class="control-btn" onclick="window.toggleDarkMode()" id="darkModeBtn">🌙 الداكن</button>
         <button class="control-btn" onclick="window.toggleLanguage()" id="langSwitchBtn">English 🌐</button>
-        <button class="whatsapp-header-btn" onclick="window.openSocialModal()">💬 تواصل معنا</button>
+        <button class="whatsapp-header-btn" id="contactBtn" onclick="window.openSocialModal()">💬 تواصل معنا</button>
       </div>
     </div>
   </header>
@@ -502,25 +484,25 @@
 
   <div class="social-modal-overlay" id="socialModal">
     <div class="social-modal-card">
-      <h3 style="font-weight: 900; color: var(--primary); font-size: 20px; margin-bottom: 5px;">📞 تواصل معنا</h3>
-      <p style="color: #64748b; font-size: 12.5px;">يسعدنا تواصلك معنا عبر وسائل الاتصال التالية:</p>
+      <h3 id="socialModalTitle" style="font-weight: 900; color: var(--primary); font-size: 20px; margin-bottom: 5px;">📞 تواصل معنا</h3>
+      <p id="socialModalSub" style="color: #64748b; font-size: 12.5px;">يسعدنا تواصلك معنا عبر وسائل الاتصال التالية:</p>
       <div class="social-links-grid" id="socialLinksContainer"></div>
-      <button onclick="window.closeSocialModal()" style="margin-top: 20px; background: #e2e8f0; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 900; cursor: pointer; width: 100%; color: #334155;">إغلاق</button>
+      <button id="socialCloseBtn" onclick="window.closeSocialModal()" style="margin-top: 20px; background: #e2e8f0; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 900; cursor: pointer; width: 100%; color: #334155;">إغلاق</button>
     </div>
   </div>
 
   <div class="modal-overlay" id="cartModal">
     <div class="modal-drawer">
       <div class="drawer-header">
-        <h3 style="font-weight: 900;">🛒 سلة التسوق</h3>
+        <h3 id="cartModalTitle" style="font-weight: 900;">🛒 سلة التسوق</h3>
         <button onclick="window.closeCartDrawer()" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">✕</button>
       </div>
       <div class="drawer-body" id="cartItemsContainer"></div>
       <div class="drawer-footer">
-        <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size: 13.5px;"><span>المجموع الفرعي:</span><strong id="subtotalText">0</strong></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size: 13.5px;"><span>التوصيل:</span><strong id="deliveryText">0</strong></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom: 16px; font-size: 17px; color: var(--primary);"><span>الإجمالي:</span><strong id="grandTotalText">0</strong></div>
-        <button class="btn-submit" onclick="window.openCheckoutDrawer()">إتمام الطلب ➔</button>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size: 13.5px;"><span id="subtotalLabel">المجموع الفرعي:</span><strong id="subtotalText">0</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size: 13.5px;"><span id="deliveryLabel">التوصيل:</span><strong id="deliveryText">0</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom: 16px; font-size: 17px; color: var(--primary);"><span id="grandTotalLabel">الإجمالي:</span><strong id="grandTotalText">0</strong></div>
+        <button class="btn-submit" id="checkoutBtn" onclick="window.openCheckoutDrawer()">إتمام الطلب ➔</button>
       </div>
     </div>
   </div>
@@ -528,38 +510,38 @@
   <div class="modal-overlay" id="checkoutModal">
     <div class="modal-drawer">
       <div class="drawer-header">
-        <h3 style="font-weight: 900;">📝 بيانات الطلب</h3>
+        <h3 id="checkoutTitle" style="font-weight: 900;">📝 بيانات الطلب</h3>
         <button onclick="window.closeCheckoutDrawer()" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">✕</button>
       </div>
       <div class="drawer-body">
-        <div class="form-group"><label>الاسم بالكامل *</label><input type="text" id="custName" placeholder="أدخل اسمك بالكامل"></div>
-        <div class="form-group"><label>رقم الهاتف *</label><input type="tel" id="custPhone" placeholder="01xxxxxxxxx"></div>
+        <div class="form-group"><label id="labelCustName">الاسم بالكامل *</label><input type="text" id="custName" placeholder="أدخل اسمك بالكامل"></div>
+        <div class="form-group"><label id="labelCustPhone">رقم الهاتف *</label><input type="tel" id="custPhone" placeholder="01xxxxxxxxx"></div>
         
         <div class="form-group">
-          <label>طريقة الاستلام *</label>
+          <label id="labelOrderType">طريقة الاستلام *</label>
           <select id="orderTypeSelect" onchange="window.toggleOrderType()">
-            <option value="delivery">🛵 توصيل للمنزل (ديلفري)</option>
-            <option value="pickup">🏪 استلام من المحل / الفرع</option>
+            <option value="delivery" id="optDelivery">🛵 توصيل للمنزل (ديلفري)</option>
+            <option value="pickup" id="optPickup">🏪 استلام من المحل / الفرع</option>
           </select>
         </div>
 
         <div id="branchSelectGroup" class="form-group" style="display: none;">
-          <label>اختر الفرع للاستلام *</label>
+          <label id="labelPickupBranch">اختر الفرع للاستلام *</label>
           <select id="pickupBranchSelect"></select>
         </div>
 
         <div id="deliveryFieldsGroup">
-          <div class="form-group"><label>منطقة التوصيل *</label><select id="custZone" onchange="window.updateDeliveryFee()"></select></div>
-          <div class="form-group"><label>العنوان التفصيلي *</label><textarea id="custAddress" rows="2" placeholder="اسم الشارع / العمارة / رقم الشقة"></textarea></div>
+          <div class="form-group"><label id="labelCustZone">منطقة التوصيل *</label><select id="custZone" onchange="window.updateDeliveryFee()"></select></div>
+          <div class="form-group"><label id="labelCustAddress">العنوان التفصيلي *</label><textarea id="custAddress" rows="2" placeholder="اسم الشارع / العمارة / رقم الشقة"></textarea></div>
         </div>
 
         <div class="form-group">
-          <label>ملاحظات عامة على الطلب (اختياري)</label>
+          <label id="labelGeneralNote">ملاحظات عامة على الطلب (اختياري)</label>
           <textarea id="orderGeneralNote" rows="2" placeholder="أي تعليمات خاصة للتوصيل أو التجهيز..."></textarea>
         </div>
       </div>
       <div class="drawer-footer">
-        <button class="btn-submit" onclick="window.submitOrder()">📲 إرسال الطلب عبر الواتساب</button>
+        <button class="btn-submit" id="submitOrderBtn" onclick="window.submitOrder()">📲 إرسال الطلب عبر الواتساب</button>
       </div>
     </div>
   </div>
@@ -586,56 +568,152 @@
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
 
+    // قاموس نصوص الواجهة المحلي المباشر لمنع البطء
+    const dict = {
+      ar: {
+        searchPlaceholder: "ابحث عن حلوياتك...",
+        contactBtn: "💬 تواصل معنا",
+        allCat: "الكل",
+        darkBtn: "🌙 الداكن",
+        lightBtn: "☀️ الفاتح",
+        socialTitle: "📞 تواصل معنا",
+        socialSub: "يسعدنا تواصلك معنا عبر وسائل الاتصال التالية:",
+        socialClose: "إغلاق",
+        cartTitle: "🛒 سلة التسوق",
+        subtotal: "المجموع الفرعي:",
+        delivery: "التوصيل:",
+        grandTotal: "الإجمالي:",
+        checkout: "إتمام الطلب ➔",
+        checkoutTitle: "📝 بيانات الطلب",
+        custName: "الاسم بالكامل *",
+        custNamePlaceholder: "أدخل اسمك بالكامل",
+        custPhone: "رقم الهاتف *",
+        orderType: "طريقة الاستلام *",
+        deliveryOpt: "🛵 توصيل للمنزل (ديلفري)",
+        pickupOpt: "🏪 استلام من المحل / الفرع",
+        pickupBranch: "اختر الفرع للاستلام *",
+        custZone: "منطقة التوصيل *",
+        custZoneSelect: "اختر المنطقة...",
+        custAddress: "العنوان التفصيلي *",
+        custAddressPlaceholder: "اسم الشارع / العمارة / رقم الشقة",
+        generalNote: "ملاحظات عامة على الطلب (اختياري)",
+        generalNotePlaceholder: "أي تعليمات خاصة للتوصيل أو التجهيز...",
+        submitOrder: "📲 إرسال الطلب عبر الواتساب",
+        kilo: "كيلو",
+        half: "نصف كيلو",
+        quarter: "ربع كيلو",
+        emptyCart: "السلة فارغة",
+        noMatch: "لا توجد منتجات مطابقة."
+      },
+      en: {
+        searchPlaceholder: "Search items...",
+        contactBtn: "💬 Contact Us",
+        allCat: "All",
+        darkBtn: "🌙 Dark",
+        lightBtn: "☀️ Light",
+        socialTitle: "📞 Contact Us",
+        socialSub: "We are glad to assist you via:",
+        socialClose: "Close",
+        cartTitle: "🛒 Shopping Cart",
+        subtotal: "Subtotal:",
+        delivery: "Delivery:",
+        grandTotal: "Total:",
+        checkout: "Checkout ➔",
+        checkoutTitle: "📝 Order Details",
+        custName: "Full Name *",
+        custNamePlaceholder: "Enter your full name",
+        custPhone: "Phone Number *",
+        orderType: "Order Type *",
+        deliveryOpt: "🛵 Home Delivery",
+        pickupOpt: "🏪 Store Pickup",
+        pickupBranch: "Select Branch *",
+        custZone: "Delivery Area *",
+        custZoneSelect: "Select area...",
+        custAddress: "Detailed Address *",
+        custAddressPlaceholder: "Street, building, apartment no...",
+        generalNote: "General Notes (Optional)",
+        generalNotePlaceholder: "Special instructions for delivery...",
+        submitOrder: "📲 Send Order via WhatsApp",
+        kilo: "1 Kilo",
+        half: "Half Kilo",
+        quarter: "Quarter Kilo",
+        emptyCart: "Cart is empty",
+        noMatch: "No matching products found."
+      }
+    };
+
     window.getCurrency = () => storeSettings.currencySymbol || "ج";
 
     window.toggleDarkMode = () => {
       const isDark = document.body.classList.toggle("dark-mode");
       localStorage.setItem("storeDarkMode", isDark ? "enabled" : "disabled");
       const btn = document.getElementById("darkModeBtn");
-      if(btn) btn.innerHTML = isDark ? "☀️ الفاتح" : "🌙 الداكن";
+      const t = dict[currentLang];
+      if(btn) btn.innerHTML = isDark ? t.lightBtn : t.darkBtn;
     };
 
     window.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem("storeDarkMode") === "enabled") {
         document.body.classList.add("dark-mode");
         const btn = document.getElementById("darkModeBtn");
-        if(btn) btn.innerHTML = "☀️ الفاتح";
+        if(btn) btn.innerHTML = dict[currentLang].lightBtn;
       }
     });
 
-    // ترجمة فورية ولحظية للصفحة بالكامل عبر المحرك المدمج
+    // تحويل اللغة بشكل فورى وبدون طلبات أوفلاين/أونلاين
     window.toggleLanguage = () => {
       currentLang = currentLang === "ar" ? "en" : "ar";
       localStorage.setItem("storeLang", currentLang);
-
-      const selectElem = document.querySelector('.goog-te-combo');
-      if (selectElem) {
-        selectElem.value = currentLang;
-        selectElem.dispatchEvent(new Event('change'));
-      }
-
       document.documentElement.setAttribute("dir", currentLang === "ar" ? "rtl" : "ltr");
       document.documentElement.setAttribute("lang", currentLang);
       
+      applyStaticTranslations();
+      renderCategories(dynamicCategories);
+      renderProducts();
+      renderZonesSelect();
+    };
+
+    function applyStaticTranslations() {
+      const t = dict[currentLang];
       const langBtn = document.getElementById("langSwitchBtn");
       if(langBtn) langBtn.innerHTML = currentLang === "ar" ? "English 🌐" : "العربية 🌐";
-    };
+
+      const isDark = document.body.classList.contains("dark-mode");
+      const darkBtn = document.getElementById("darkModeBtn");
+      if(darkBtn) darkBtn.innerHTML = isDark ? t.lightBtn : t.darkBtn;
+
+      document.getElementById("searchInput").placeholder = t.searchPlaceholder;
+      document.getElementById("contactBtn").innerText = t.contactBtn;
+      document.getElementById("socialModalTitle").innerText = t.socialTitle;
+      document.getElementById("socialModalSub").innerText = t.socialSub;
+      document.getElementById("socialCloseBtn").innerText = t.socialClose;
+
+      document.getElementById("cartModalTitle").innerText = t.cartTitle;
+      document.getElementById("subtotalLabel").innerText = t.subtotal;
+      document.getElementById("deliveryLabel").innerText = t.delivery;
+      document.getElementById("grandTotalLabel").innerText = t.grandTotal;
+      document.getElementById("checkoutBtn").innerText = t.checkout;
+
+      document.getElementById("checkoutTitle").innerText = t.checkoutTitle;
+      document.getElementById("labelCustName").innerText = t.custName;
+      document.getElementById("custName").placeholder = t.custNamePlaceholder;
+      document.getElementById("labelCustPhone").innerText = t.custPhone;
+      document.getElementById("labelOrderType").innerText = t.orderType;
+      document.getElementById("optDelivery").innerText = t.deliveryOpt;
+      document.getElementById("optPickup").innerText = t.pickupOpt;
+      document.getElementById("labelPickupBranch").innerText = t.pickupBranch;
+      document.getElementById("labelCustZone").innerText = t.custZone;
+      document.getElementById("labelCustAddress").innerText = t.custAddress;
+      document.getElementById("custAddress").placeholder = t.custAddressPlaceholder;
+      document.getElementById("labelGeneralNote").innerText = t.generalNote;
+      document.getElementById("orderGeneralNote").placeholder = t.generalNotePlaceholder;
+      document.getElementById("submitOrderBtn").innerText = t.submitOrder;
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       document.documentElement.setAttribute("dir", currentLang === "ar" ? "rtl" : "ltr");
       document.documentElement.setAttribute("lang", currentLang);
-      const langBtn = document.getElementById("langSwitchBtn");
-      if(langBtn) langBtn.innerHTML = currentLang === "ar" ? "English 🌐" : "العربية 🌐";
-
-      if(currentLang === 'en') {
-        setTimeout(() => {
-          const selectElem = document.querySelector('.goog-te-combo');
-          if (selectElem) {
-            selectElem.value = 'en';
-            selectElem.dispatchEvent(new Event('change'));
-          }
-        }, 1000);
-      }
+      applyStaticTranslations();
     });
 
     function checkAndShowAnnouncement() {
@@ -680,14 +758,14 @@
       const whatsapp = storeSettings.whatsappNumber || "201011406537";
       let cleanPhone = getCleanPhone(whatsapp);
       const msg = encodeURIComponent("مرحباً، أود الاستفسار عن المنتجات في متجر " + (storeSettings.storeName || "بيستاش دي ألب"));
-      html += `<a href="https://api.whatsapp.com/send?phone=${cleanPhone}&text=${msg}" target="_blank" class="social-btn btn-whatsapp"><i class="fa-brands fa-whatsapp fa-lg"></i> مراسلة عبر الواتساب</a>`;
+      html += `<a href="https://api.whatsapp.com/send?phone=${cleanPhone}&text=${msg}" target="_blank" class="social-btn btn-whatsapp"><i class="fa-brands fa-whatsapp fa-lg"></i> ${currentLang === 'en' ? 'Chat on WhatsApp' : 'مراسلة عبر الواتساب'}</a>`;
 
       if(storeSettings.socialLinks) {
         const s = storeSettings.socialLinks;
-        if(s.facebook) html += `<a href="${s.facebook}" target="_blank" class="social-btn btn-facebook"><i class="fa-brands fa-facebook fa-lg"></i> صفحتنا على فيسبوك</a>`;
-        if(s.instagram) html += `<a href="${s.instagram}" target="_blank" class="social-btn btn-instagram"><i class="fa-brands fa-instagram fa-lg"></i> حسابنا على إنستغرام</a>`;
-        if(s.telegram) html += `<a href="${s.telegram}" target="_blank" class="social-btn btn-telegram"><i class="fa-brands fa-telegram fa-lg"></i> قناة تيليجرام</a>`;
-        if(s.tiktok) html += `<a href="${s.tiktok}" target="_blank" class="social-btn btn-tiktok"><i class="fa-brands fa-tiktok fa-lg"></i> حساب تيك توك</a>`;
+        if(s.facebook) html += `<a href="${s.facebook}" target="_blank" class="social-btn btn-facebook"><i class="fa-brands fa-facebook fa-lg"></i> Facebook</a>`;
+        if(s.instagram) html += `<a href="${s.instagram}" target="_blank" class="social-btn btn-instagram"><i class="fa-brands fa-instagram fa-lg"></i> Instagram</a>`;
+        if(s.telegram) html += `<a href="${s.telegram}" target="_blank" class="social-btn btn-telegram"><i class="fa-brands fa-telegram fa-lg"></i> Telegram</a>`;
+        if(s.tiktok) html += `<a href="${s.tiktok}" target="_blank" class="social-btn btn-tiktok"><i class="fa-brands fa-tiktok fa-lg"></i> TikTok</a>`;
       }
 
       container.innerHTML = html;
@@ -841,7 +919,8 @@
 
     function renderCategories(cats) {
       const bar = document.getElementById("categoriesBar");
-      let html = `<button class="cat-btn ${selectedCat === 'الكل' ? 'active':''}" data-cat="الكل" onclick="window.selectCategory('الكل')">الكل</button>`;
+      const t = dict[currentLang];
+      let html = `<button class="cat-btn ${selectedCat === 'الكل' ? 'active':''}" data-cat="الكل" onclick="window.selectCategory('الكل')">${t.allCat}</button>`;
       
       cats.forEach((c) => {
         const isActive = (selectedCat === c) ? 'active' : '';
@@ -887,6 +966,7 @@
       const scrollArea = document.getElementById("productsScrollArea");
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
       const curr = window.getCurrency();
+      const t = dict[currentLang];
 
       let categoriesToDisplay = [...dynamicCategories];
       allProducts.forEach(p => {
@@ -923,9 +1003,9 @@
             if(p.saleType === 'weight') {
               optionsHTML = `
                 <select class="unit-select" id="opt-${p.id}" onchange="window.updateCardPrice('${p.id}')">
-                  <option value="kilo" data-price="${p.pricing?.kilo || p.price}">كيلو</option>
-                  <option value="half" data-price="${p.pricing?.half || p.price/2}">نصف كيلو</option>
-                  <option value="quarter" data-price="${p.pricing?.quarter || p.price/4}">ربع كيلو</option>
+                  <option value="kilo" data-price="${p.pricing?.kilo || p.price}">${t.kilo}</option>
+                  <option value="half" data-price="${p.pricing?.half || p.price/2}">${t.half}</option>
+                  <option value="quarter" data-price="${p.pricing?.quarter || p.price/4}">${t.quarter}</option>
                 </select>`;
               defaultPrice = p.pricing?.kilo || p.price;
             } else {
@@ -939,19 +1019,22 @@
               imgSrc = fallbackImg;
             }
 
+            const displayName = (currentLang === 'en' && p.nameEn) ? p.nameEn : p.name;
+            const displayDesc = p.description || '';
+
             finalHtml += `
               <div class="product-card">
                 <div class="product-img-wrapper" onclick="window.addToCart('${p.id}')" title="اضغط لإضافة الصنف إلى السلة">
-                  <img src="${imgSrc}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null; this.src='${fallbackImg}';">
+                  <img src="${imgSrc}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null; this.src='${fallbackImg}';">
                   <div class="img-gradient-overlay"></div>
                 </div>
                 <div class="product-info">
-                  <div class="product-title">${escapeHtml(p.name)}</div>
+                  <div class="product-title">${escapeHtml(displayName)}</div>
                   <div class="product-controls">
                     ${optionsHTML}
                     <span class="price-tag" id="price-${p.id}">${defaultPrice} ${curr}</span>
                   </div>
-                  <div class="product-desc">${escapeHtml(p.description || '')}</div>
+                  <div class="product-desc">${escapeHtml(displayDesc)}</div>
                 </div>
               </div>`;
           });
@@ -965,7 +1048,7 @@
       }
 
       if(totalFilteredCount === 0) {
-        scrollArea.innerHTML = `<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800; text-shadow:0 2px 4px rgba(0,0,0,0.5);">لا توجد منتجات مطابقة.</div>`;
+        scrollArea.innerHTML = `<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800; text-shadow:0 2px 4px rgba(0,0,0,0.5);">${t.noMatch}</div>`;
       } else {
         scrollArea.innerHTML = finalHtml;
         const cards = scrollArea.querySelectorAll('.product-card');
@@ -1035,14 +1118,17 @@
       const cartKey = pId + "_" + optLabel;
       const exist = cart.find(c => c.key === cartKey);
 
+      const displayName = (currentLang === 'en' && p.nameEn) ? p.nameEn : p.name;
+
       if(exist) { exist.qty++; }
-      else { cart.push({ key: cartKey, id: pId, name: p.name, option: optLabel, price: unitPrice, qty: 1, note: '' }); }
+      else { cart.push({ key: cartKey, id: pId, name: displayName, option: optLabel, price: unitPrice, qty: 1, note: '' }); }
 
       updateCartUI();
     };
 
     function updateCartUI() {
       const curr = window.getCurrency();
+      const t = dict[currentLang];
       const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
       document.getElementById("cartCount").innerText = totalCount;
@@ -1052,7 +1138,7 @@
       document.getElementById("grandTotalText").innerText = (subtotal + currentFee) + " " + curr;
 
       const container = document.getElementById("cartItemsContainer");
-      if(!cart.length) { container.innerHTML = `<p style='text-align:center; color:#94a3b8; padding:40px; font-weight:700;'>السلة فارغة</p>`; return; }
+      if(!cart.length) { container.innerHTML = `<p style='text-align:center; color:#94a3b8; padding:40px; font-weight:700;'>${t.emptyCart}</p>`; return; }
 
       container.innerHTML = cart.map((item, idx) => `
         <div class="cart-item">
@@ -1067,7 +1153,7 @@
               <button class="qty-btn" onclick="window.changeQty(${idx}, 1)">+</button>
             </div>
           </div>
-          <input type="text" placeholder="ملاحظة لهذا الصنف (اختياري)..." value="${item.note || ''}" oninput="window.updateItemNote(${idx}, this.value)" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background: #f8fafc;">
+          <input type="text" placeholder="${currentLang === 'en' ? 'Item note (optional)...' : 'ملاحظة لهذا الصنف (اختياري)...'}" value="${item.note || ''}" oninput="window.updateItemNote(${idx}, this.value)" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background: #f8fafc;">
         </div>
       `).join("");
     }
@@ -1082,13 +1168,14 @@
 
     window.openCartDrawer = () => { updateCartUI(); document.getElementById("cartModal").style.display = "flex"; };
     window.closeCartDrawer = () => document.getElementById("cartModal").style.display = "none";
-    window.openCheckoutDrawer = () => { if(!cart.length) return alert("السلة فارغة!"); window.closeCartDrawer(); document.getElementById("checkoutModal").style.display = "flex"; };
+    window.openCheckoutDrawer = () => { if(!cart.length) return alert(dict[currentLang].emptyCart); window.closeCartDrawer(); document.getElementById("checkoutModal").style.display = "flex"; };
     window.closeCheckoutDrawer = () => document.getElementById("checkoutModal").style.display = "none";
 
     function renderZonesSelect() {
       const curr = window.getCurrency();
       const sel = document.getElementById("custZone");
-      sel.innerHTML = `<option value="">اختر المنطقة...</option>` + deliveryZones.map(z => `<option value="${z.name}" data-fee="${z.fee}">${z.name} (${z.fee} ${curr})</option>`).join("");
+      const t = dict[currentLang];
+      sel.innerHTML = `<option value="">${t.custZoneSelect}</option>` + deliveryZones.map(z => `<option value="${z.name}" data-fee="${z.fee}">${z.name} (${z.fee} ${curr})</option>`).join("");
     }
 
     function renderBranchesSelect(branchesArr) {
@@ -1138,12 +1225,12 @@
 
       let zone = "", address = "", selectedBranch = "";
 
-      if(!name || !phone) return alert("يرجى إدخال الاسم ورقم الهاتف!");
+      if(!name || !phone) return alert(currentLang === 'en' ? "Please enter name and phone!" : "يرجى إدخال الاسم ورقم الهاتف!");
 
       if (orderType === 'delivery') {
         zone = document.getElementById("custZone").value;
         address = document.getElementById("custAddress").value.trim();
-        if(!zone || !address) return alert("يرجى اختيار منطقة التوصيل وكتابة العنوان التفصيلي!");
+        if(!zone || !address) return alert(currentLang === 'en' ? "Please select zone and address!" : "يرجى اختيار منطقة التوصيل وكتابة العنوان التفصيلي!");
       } else {
         selectedBranch = document.getElementById("pickupBranchSelect").value;
       }
@@ -1203,7 +1290,7 @@
         window.location.href = whatsappUrl;
 
       } catch(e) {
-        alert("حدث خطأ في تقديم الطلب، يرجى المحاولة مرة أخرى.");
+        alert(currentLang === 'en' ? "Error submitting order." : "حدث خطأ في تقديم الطلب، يرجى المحاولة مرة أخرى.");
       }
     };
 

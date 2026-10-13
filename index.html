@@ -463,37 +463,44 @@
       container.innerHTML = html;
     }
 
-    // جلب البيانات مع التخزين المؤقت المحلي لمدة أسبوع كامل (7 أيام)
+    // جلب البيانات مع كاش دائم بجهاز الزبون مرتبط بزر التحديث في لوحة التحكم (لتوفير 100% من القراءات)
     async function fetchStoreData() {
       try {
-        const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // أسبوع كامل (7 أيام)
         const cachedProducts = localStorage.getItem('pista_products_cache');
         const cachedSettings = localStorage.getItem('pista_settings_cache');
-        const cacheTime = localStorage.getItem('pista_cache_time');
-        const now = Date.now();
+        const cachedLastUpdated = localStorage.getItem('pista_last_updated');
 
-        // 1. استخدام الكاش المحلي إن لم تنتهِ مدة الـ 7 أيام
-        if (cachedProducts && cachedSettings && cacheTime && (now - cacheTime < CACHE_DURATION)) {
+        // 1. قراءة الإعدادات من Firebase (قراءة واحدة فقط) لمعرفة رقم آخر تحديث
+        const settingsSnap = await getDoc(doc(db, "settings", "store"));
+        let remoteLastUpdated = 0;
+        
+        if (settingsSnap.exists()) {
+          storeSettings = settingsSnap.data();
+          remoteLastUpdated = storeSettings.lastUpdated || 0;
+        }
+
+        // الشرط: وجود الكاش + عدم الضغط على زر إجبار التحديث من لوحة التحكم
+        const isNotForcedRefresh = cachedLastUpdated && Number(cachedLastUpdated) >= remoteLastUpdated;
+
+        if (cachedProducts && cachedSettings && isNotForcedRefresh) {
+          // استخدام البيانات المخزنة بهاتف الزبون فوراً (0 قراءات لمجموعة المنتجات)
           allProducts = JSON.parse(cachedProducts);
-          storeSettings = JSON.parse(cachedSettings);
-          
+          try {
+            storeSettings = JSON.parse(cachedSettings);
+          } catch(e) {}
           processLoadedData();
           return;
         }
 
-        // 2. إذا انتهت الـ 7 أيام، نسحب البيانات من Firebase مرة واحدة ونحدث الكاش
-        const settingsSnap = await getDoc(doc(db, "settings", "store"));
-        if(settingsSnap.exists()){
-          storeSettings = settingsSnap.data();
-          localStorage.setItem('pista_settings_cache', JSON.stringify(storeSettings));
-        }
-
+        // 2. إذا لم يوجد كاش أو قمت بضغط زر التحديث من لوحة التحكم، نسحب أحدث المنتجات
         const productsSnap = await getDocs(collection(db, "products"));
         allProducts = []; 
         productsSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
-        localStorage.setItem('pista_products_cache', JSON.stringify(allProducts));
         
-        localStorage.setItem('pista_cache_time', now);
+        // حفظ البيانات في جهاز الزبون بشكل دائم مع رقم التحديث الحالي
+        localStorage.setItem('pista_products_cache', JSON.stringify(allProducts));
+        localStorage.setItem('pista_settings_cache', JSON.stringify(storeSettings));
+        localStorage.setItem('pista_last_updated', remoteLastUpdated.toString());
 
         processLoadedData();
 
@@ -501,8 +508,10 @@
         console.error("خطأ في جلب البيانات:", error);
         const fallbackProducts = localStorage.getItem('pista_products_cache');
         if(fallbackProducts) {
-          allProducts = JSON.parse(fallbackProducts);
-          storeSettings = JSON.parse(localStorage.getItem('pista_settings_cache') || "{}");
+          try {
+            allProducts = JSON.parse(fallbackProducts);
+            storeSettings = JSON.parse(localStorage.getItem('pista_settings_cache') || "{}");
+          } catch(e) {}
           processLoadedData();
         } else {
           document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
@@ -569,7 +578,7 @@
     function extractCategories(settingsCats = []) {
       let orderedList = [];
       if(Array.isArray(settingsCats)) {
-        settingsCats.forEach(c => { if(c.trim() && !orderedList.includes(c.trim())) orderedList.push(c.trim()); });
+        settingsCats.forEach(c => { if(c && c.trim() && !orderedList.includes(c.trim())) orderedList.push(c.trim()); });
       }
       allProducts.forEach(p => { 
         if(p.category && !orderedList.includes(p.category.trim())) {
@@ -705,6 +714,7 @@
 
     window.addToCart = (pId) => {
       const p = allProducts.find(item => item.id === pId);
+      if(!p) return;
       let optLabel = "وحدة", unitPrice = p.price;
 
       if(p.saleType === 'weight') {

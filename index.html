@@ -150,6 +150,7 @@
       display: flex;
       flex-direction: column;
       padding: 0 14px;
+      position: relative;
     }
 
     .categories-bar { 
@@ -165,6 +166,7 @@
       top: 0;
       z-index: 99;
       background-color: var(--menu-bg-color);
+      flex-shrink: 0;
     }
     .categories-bar::-webkit-scrollbar { display: none; }
     
@@ -498,7 +500,7 @@
 
     let allProducts = [], cart = [], deliveryZones = [], storeSettings = {};
     let selectedCat = "الكل", currentFee = 0, dynamicCategories = [];
-    let isProgrammaticScroll = flag => {};
+    let isScrollingProgrammatically = false;
 
     window.getCurrency = () => storeSettings.currencySymbol || "ج";
 
@@ -684,8 +686,6 @@
 
       bar.innerHTML = html;
     }
-
-    let isScrollingProgrammatically = false;
 
     window.selectCategory = (cat) => {
       selectedCat = cat;

@@ -453,11 +453,8 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         }
         if(data.categoriesList) {
           categoriesList = data.categoriesList;
-          // ترتيب الأقسام أبجدياً عند جلبها لتثبيت الترتيب
-          categoriesList.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
         } else if(data.categories) {
           categoriesList = Array.isArray(data.categories) ? data.categories.map(c=>({ name: c, hidden: false })) : [];
-          categoriesList.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
         }
 
         if(data.branches) {
@@ -619,12 +616,11 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     if(!name) return alert("أدخل اسم القسم");
     if(categoriesList.some(c => c.name === name)) return alert("موجود مسبقاً");
     categoriesList.push({ name: name, hidden: false });
-    // فرز الأقسام أبجدياً قبل الحفظ
-    categoriesList.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
     await window.saveCategoriesToFirebase();
     input.value = "";
   };
 
+  // تحريك القسم وحفظ الترتيب الجديد فوراً في Firebase
   window.moveCategory = async (index, direction) => {
     const newIndex = index + direction;
     if(newIndex < 0 || newIndex >= categoriesList.length) return;
@@ -634,30 +630,28 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     await window.saveCategoriesToFirebase();
   };
 
-  // تعديل اسم القسم وتحديث المنتجات المرتبطة به تلقائياً وفرزها أبجدياً
+  // تعديل اسم القسم وتحديث حزمة المنتجات وحفظها فوراً في Firebase
   window.editCategoryName = async (index) => {
     const oldName = categoriesList[index].name;
     const newName = prompt("تعديل اسم القسم:", oldName);
     if(newName && newName.trim() !== "" && newName !== oldName) {
       const trimmedNewName = newName.trim();
       
-      // 1. تحديث الاسم في مصفوفة الأقسام المحلية
+      // 1. تحديث اسم القسم في مصفوفة الأقسام
       categoriesList[index].name = trimmedNewName;
-      
-      // فرز الأقسام أبجدياً بعد التعديل لضمان الترتيب السليم
-      categoriesList.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
-      // 2. تحديث الاسم في جميع المنتجات التي تنتمي لهذا القسم لتجنب بقاء الاسم القديم
+      // 2. تحديث اسم القسم في كل المنتجات المرتبطة به داخل الحزمة
       products.forEach(p => {
         if (p.category === oldName) {
           p.category = trimmedNewName;
         }
       });
 
-      // 3. حفظ الأقسام ومزامنة حزمة المنتجات بالأسماء الجديدة
+      // 3. حفظ الأقسام ومزامنة المنتجات وتحديث الصفحة فوراً
       await window.saveCategoriesToFirebase();
       await syncProductsBundle();
       
+      renderProducts();
       alert("✨ تم تعديل القسم وتحديث جميع المنتجات المرتبطة به بنجاح!");
     }
   };
@@ -669,6 +663,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
   };
 
+  // حفظ الأقسام ومزامنة الترتيب والحزمة التلقائية مع قاعدة البيانات
   window.saveCategoriesToFirebase = async () => {
     const catNamesOnly = categoriesList.filter(c => !c.hidden).map(c => c.name);
     await setDoc(doc(db, "settings", "store"), { 
@@ -676,6 +671,9 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       categories: catNamesOnly,
       lastUpdated: Date.now() 
     }, { merge: true });
+
+    await syncProductsBundle();
+
     renderCategoriesAdmin();
     updateCategorySelectOptions();
   };
@@ -683,7 +681,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   function renderCategoriesAdmin() {
     const container = document.getElementById("categoriesListContainer");
     if(!categoriesList.length) return container.innerHTML = "<p>لا توجد أقسام.</p>";
-    
     container.innerHTML = categoriesList.map((cat, idx) => `
       <div class="category-row">
         <div><strong>${idx + 1}. ${escapeHtml(cat.name)}</strong></div>

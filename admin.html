@@ -71,7 +71,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
       <h1 style="margin: 0; color: var(--primary); font-size: 22px; font-weight:900;" id="dashboardTitle">لوحة التحكم</h1>
       <div style="display: flex; gap: 8px;">
-        <button class="btn btn-warning" id="forceRefreshBtn" style="background: #f59e0b; color: #fff;">🔄 إجبار تحديث المنيو للزبائن</button>
+        <button class="btn btn-warning" id="forceRefreshBtn" style="background: #f59e0b; color: #fff;">🔄 نشر التحديثات للزبائن</button>
         <button class="btn btn-danger" id="logoutBtn">تسجيل الخروج</button>
       </div>
     </div>
@@ -219,7 +219,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       <div class="card">
         <h2>⚙️ الإعدادات العامة وسائل التواصل</h2>
 
-        <!-- إضافة إعدادات النافذة المنبثقة هنا -->
         <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; margin-bottom: 20px;">
           <h3 style="margin-top: 0; font-size: 15px; color: var(--primary);">📢 إعدادات النافذة المنبثقة للعملاء (الإعلان)</h3>
           <div class="form-group" style="margin-top: 10px;">
@@ -309,7 +308,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw",
@@ -341,11 +340,34 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
+  // دالة مزامنة وتحديث حزمة المنتجات بالكامل في المستند المجمع وحفظ lastUpdated في مستند الإعدادات
+  async function syncProductsBundle() {
+    try {
+      const timestamp = Date.now();
+      // ترتيب المنتجات حسب حقل order
+      products.sort((a, b) => (a.order || 0) - (b.order || 0));
+      
+      // تحديث مستند الحزمة المجمع بالمصفوفة الجديدة
+      await setDoc(doc(db, "settings", "products_bundle"), {
+        productsArray: products,
+        lastUpdated: timestamp
+      }, { merge: true });
+
+      // تحديث مؤشر الإعدادات ليقوم المتجر بتمييز التحديث فوراً
+      await setDoc(doc(db, "settings", "store"), {
+        lastUpdated: timestamp
+      }, { merge: true });
+
+    } catch (e) {
+      console.error("خطأ أثناء مزامنة الحزمة:", e);
+    }
+  }
+
   document.getElementById("forceRefreshBtn").addEventListener("click", async () => {
-    if(confirm("هل تريد إجبار جميع الزبائن على جلب التحديثات فوراً عند فتحهم للمتجر؟")) {
+    if(confirm("هل تريد نشر التحديثات وإجبار جميع الزبائن على جلب أحدث منتجات؟")) {
       try {
-        await setDoc(doc(db, "settings", "store"), { lastUpdated: Date.now() }, { merge: true });
-        alert("✨ تم إرسال أمر التحديث! سيشاهد الزبائن أحدث نسخة فور عمل Refresh.");
+        await syncProductsBundle();
+        alert("✨ تم نشر التحديثات ومزامنة المنتجات بنجاح! سيشاهد الزبائن أحدث نسخة فور عمل Refresh.");
       } catch(e) {
         alert("حدث خطأ في تحديث البيانات.");
       }
@@ -369,9 +391,15 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   };
 
   function initListeners() {
-    onSnapshot(collection(db, "products"), snap => {
-      products = []; snap.forEach(d => products.push({ id: d.id, ...d.data() }));
-      renderProducts(); renderReports();
+    // جلب مستند الحزمة المجمع مباشرة لقراءة المنتجات بدون قריات متعددة
+    onSnapshot(doc(db, "settings", "products_bundle"), snap => {
+      if(snap.exists() && snap.data().productsArray) {
+        products = snap.data().productsArray;
+      } else {
+        products = [];
+      }
+      renderProducts(); 
+      renderReports();
     });
 
     onSnapshot(collection(db, "orders"), snap => {
@@ -385,7 +413,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
         if(data.currencySymbol) document.getElementById("currencyInput").value = data.currencySymbol;
         
-        // تعبئة حقول الإعلان
         document.getElementById("adminAnnouncement").value = data.announcement || "";
         document.getElementById("adminAnnouncementCloseType").value = data.announcementCloseType || "button";
         document.getElementById("adminAnnouncementSeconds").value = data.announcementSeconds || 5;
@@ -448,7 +475,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
     const dl = document.createElement('a');
     dl.setAttribute("href", dataStr);
-    dl.setAttribute("download", `products_backup_${new Date().toISOString().slice(0,10)}.json`);
+    dl.setAttribute("download", `products_bundle_backup_${new Date().toISOString().slice(0,10)}.json`);
     dl.click();
   };
 
@@ -459,9 +486,14 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     reader.onload = async function(event) {
       try {
         const imported = JSON.parse(event.target.result);
-        if(confirm(`استعادة ${imported.length} منتج؟`)) {
-          for(const item of imported) { delete item.id; await addDoc(collection(db, "products"), item); }
-          alert("تمت الاستعادة بنجاح!");
+        if(confirm(`استعادة وتحديث ${imported.length} منتج داخل الحزمة؟`)) {
+          products = imported.map((item, idx) => ({
+            ...item,
+            id: item.id || 'p_' + Math.random().toString(36).substr(2, 9),
+            order: idx
+          }));
+          await syncProductsBundle();
+          alert("تمت الاستعادة بنجاح ونشر التحديثات!");
         }
       } catch(err) { alert("خطأ في قراءة الملف!"); }
     };
@@ -469,11 +501,9 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   };
 
   window.deleteAllProducts = async () => {
-    if(confirm("⚠️ حذف كافة المنتجات؟")) {
-      const snap = await getDocs(collection(db, "products"));
-      const batch = writeBatch(db);
-      snap.forEach(d => batch.delete(d.ref));
-      await batch.commit();
+    if(confirm("⚠️ حذف كافة المنتجات من الحزمة؟")) {
+      products = [];
+      await syncProductsBundle();
       alert("تم الحذف بنجاح!");
     }
   };
@@ -490,7 +520,10 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       const snap = await getDocs(collection(db, "orders"));
       const batch = writeBatch(db);
       snap.forEach(d => batch.delete(d.ref));
-      await batch.commit();
+      // ملاحظة: writeBatch مستوردة من السكربت الأصلي أو نستبدلها بـ deleteDoc لكل طلب تفادياً لأخطاء
+      for(const o of orders) {
+        await deleteDoc(doc(db, "orders", o.id));
+      }
       alert("تم التفريغ بنجاح!");
     }
   };
@@ -537,7 +570,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const currencySymbol = document.getElementById("currencyInput").value.trim() || "ج";
     const defaultImage = document.getElementById("defaultImageInput").value.trim();
     
-    // بيانات النافذة المنبثقة
     const announcement = document.getElementById("adminAnnouncement").value.trim();
     const announcementCloseType = document.getElementById("adminAnnouncementCloseType").value;
     const announcementSeconds = Number(document.getElementById("adminAnnouncementSeconds").value) || 5;
@@ -730,20 +762,22 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
     if (targetIndex < 0 || targetIndex >= products.length) return;
 
-    const currentProduct = products[currentIndex];
-    const targetProduct = products[targetIndex];
+    // تبديل مواقع العناصر في المصفوفة وتحديث حقل order
+    const temp = products[currentIndex];
+    products[currentIndex] = products[targetIndex];
+    products[targetIndex] = temp;
 
-    const currentOrder = currentProduct.order !== undefined ? currentProduct.order : currentIndex;
-    const targetOrder = targetProduct.order !== undefined ? targetProduct.order : targetIndex;
+    products.forEach((p, idx) => { p.order = idx; });
 
-    const batch = writeBatch(db);
-    batch.update(doc(db, "products", currentProduct.id), { order: targetOrder });
-    batch.update(doc(db, "products", targetProduct.id), { order: currentOrder });
-    await batch.commit();
+    await syncProductsBundle();
   };
 
   window.toggleProductVisibility = async (id, makeHidden) => {
-    await updateDoc(doc(db, "products", id), { hidden: makeHidden });
+    const p = products.find(item => item.id === id);
+    if(p) {
+      p.hidden = makeHidden;
+      await syncProductsBundle();
+    }
   };
 
   function renderOrders() {
@@ -811,6 +845,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     if(!name) return alert("أدخل اسم المنتج!");
 
     let payload = { 
+      id: id || 'p_' + Math.random().toString(36).substr(2, 9),
       name, 
       category, 
       saleType, 
@@ -832,13 +867,21 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
 
     if(id) { 
-      await updateDoc(doc(db, "products", id), payload); 
+      const index = products.findIndex(item => item.id === id);
+      if(index !== -1) {
+        payload.order = products[index].order !== undefined ? products[index].order : index;
+        payload.hidden = products[index].hidden || false;
+        payload.createdAt = products[index].createdAt || Date.now();
+        products[index] = payload;
+      }
     } else { 
       payload.hidden = false; 
       payload.order = products.length;
       payload.createdAt = Date.now(); 
-      await addDoc(collection(db, "products"), payload); 
+      products.push(payload);
     }
+
+    await syncProductsBundle();
     closeModal();
   });
 
@@ -860,7 +903,12 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     togglePricing();
   };
 
-  window.deleteProduct = async (id) => { if(confirm("حذف المنتج؟")) await deleteDoc(doc(db, "products", id)); };
+  window.deleteProduct = async (id) => { 
+    if(confirm("حذف المنتج؟")) {
+      products = products.filter(item => item.id !== id);
+      await syncProductsBundle();
+    }
+  };
 
   document.getElementById("addZoneBtn").addEventListener("click", async () => {
     const name = document.getElementById("zoneName").value.trim();

@@ -340,20 +340,16 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
-  // دالة مزامنة وتحديث حزمة المنتجات بالكامل في المستند المجمع وحفظ lastUpdated في مستند الإعدادات
   async function syncProductsBundle() {
     try {
       const timestamp = Date.now();
-      // ترتيب المنتجات حسب حقل order
       products.sort((a, b) => (a.order || 0) - (b.order || 0));
       
-      // تحديث مستند الحزمة المجمع بالمصفوفة الجديدة
       await setDoc(doc(db, "settings", "products_bundle"), {
         productsArray: products,
         lastUpdated: timestamp
       }, { merge: true });
 
-      // تحديث مؤشر الإعدادات ليقوم المتجر بتمييز التحديث فوراً
       await setDoc(doc(db, "settings", "store"), {
         lastUpdated: timestamp
       }, { merge: true });
@@ -367,7 +363,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     if(confirm("هل تريد نشر التحديثات وإجبار جميع الزبائن على جلب أحدث منتجات؟")) {
       try {
         await syncProductsBundle();
-        alert("✨ تم نشر التحديثات ومزامنة المنتجات بنجاح! سيشاهد الزبائن أحدث نسخة فور عمل Refresh.");
+        alert("✨ تم نشر التحديثات ومزامنة المنتجات بنجاح!");
       } catch(e) {
         alert("حدث خطأ في تحديث البيانات.");
       }
@@ -390,16 +386,39 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     document.getElementById("secondsGroup").style.display = (type === 'auto') ? 'block' : 'none';
   };
 
+  async function loadProductsData() {
+    try {
+      const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
+      
+      if (bundleSnap.exists() && bundleSnap.data().productsArray && bundleSnap.data().productsArray.length > 0) {
+        products = bundleSnap.data().productsArray;
+      } else {
+        const oldDocsSnap = await getDocs(collection(db, "products"));
+        products = [];
+        oldDocsSnap.forEach(d => {
+          products.push({ id: d.id, ...d.data() });
+        });
+        
+        if (products.length > 0) {
+          await syncProductsBundle();
+        }
+      }
+      renderProducts();
+      renderReports();
+    } catch(err) {
+      console.error("خطأ في جلب المنتجات:", err);
+    }
+  }
+
   function initListeners() {
-    // جلب مستند الحزمة المجمع مباشرة لقراءة المنتجات بدون قריات متعددة
+    loadProductsData();
+
     onSnapshot(doc(db, "settings", "products_bundle"), snap => {
       if(snap.exists() && snap.data().productsArray) {
         products = snap.data().productsArray;
-      } else {
-        products = [];
+        renderProducts(); 
+        renderReports();
       }
-      renderProducts(); 
-      renderReports();
     });
 
     onSnapshot(collection(db, "orders"), snap => {
@@ -517,10 +536,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   window.deleteAllOrders = async () => {
     if(confirm("⚠️ تفريغ كافة الطلبات؟")) {
-      const snap = await getDocs(collection(db, "orders"));
-      const batch = writeBatch(db);
-      snap.forEach(d => batch.delete(d.ref));
-      // ملاحظة: writeBatch مستوردة من السكربت الأصلي أو نستبدلها بـ deleteDoc لكل طلب تفادياً لأخطاء
       for(const o of orders) {
         await deleteDoc(doc(db, "orders", o.id));
       }
@@ -762,7 +777,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
     if (targetIndex < 0 || targetIndex >= products.length) return;
 
-    // تبديل مواقع العناصر في المصفوفة وتحديث حقل order
     const temp = products[currentIndex];
     products[currentIndex] = products[targetIndex];
     products[targetIndex] = temp;

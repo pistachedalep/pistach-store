@@ -629,12 +629,28 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     await window.saveCategoriesToFirebase();
   };
 
+  // الحل الأول: تحديث اسم القسم وتحديث المنتجات المرتبطة به تلقائياً لمنع ظهور الاسم القديم والجديد معاً
   window.editCategoryName = async (index) => {
-    const current = categoriesList[index].name;
-    const newName = prompt("تعديل اسم القسم:", current);
-    if(newName && newName.trim() !== "" && newName !== current) {
-      categoriesList[index].name = newName.trim();
+    const oldName = categoriesList[index].name;
+    const newName = prompt("تعديل اسم القسم:", oldName);
+    if(newName && newName.trim() !== "" && newName !== oldName) {
+      const trimmedNewName = newName.trim();
+      
+      // 1. تحديث الاسم في مصفوفة الأقسام المحلية
+      categoriesList[index].name = trimmedNewName;
+
+      // 2. تحديث الاسم في جميع المنتجات التي تنتمي لهذا القسم لتجنب بقاء الاسم القديم
+      products.forEach(p => {
+        if (p.category === oldName) {
+          p.category = trimmedNewName;
+        }
+      });
+
+      // 3. حفظ الأقسام ومزامنة حزمة المنتجات بالأسماء الجديدة
       await window.saveCategoriesToFirebase();
+      await syncProductsBundle();
+      
+      alert("✨ تم تعديل القسم وتحديث جميع المنتجات المرتبطة به بنجاح!");
     }
   };
 
@@ -659,17 +675,26 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   function renderCategoriesAdmin() {
     const container = document.getElementById("categoriesListContainer");
     if(!categoriesList.length) return container.innerHTML = "<p>لا توجد أقسام.</p>";
-    container.innerHTML = categoriesList.map((cat, idx) => `
-      <div class="category-row">
-        <div><strong>${idx + 1}. ${escapeHtml(cat.name)}</strong></div>
-        <div style="display:flex; gap:4px;">
-          <button class="btn btn-secondary" type="button" onclick="window.moveCategory(${idx}, -1)">⬆️</button>
-          <button class="btn btn-secondary" type="button" onclick="window.moveCategory(${idx}, 1)">⬇️</button>
-          <button class="btn btn-warning" type="button" onclick="window.editCategoryName(${idx})">تعديل</button>
-          <button class="btn btn-danger" type="button" onclick="window.deleteCategory(${idx})">حذف</button>
+    
+    // الحل الثاني: فرز وترتيب الأقسام أبجدياً برمجياً لمنع ظهورها بشكل عشوائي
+    let sortedCategories = [...categoriesList];
+    sortedCategories.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+
+    container.innerHTML = sortedCategories.map((cat, idx) => {
+      // إيجاد الفهرس الحقيقي للعنصر الأصلي لضمان دقة أزرار التعديل والحذف والتحريك
+      const originalIdx = categoriesList.findIndex(c => c.name === cat.name);
+      return `
+        <div class="category-row">
+          <div><strong>${idx + 1}. ${escapeHtml(cat.name)}</strong></div>
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-secondary" type="button" onclick="window.moveCategory(${originalIdx}, -1)">⬆️</button>
+            <button class="btn btn-secondary" type="button" onclick="window.moveCategory(${originalIdx}, 1)">⬇️</button>
+            <button class="btn btn-warning" type="button" onclick="window.editCategoryName(${originalIdx})">تعديل</button>
+            <button class="btn btn-danger" type="button" onclick="window.deleteCategory(${originalIdx})">حذف</button>
+          </div>
         </div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
   }
 
   window.addNewBranch = async () => {
@@ -713,7 +738,9 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   function updateCategorySelectOptions() {
     const select = document.getElementById("pCategorySelect");
     if(select) {
-      select.innerHTML = categoriesList.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
+      // ترتيب الخيارات في القائمة المنسدلة أيضاً أبجدياً لسهولة الاستخدام
+      let sortedOpts = [...categoriesList].sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+      select.innerHTML = sortedOpts.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
     }
   }
 

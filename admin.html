@@ -453,8 +453,11 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         }
         if(data.categoriesList) {
           categoriesList = data.categoriesList;
+          // ترتيب الأقسام أبجدياً عند جلبها لتثبيت الترتيب
+          categoriesList.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
         } else if(data.categories) {
           categoriesList = Array.isArray(data.categories) ? data.categories.map(c=>({ name: c, hidden: false })) : [];
+          categoriesList.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
         }
 
         if(data.branches) {
@@ -616,6 +619,8 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     if(!name) return alert("أدخل اسم القسم");
     if(categoriesList.some(c => c.name === name)) return alert("موجود مسبقاً");
     categoriesList.push({ name: name, hidden: false });
+    // فرز الأقسام أبجدياً قبل الحفظ
+    categoriesList.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
     await window.saveCategoriesToFirebase();
     input.value = "";
   };
@@ -629,7 +634,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     await window.saveCategoriesToFirebase();
   };
 
-  // الحل الأول: تحديث اسم القسم وتحديث المنتجات المرتبطة به تلقائياً لمنع ظهور الاسم القديم والجديد معاً
+  // تعديل اسم القسم وتحديث المنتجات المرتبطة به تلقائياً وفرزها أبجدياً
   window.editCategoryName = async (index) => {
     const oldName = categoriesList[index].name;
     const newName = prompt("تعديل اسم القسم:", oldName);
@@ -638,6 +643,9 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       
       // 1. تحديث الاسم في مصفوفة الأقسام المحلية
       categoriesList[index].name = trimmedNewName;
+      
+      // فرز الأقسام أبجدياً بعد التعديل لضمان الترتيب السليم
+      categoriesList.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
       // 2. تحديث الاسم في جميع المنتجات التي تنتمي لهذا القسم لتجنب بقاء الاسم القديم
       products.forEach(p => {
@@ -676,25 +684,17 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const container = document.getElementById("categoriesListContainer");
     if(!categoriesList.length) return container.innerHTML = "<p>لا توجد أقسام.</p>";
     
-    // الحل الثاني: فرز وترتيب الأقسام أبجدياً برمجياً لمنع ظهورها بشكل عشوائي
-    let sortedCategories = [...categoriesList];
-    sortedCategories.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-
-    container.innerHTML = sortedCategories.map((cat, idx) => {
-      // إيجاد الفهرس الحقيقي للعنصر الأصلي لضمان دقة أزرار التعديل والحذف والتحريك
-      const originalIdx = categoriesList.findIndex(c => c.name === cat.name);
-      return `
-        <div class="category-row">
-          <div><strong>${idx + 1}. ${escapeHtml(cat.name)}</strong></div>
-          <div style="display:flex; gap:4px;">
-            <button class="btn btn-secondary" type="button" onclick="window.moveCategory(${originalIdx}, -1)">⬆️</button>
-            <button class="btn btn-secondary" type="button" onclick="window.moveCategory(${originalIdx}, 1)">⬇️</button>
-            <button class="btn btn-warning" type="button" onclick="window.editCategoryName(${originalIdx})">تعديل</button>
-            <button class="btn btn-danger" type="button" onclick="window.deleteCategory(${originalIdx})">حذف</button>
-          </div>
+    container.innerHTML = categoriesList.map((cat, idx) => `
+      <div class="category-row">
+        <div><strong>${idx + 1}. ${escapeHtml(cat.name)}</strong></div>
+        <div style="display:flex; gap:4px;">
+          <button class="btn btn-secondary" type="button" onclick="window.moveCategory(${idx}, -1)">⬆️</button>
+          <button class="btn btn-secondary" type="button" onclick="window.moveCategory(${idx}, 1)">⬇️</button>
+          <button class="btn btn-warning" type="button" onclick="window.editCategoryName(${idx})">تعديل</button>
+          <button class="btn btn-danger" type="button" onclick="window.deleteCategory(${idx})">حذف</button>
         </div>
-      `;
-    }).join("");
+      </div>
+    `).join("");
   }
 
   window.addNewBranch = async () => {
@@ -738,9 +738,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   function updateCategorySelectOptions() {
     const select = document.getElementById("pCategorySelect");
     if(select) {
-      // ترتيب الخيارات في القائمة المنسدلة أيضاً أبجدياً لسهولة الاستخدام
-      let sortedOpts = [...categoriesList].sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-      select.innerHTML = sortedOpts.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
+      select.innerHTML = categoriesList.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
     }
   }
 

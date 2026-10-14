@@ -567,7 +567,6 @@
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
 
-    // ذاكرة الترجمة الآلية المؤقتة لتسريع الأداء وعدم تكرار الطلبات
     const translationCache = JSON.parse(localStorage.getItem('pista_trans_cache') || '{}');
 
     async function autoTranslate(text) {
@@ -809,13 +808,12 @@
       scrollArea.innerHTML = skeletonsHtml;
     }
 
+    // دالة جلب البيانات المعدلة بنظام الحزمة المجمعة (Bundle) لتوفير قراءات فايربيس
     async function fetchStoreData() {
       try {
         renderSkeletons();
-        const cachedProducts = localStorage.getItem('pista_products_cache');
-        const cachedSettings = localStorage.getItem('pista_settings_cache');
-        const cachedLastUpdated = localStorage.getItem('pista_last_updated');
-
+        
+        // قراءة إعدادات المتجر الأساسية أولاً
         const settingsSnap = await getDoc(doc(db, "settings", "store"));
         let remoteLastUpdated = 0;
         
@@ -824,28 +822,38 @@
           remoteLastUpdated = storeSettings.lastUpdated || 0;
         }
 
-        const isNotForcedRefresh = cachedLastUpdated && Number(cachedLastUpdated) >= remoteLastUpdated;
+        const cachedProducts = localStorage.getItem('pista_products_bundle_cache');
+        const cachedLastUpdated = localStorage.getItem('pista_bundle_last_updated');
 
-        if (cachedProducts && cachedSettings && isNotForcedRefresh) {
+        // إذا كانت النسخة المحلية مطابقة ولا تحتاج لتحديث، نستخدمها مباشرة (0 قراءات إضافية)
+        if (cachedProducts && cachedLastUpdated && Number(cachedLastUpdated) >= remoteLastUpdated) {
           allProducts = JSON.parse(cachedProducts);
-          try { storeSettings = JSON.parse(cachedSettings); } catch(e) {}
           processLoadedData();
           return;
         }
 
-        const productsSnap = await getDocs(collection(db, "products"));
-        allProducts = []; 
-        productsSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
-        
-        localStorage.setItem('pista_products_cache', JSON.stringify(allProducts));
+        // قراءة مستند الحزمة المجمع الوحيد من مجموعة settings (قراءة واحدة فقط لجميع المنتجات)
+        const bundleDocRef = doc(db, "settings", "products_bundle");
+        const bundleSnap = await getDoc(bundleDocRef);
+
+        if (bundleSnap.exists() && bundleSnap.data().productsArray && bundleSnap.data().productsArray.length > 0) {
+          allProducts = bundleSnap.data().productsArray;
+        } else {
+          // خطة بديلة احتياطية في حال كانت المصفوفة فارغة مؤقتاً
+          const productsSnap = await getDocs(collection(db, "products"));
+          allProducts = []; 
+          productsSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
+        }
+
+        localStorage.setItem('pista_products_bundle_cache', JSON.stringify(allProducts));
+        localStorage.setItem('pista_bundle_last_updated', remoteLastUpdated.toString());
         localStorage.setItem('pista_settings_cache', JSON.stringify(storeSettings));
-        localStorage.setItem('pista_last_updated', remoteLastUpdated.toString());
 
         processLoadedData();
 
       } catch(error) {
         console.error("خطأ في جلب البيانات:", error);
-        const fallbackProducts = localStorage.getItem('pista_products_cache');
+        const fallbackProducts = localStorage.getItem('pista_products_bundle_cache');
         if(fallbackProducts) {
           try {
             allProducts = JSON.parse(fallbackProducts);

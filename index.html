@@ -743,7 +743,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, getDoc, addDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw",
@@ -1071,17 +1071,22 @@
     }
 
     async function trackVisitor() {
-      const visitorSession = sessionStorage.getItem('pista_visited');
-      if (!visitorSession) {
+      const isAlreadyVisited = localStorage.getItem('pista_visited_unique');
+      if (!isAlreadyVisited) {
         try {
           const statsRef = doc(db, "settings", "store");
           await updateDoc(statsRef, {
             totalVisits: increment(1),
             visitsSinceLastReset: increment(1)
           });
-          sessionStorage.setItem('pista_visited', 'true');
+          localStorage.setItem('pista_visited_unique', Date.now().toString());
         } catch (e) {
           console.error("خطأ في تسجيل الزيارة:", e);
+        }
+      } else {
+        const lastVisit = Number(isAlreadyVisited);
+        if (Date.now() - lastVisit > 12 * 60 * 60 * 1000) {
+          localStorage.removeItem('pista_visited_unique');
         }
       }
     }
@@ -1114,9 +1119,7 @@
         if (bundleSnap.exists() && bundleSnap.data().productsArray && bundleSnap.data().productsArray.length > 0) {
           allProducts = bundleSnap.data().productsArray;
         } else {
-          const productsSnap = await getDocs(collection(db, "products"));
           allProducts = []; 
-          productsSnap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
         }
 
         localStorage.setItem('pista_products_bundle_cache', JSON.stringify(allProducts));
@@ -1405,7 +1408,6 @@
           card.style.animation = `fadeIn 0.35s ease-out ${index * 0.03}s forwards`;
         });
 
-        // التمرير الدقيق داخل منطقة المنتجات وحول الصنف المستهدف
         if (window.location.hash && window.location.hash.startsWith('#p_')) {
           setTimeout(() => {
             const targetCard = document.querySelector(window.location.hash);

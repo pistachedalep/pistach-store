@@ -185,7 +185,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
           <h2 style="margin:0;">الطلبات الواردة</h2>
           <div style="display:flex; gap:8px;">
             <button class="btn btn-primary" onclick="exportOrdersBackup()">📥 تنزيل السجل</button>
-            <button class="btn btn-danger" onclick="deleteAllOrders()">🗑️ تفريغ الطلبات</button>
+            <button class="btn btn-danger" onclick="deleteAllOrders()">🗑️ تفريغ الطلبات وتصفير العداد الدوري</button>
           </div>
         </div>
         <div id="ordersContainer">جاري التحميل...</div>
@@ -537,11 +537,12 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   };
 
   window.deleteAllOrders = async () => {
-    if(confirm("⚠️ تفريغ كافة الطلبات؟")) {
+    if(confirm("⚠️ هل أنت متأكد من تفريغ كافة الطلبات وتصفير عداد زوار الفترة الحالية؟")) {
       for(const o of orders) {
         await deleteDoc(doc(db, "orders", o.id));
       }
-      alert("تم التفريغ بنجاح!");
+      await setDoc(doc(db, "settings", "store"), { visitsSinceLastReset: 0 }, { merge: true });
+      alert("تم التفريغ وتصفير العداد الدوري للزوار بنجاح!");
     }
   };
 
@@ -813,22 +814,28 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const repContainer = document.getElementById("reportsContainer");
     if(repContainer) {
       const totalVisits = storeSettingsData.totalVisits || 0;
+      const visitsSinceReset = storeSettingsData.visitsSinceLastReset || 0;
+
       repContainer.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 5px;">
           <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
-            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">👀 إجمالي زوار المتجر</span>
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">🌐 إجمالي الزوار (التراكمي)</span>
             <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${totalVisits}</h2>
+          </div>
+          <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">🔄 زوار الفترة الحالية</span>
+            <h2 style="color: #10b981; margin: 5px 0 0 0; font-size: 22px;">${visitsSinceReset}</h2>
           </div>
           <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
             <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">📦 المنتجات</span>
             <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${products.length}</h2>
           </div>
           <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
-            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">📋 الطلبات</span>
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">📋 الطلبات الحالية</span>
             <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${orders.length}</h2>
           </div>
           <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
-            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">💰 المبيعات</span>
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">💰 المبيعات الحالية</span>
             <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${orders.reduce((sum,o)=>sum+(o.grandTotal||0),0)} ${storeSettingsData.currencySymbol || 'ج'}</h2>
           </div>
         </div>

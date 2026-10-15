@@ -299,7 +299,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     <div class="form-group"><label>الوصف</label><textarea id="pDesc" rows="2"></textarea></div>
     <div class="form-group"><label>رابط الصورة الرئيسية (اتركه فارغاً للاستخدام الافتراضي)</label><input type="url" id="pImage"></div>
     
-    <!-- الحقول الجديدة للصور المتعددة والفيديو -->
     <div class="form-group">
       <label>روابط صور إضافية (اختياري - افصل بينها بفاصلة ,)</label>
       <input type="text" id="pExtraImages" placeholder="https://img1.com/a.jpg, https://img2.com/b.jpg">
@@ -319,7 +318,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  import { getFirestore, collection, doc, onSnapshot, setDoc, getDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw",
@@ -549,11 +548,17 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   window.deleteAllOrders = async () => {
     if(confirm("⚠️ هل أنت متأكد من تفريغ كافة الطلبات وتصفير عداد زوار الفترة الحالية؟")) {
-      for(const o of orders) {
-        await deleteDoc(doc(db, "orders", o.id));
+      try {
+        const batch = writeBatch(db);
+        orders.forEach(o => {
+          batch.delete(doc(db, "orders", o.id));
+        });
+        batch.set(doc(db, "settings", "store"), { visitsSinceLastReset: 0 }, { merge: true });
+        await batch.commit();
+        alert("✨ تم التفريغ وتصفير العداد الدوري بنجاح!");
+      } catch(e) {
+        alert("حدث خطأ أثناء التفريغ.");
       }
-      await setDoc(doc(db, "settings", "store"), { visitsSinceLastReset: 0 }, { merge: true });
-      alert("تم التفريغ وتصفير العداد الدوري للزوار بنجاح!");
     }
   };
 
@@ -1003,7 +1008,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
   }
 
-    window.deleteZone = async (idx) => {
+  window.deleteZone = async (idx) => {
     const storeRef = doc(db, "settings", "store");
     const docSnap = await getDoc(storeRef);
     if(docSnap.exists() && docSnap.data().deliveryZones) {

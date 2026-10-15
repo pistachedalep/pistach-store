@@ -293,7 +293,7 @@
       flex-direction: column;
       box-shadow: var(--card-shadow);
       color: var(--card-text); 
-      transition: all 0.25s ease; 
+      transition: all 0.3s ease; 
       position: relative; 
       overflow: hidden; 
       width: 100%;
@@ -396,7 +396,6 @@
       overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-weight: 600; 
     }
 
-    /* ستايل صف الأزرار الجديد (إضافة + مشاركة) */
     .product-actions-row {
       display: flex;
       gap: 6px;
@@ -1350,7 +1349,7 @@
             }
 
             finalHtml += `
-              <div class="product-card">
+              <div class="product-card" id="p_${p.id}">
                 <div class="product-img-wrapper" onclick="window.openLightbox('${p.id}')" title="اضغط لتكبير الصور">
                   ${videoBtnHtml}
                   <div class="product-img-slider" id="slider-${p.id}">
@@ -1366,7 +1365,6 @@
                     <span class="price-tag" id="price-${p.id}">${defaultPrice} ${curr}</span>
                   </div>
                   <div class="product-desc">${escapeHtml(displayDesc)}</div>
-                  <!-- أزرار العمليات (إضافة بالسلة ومشاركة) -->
                   <div class="product-actions-row">
                     <button class="btn-add-cart-card" onclick="window.addToCart('${p.id}')">
                       🛒 ${currentLang === 'en' ? 'Add' : 'إضافة'}
@@ -1397,6 +1395,18 @@
           card.offsetHeight;
           card.style.animation = `fadeIn 0.35s ease-out ${index * 0.03}s forwards`;
         });
+
+        // التوجيه التلقائي والتمركز عند فتح رابط مشاركة منتج معين
+        if (window.location.hash && window.location.hash.startsWith('#p_')) {
+          setTimeout(() => {
+            const targetCard = document.querySelector(window.location.hash);
+            if (targetCard) {
+              targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              targetCard.style.border = "2px solid var(--accent)";
+              targetCard.style.boxShadow = "0 0 15px var(--accent)";
+            }
+          }, 400);
+        }
       }
     }
 
@@ -1456,19 +1466,24 @@
       }
 
       const storeName = storeSettings.storeName || "بيستاش دي ألب";
-      const shareText = `حلى مميز من ${storeName}:\n✨ ${displayName}\n💰 السعر: ${priceText}\n\nاطلبه الآن من متجرنا!`;
+      
+      // بناء رابط مباشر دقيق للمنتج عبر הـ Hash #
+      const baseUrl = window.location.origin + window.location.pathname;
+      const productUrl = `${baseUrl}#p_${pId}`;
+
+      const shareText = `حلى مميز من ${storeName}:\n✨ ${displayName}\n💰 السعر: ${priceText}\n\nاطلبه الآن من الرابط مباشرة:`;
 
       if (navigator.share) {
         try {
           await navigator.share({
             title: displayName,
             text: shareText,
-            url: window.location.href,
+            url: productUrl,
           });
         } catch (err) {}
       } else {
-        navigator.clipboard.writeText(shareText + "\n" + window.location.href);
-        alert(currentLang === 'en' ? "Product info copied to clipboard!" : "تم نسخ تفاصيل الصنف والرابط إلى الحافظة!");
+        navigator.clipboard.writeText(shareText + "\n" + productUrl);
+        alert(currentLang === 'en' ? "Product link copied!" : "تم نسخ رابط الصنف بنجاح!");
       }
     };
 

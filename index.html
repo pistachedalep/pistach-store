@@ -547,7 +547,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw",
@@ -808,6 +808,21 @@
       scrollArea.innerHTML = skeletonsHtml;
     }
 
+    async function trackVisitor() {
+      const visitorSession = sessionStorage.getItem('pista_visited');
+      if (!visitorSession) {
+        try {
+          const statsRef = doc(db, "settings", "store");
+          await updateDoc(statsRef, {
+            totalVisits: increment(1)
+          });
+          sessionStorage.setItem('pista_visited', 'true');
+        } catch (e) {
+          console.error("خطأ في تسجيل الزيارة:", e);
+        }
+      }
+    }
+
     // دالة جلب البيانات المعدلة بنظام الحزمة المجمعة (Bundle) لتوفير قراءات فايربيس
     async function fetchStoreData() {
       try {
@@ -829,6 +844,7 @@
         if (cachedProducts && cachedLastUpdated && Number(cachedLastUpdated) >= remoteLastUpdated) {
           allProducts = JSON.parse(cachedProducts);
           processLoadedData();
+          trackVisitor();
           return;
         }
 
@@ -850,6 +866,7 @@
         localStorage.setItem('pista_settings_cache', JSON.stringify(storeSettings));
 
         processLoadedData();
+        trackVisitor();
 
       } catch(error) {
         console.error("خطأ في جلب البيانات:", error);
@@ -860,6 +877,7 @@
             storeSettings = JSON.parse(localStorage.getItem('pista_settings_cache') || "{}");
           } catch(e) {}
           processLoadedData();
+          trackVisitor();
         } else {
           document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
         }

@@ -297,7 +297,18 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       </div>
     </div>
     <div class="form-group"><label>الوصف</label><textarea id="pDesc" rows="2"></textarea></div>
-    <div class="form-group"><label>رابط الصورة (اتركه فارغاً للاستخدام الافتراضي)</label><input type="url" id="pImage"></div>
+    <div class="form-group"><label>رابط الصورة الرئيسية (اتركه فارغاً للاستخدام الافتراضي)</label><input type="url" id="pImage"></div>
+    
+    <!-- الحقول الجديدة للصور المتعددة والفيديو -->
+    <div class="form-group">
+      <label>روابط صور إضافية (اختياري - افصل بينها بفاصلة ,)</label>
+      <input type="text" id="pExtraImages" placeholder="https://img1.com/a.jpg, https://img2.com/b.jpg">
+    </div>
+    <div class="form-group">
+      <label>رابط فيديو المنتج (YouTube أو رابط مباشر - اختياري)</label>
+      <input type="url" id="pVideoUrl" placeholder="https://www.youtube.com/watch?v=...">
+    </div>
+
     <div style="display: flex; gap: 10px; margin-top: 15px;">
       <button class="btn btn-success" style="flex:1;" id="saveProductBtn">حفظ المنتج</button>
       <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
@@ -867,6 +878,8 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     document.getElementById("pUnitLabel").value = "";
     document.getElementById("pDesc").value = "";
     document.getElementById("pImage").value = "";
+    document.getElementById("pExtraImages").value = "";
+    document.getElementById("pVideoUrl").value = "";
     document.getElementById("productModal").style.display = "flex"; 
   };
 
@@ -881,7 +894,13 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const imageInput = document.getElementById("pImage").value.trim();
     const finalImage = imageInput || currentDefaultImage;
 
+    const extraImagesInput = document.getElementById("pExtraImages").value.trim();
+    const videoUrl = document.getElementById("pVideoUrl").value.trim();
+
     if(!name) return alert("أدخل اسم المنتج!");
+
+    let extraImagesArray = extraImagesInput ? extraImagesInput.split(',').map(s => s.trim()).filter(s => s) : [];
+    let allProductImages = [finalImage, ...extraImagesArray];
 
     let payload = { 
       id: id || 'p_' + Math.random().toString(36).substr(2, 9),
@@ -890,7 +909,8 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       saleType, 
       description, 
       image: finalImage,
-      images: [finalImage] 
+      images: allProductImages,
+      videoUrl: videoUrl
     };
 
     if(saleType === 'weight') {
@@ -938,7 +958,17 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     document.getElementById("pUnitPrice").value = p.pricing?.unitPrice || "";
     document.getElementById("pUnitLabel").value = p.pricing?.unitLabel || "";
     document.getElementById("pDesc").value = p.description || "";
-    document.getElementById("pImage").value = (p.images?.[0] === currentDefaultImage || p.image === currentDefaultImage) ? "" : (p.images?.[0] || p.image || "");
+    
+    let allImgs = p.images && p.images.length > 0 ? p.images : [p.image || currentDefaultImage];
+    document.getElementById("pImage").value = (allImgs[0] === currentDefaultImage) ? "" : allImgs[0];
+    
+    if(allImgs.length > 1) {
+      document.getElementById("pExtraImages").value = allImgs.slice(1).join(", ");
+    } else {
+      document.getElementById("pExtraImages").value = "";
+    }
+
+    document.getElementById("pVideoUrl").value = p.videoUrl || "";
     togglePricing();
   };
 
@@ -973,7 +1003,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
   }
 
-  window.deleteZone = async (idx) => {
+    window.deleteZone = async (idx) => {
     const storeRef = doc(db, "settings", "store");
     const docSnap = await getDoc(storeRef);
     if(docSnap.exists() && docSnap.data().deliveryZones) {

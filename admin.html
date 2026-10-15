@@ -324,7 +324,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   const db = getFirestore(app);
 
   let currentDefaultImage = "";
-  let products = [], orders = [], categoriesList = [], branchesList = [], uploadedBase64Image = "";
+  let products = [], orders = [], categoriesList = [], branchesList = [], uploadedBase64Image = "", storeSettingsData = {};
 
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = document.getElementById("adminEmail").value.trim();
@@ -429,6 +429,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     onSnapshot(doc(db, "settings", "store"), snap => {
       if(snap.exists()){
         const data = snap.data();
+        storeSettingsData = data;
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
         if(data.currencySymbol) document.getElementById("currencyInput").value = data.currencySymbol;
         
@@ -485,6 +486,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         }
 
         renderProducts();
+        renderReports();
       }
     });
   }
@@ -810,10 +812,26 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   function renderReports() {
     const repContainer = document.getElementById("reportsContainer");
     if(repContainer) {
+      const totalVisits = storeSettingsData.totalVisits || 0;
       repContainer.innerHTML = `
-        <p>📦 المنتجات: <strong>${products.length}</strong></p>
-        <p>📋 الطلبات: <strong>${orders.length}</strong></p>
-        <p>💰 المبيعات: <strong>${orders.reduce((sum,o)=>sum+(o.grandTotal||0),0)}</strong></p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 5px;">
+          <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">👀 إجمالي زوار المتجر</span>
+            <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${totalVisits}</h2>
+          </div>
+          <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">📦 المنتجات</span>
+            <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${products.length}</h2>
+          </div>
+          <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">📋 الطلبات</span>
+            <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${orders.length}</h2>
+          </div>
+          <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">💰 المبيعات</span>
+            <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${orders.reduce((sum,o)=>sum+(o.grandTotal||0),0)} ${storeSettingsData.currencySymbol || 'ج'}</h2>
+          </div>
+        </div>
       `;
     }
   }

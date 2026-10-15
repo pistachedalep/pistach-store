@@ -814,7 +814,8 @@
         try {
           const statsRef = doc(db, "settings", "store");
           await updateDoc(statsRef, {
-            totalVisits: increment(1)
+            totalVisits: increment(1),
+            visitsSinceLastReset: increment(1)
           });
           sessionStorage.setItem('pista_visited', 'true');
         } catch (e) {

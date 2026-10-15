@@ -283,6 +283,12 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes highlightPulse {
+      0% { border-color: var(--accent); box-shadow: 0 0 0px var(--accent); }
+      50% { border-color: var(--accent); box-shadow: 0 0 25px var(--accent); transform: scale(1.02); }
+      100% { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+    }
+
     .product-card {
       background: var(--card-bg); 
       backdrop-filter: blur(10px);
@@ -298,6 +304,9 @@
       overflow: hidden; 
       width: 100%;
       animation: fadeIn 0.35s ease-out forwards;
+    }
+    .product-card.highlighted-product {
+      animation: highlightPulse 1.2s ease-in-out infinite alternate !important;
     }
     .product-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); }
     
@@ -1396,16 +1405,21 @@
           card.style.animation = `fadeIn 0.35s ease-out ${index * 0.03}s forwards`;
         });
 
-        // التوجيه التلقائي والتمركز عند فتح رابط مشاركة منتج معين
+        // التمرير الدقيق داخل منطقة المنتجات وحول الصنف المستهدف
         if (window.location.hash && window.location.hash.startsWith('#p_')) {
           setTimeout(() => {
             const targetCard = document.querySelector(window.location.hash);
-            if (targetCard) {
-              targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              targetCard.style.border = "2px solid var(--accent)";
-              targetCard.style.boxShadow = "0 0 15px var(--accent)";
+            const container = document.getElementById("productsScrollArea");
+            if (targetCard && container) {
+              const cardTop = targetCard.offsetTop - container.offsetTop - 20;
+              container.scrollTo({ top: cardTop, behavior: 'smooth' });
+              targetCard.classList.add("highlighted-product");
+              
+              setTimeout(() => {
+                targetCard.classList.remove("highlighted-product");
+              }, 4500);
             }
-          }, 400);
+          }, 500);
         }
       }
     }
@@ -1467,7 +1481,6 @@
 
       const storeName = storeSettings.storeName || "بيستاش دي ألب";
       
-      // بناء رابط مباشر دقيق للمنتج عبر הـ Hash #
       const baseUrl = window.location.origin + window.location.pathname;
       const productUrl = `${baseUrl}#p_${pId}`;
 

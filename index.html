@@ -1091,57 +1091,31 @@
       }
     }
 
+    // 🔥 دالة الجلب المباشر والمستقر بقراءتين فقط بدون تعقيدات كاش زائل
     async function fetchStoreData() {
       try {
         renderSkeletons();
         
+        // 1. قراءة إعدادات المتجر (قراءة واحدة فقط)
         const settingsSnap = await getDoc(doc(db, "settings", "store"));
-        let remoteLastUpdated = 0;
-        
         if (settingsSnap.exists()) {
           storeSettings = settingsSnap.data();
-          remoteLastUpdated = storeSettings.lastUpdated || 0;
         }
 
-        const cachedProducts = localStorage.getItem('pista_products_bundle_cache');
-        const cachedLastUpdated = localStorage.getItem('pista_bundle_last_updated');
-
-        if (cachedProducts && cachedLastUpdated && Number(cachedLastUpdated) >= remoteLastUpdated) {
-          allProducts = JSON.parse(cachedProducts);
-          processLoadedData();
-          trackVisitor();
-          return;
-        }
-
-        const bundleDocRef = doc(db, "settings", "products_bundle");
-        const bundleSnap = await getDoc(bundleDocRef);
-
-        if (bundleSnap.exists() && bundleSnap.data().productsArray && bundleSnap.data().productsArray.length > 0) {
+        // 2. قراءة الحزمة المجمعة للمنتجات (قراءة واحدة فقط للمستند المجمع)
+        const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
+        if (bundleSnap.exists() && bundleSnap.data().productsArray) {
           allProducts = bundleSnap.data().productsArray;
         } else {
-          allProducts = []; 
+          allProducts = [];
         }
-
-        localStorage.setItem('pista_products_bundle_cache', JSON.stringify(allProducts));
-        localStorage.setItem('pista_bundle_last_updated', remoteLastUpdated.toString());
-        localStorage.setItem('pista_settings_cache', JSON.stringify(storeSettings));
 
         processLoadedData();
         trackVisitor();
 
       } catch(error) {
         console.error("خطأ في جلب البيانات:", error);
-        const fallbackProducts = localStorage.getItem('pista_products_bundle_cache');
-        if(fallbackProducts) {
-          try {
-            allProducts = JSON.parse(fallbackProducts);
-            storeSettings = JSON.parse(localStorage.getItem('pista_settings_cache') || "{}");
-          } catch(e) {}
-          processLoadedData();
-          trackVisitor();
-        } else {
-          document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
-        }
+        document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
       }
     }
 
@@ -1316,7 +1290,7 @@
         });
 
         if(catProds.length > 0) {
-          catProds.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+          catProds.sort((a, b) => (a.order || 0) - (b.order || 0));
           totalFilteredCount += catProds.length;
 
           const cleanCatId = encodeURIComponent(catName).replace(/%/g, '_');

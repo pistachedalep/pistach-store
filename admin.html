@@ -44,7 +44,6 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 .product-row, .category-row { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 14px 0; justify-content: space-between; flex-wrap: wrap; }
 .product-row img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; background: #f1f5f9; }
 
-/* المعاينة الحية */
 .preview-sticky { position: sticky; top: 20px; }
 .preview-phone { width: 100%; height: 620px; border: 10px solid #0f172a; border-radius: 30px; overflow: hidden; background: #11261d; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
 .preview-header { padding: 10px 12px; background: rgba(17,38,29,0.95); color: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -61,15 +60,13 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 
 <div class="admin-container">
 
-  <!-- التحكم والتعديل -->
   <div>
-    <!-- استيراد وتصدير -->
     <div class="card" style="background: #eff6ff; border-color: #bfdbfe;">
       <h2 style="color: #1e40af; margin-top:0; font-size:16px;"><i class="fa-solid fa-file-import"></i> استيراد وتصدير ملف products.json</h2>
-      <p style="color: #1e3a8a; font-size:13px; margin-bottom:12px;">قم برفع ملف <code>products.json</code> لاستيراد البيانات، وبعد التعديل اضغط تصدير لتنزيل الملف المعدل!</p>
+      <p style="color: #1e3a8a; font-size:13px; margin-bottom:12px;">يمكنك اختيار ملفك القديم فوراً، وسيقوم النظام بتنسيقه وتجهيزه تلقائياً!</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <label class="btn btn-import">
-          <i class="fa-solid fa-upload"></i> 📥 استيراد ملف
+          <i class="fa-solid fa-upload"></i> 📥 استيراد ملف (القديم أو الجديد)
           <input type="file" id="importJsonFile" accept=".json" style="display:none;" onchange="importJSONFile(event)">
         </label>
         <button class="btn btn-export" onclick="exportJSONFile()"><i class="fa-solid fa-download"></i> 📤 تصدير وتنزيل products.json</button>
@@ -89,7 +86,7 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       <div class="card"><button class="btn btn-success" onclick="openModal()">➕ إضافة منتج جديد</button></div>
       <div class="card">
         <h2>قائمة المنتجات الحالية</h2>
-        <div id="productsContainer">جاري التحميل...</div>
+        <div id="productsContainer">اضغط "استيراد ملف" وقم برفع ملفك القديم...</div>
       </div>
     </div>
 
@@ -168,7 +165,6 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     </div>
   </div>
 
-  <!-- المعاينة الحية المباشرة -->
   <div class="preview-sticky">
     <div class="card" style="padding: 12px; text-align: center; margin-bottom: 10px;">
       <h3 style="margin:0; font-size:14px; color:var(--primary);"><i class="fa-solid fa-mobile-screen"></i> معاينة شكل المنيو فوري</h3>
@@ -178,15 +174,12 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
         <span id="prevLogo" style="font-weight:900; font-size:13px; color:#d4af37;">بيستاش دي ألب</span>
         <span style="font-size:10px; opacity:0.8;">🛒 السلة (0)</span>
       </div>
-      <div class="preview-body" id="prevBody">
-        <!-- الأصناف المعاينة -->
-      </div>
+      <div class="preview-body" id="prevBody"></div>
     </div>
   </div>
 
 </div>
 
-<!-- نافذة إضافة وتعديل صنف -->
 <div class="modal-overlay" id="productModal">
   <div class="modal-card">
     <h3 id="modalTitle">إضافة / تعديل منتج</h3>
@@ -253,15 +246,26 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     reader.onload = function(event) {
       try {
         const importedData = JSON.parse(event.target.result);
+        
+        // ذكاء التوافق: يدعم الصيغة القديمة (Array) والصيغة الجديدة (Object)
         if (Array.isArray(importedData)) {
           storeData.products = importedData;
+          // استخراج الأقسام تلقائياً من الملف القديم
+          const extractedCats = [];
+          importedData.forEach(p => {
+            if(p.category && !extractedCats.some(c => c.name === p.category)) {
+              extractedCats.push({ name: p.category, hidden: false });
+            }
+          });
+          storeData.settings.categoriesList = extractedCats;
         } else {
           storeData = importedData;
         }
+
         applyDataToUI();
-        alert("✨ تم استيراد بيانات الملف بنجاح!");
+        alert("✨ تم استيراد وقراءة بيانات الملف بنجاح!");
       } catch (err) {
-        alert("خطأ في قراءة الملف!");
+        alert("خطأ في قراءة الملف! تأكد من أنه بصيغة JSON سليم.");
       }
     };
     reader.readAsText(file);

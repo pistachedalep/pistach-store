@@ -1,0 +1,2753 @@
+{
+  "settings": {
+    "storeName": "بيستاش دي ألب",
+    "whatsappNumber": "201011406537",
+    "currencySymbol": "ج",
+    "defaultImage": "",
+    "categoriesList": [
+      {
+        "name": "حلويات يومية",
+        "hidden": false
+      },
+      {
+        "name": "مطبخ حلبي ( بالطلب المسبق )",
+        "hidden": false
+      },
+      {
+        "name": "منتجات حلبية",
+        "hidden": false
+      },
+      {
+        "name": "وجبات جاهزة للطهي Frozen",
+        "hidden": false
+      },
+      {
+        "name": "حلويات شرقية Oriantel sweet",
+        "hidden": false
+      },
+      {
+        "name": "قهوة Coffee",
+        "hidden": false
+      },
+      {
+        "name": "معجنات شرقية",
+        "hidden": false
+      },
+      {
+        "name": "فطور حلبي ( كل  يوم جمعة )",
+        "hidden": false
+      },
+      {
+        "name": "مشاوي",
+        "hidden": false
+      },
+      {
+        "name": "صحن فرنسي",
+        "hidden": false
+      },
+      {
+        "name": "مثلجات ice cream",
+        "hidden": false
+      }
+    ],
+    "socialLinks": {
+      "facebook": "",
+      "instagram": "",
+      "telegram": "",
+      "tiktok": ""
+    },
+    "theme": {
+      "primaryColor": "#11261d",
+      "accentColor": "#d4af37",
+      "bgColor": "#11261d",
+      "cardBgColor": "#ffffff",
+      "cardTextColor": "#0f172a"
+    }
+  },
+  "products": [
+    {
+      "hidden": false,
+      "price": 380,
+      "image": "https://i.ibb.co/m5gPxFXp/IMG-20261013-WA0175-1.jpg",
+      "saleType": "weight",
+      "order": 0,
+      "videoUrl": "",
+      "id": "00FGeJcfRB5krNf4cVGQ",
+      "images": [
+        "https://i.ibb.co/m5gPxFXp/IMG-20261013-WA0175-1.jpg"
+      ],
+      "pricing": {
+        "kilo": 380,
+        "quarter": 95,
+        "half": 190
+      },
+      "name": "بسبوسة شوكولا",
+      "category": "حلويات يومية",
+      "createdAt": 1791832590249,
+      "description": ""
+    },
+    {
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "pricing": {
+        "half": 275,
+        "quarter": 137.5,
+        "kilo": 550
+      },
+      "images": [
+        "https://i.ibb.co/BKjWzZCf/IMG-20261014-WA0019.jpg"
+      ],
+      "saleType": "weight",
+      "image": "https://i.ibb.co/BKjWzZCf/IMG-20261014-WA0019.jpg",
+      "createdAt": 1791835613311,
+      "price": 550,
+      "hidden": false,
+      "id": "047RB9QLbprlVHlF7XTA",
+      "name": "شيخ المحشي مع رز",
+      "description": "بالطلب لمسبق"
+    },
+    {
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "images": [
+        "https://i.ibb.co/dwkCHCcC/IMG-20261013-WA0117.jpg"
+      ],
+      "name": "داوود باشا مع رز",
+      "saleType": "weight",
+      "id": "4YeeWCRyqjphX0ZIgWK5",
+      "createdAt": 1791835565783,
+      "price": 390,
+      "description": "بللطلب المسبق",
+      "pricing": {
+        "half": 195,
+        "quarter": 97.5,
+        "kilo": 390
+      },
+      "image": "https://i.ibb.co/dwkCHCcC/IMG-20261013-WA0117.jpg",
+      "hidden": false
+    },
+    {
+      "id": "4zjUCpPrJ27Ytj86A7Qc",
+      "createdAt": 1791834663690,
+      "description": "",
+      "hidden": false,
+      "category": "منتجات حلبية",
+      "images": [
+        "https://i.ibb.co/WWV676RN/IMG-20261013-WA0178.jpg"
+      ],
+      "name": "زعتر حلبي",
+      "saleType": "unit",
+      "price": 120,
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 120
+      },
+      "image": "https://i.ibb.co/WWV676RN/IMG-20261013-WA0178.jpg"
+    },
+    {
+      "description": "",
+      "saleType": "weight",
+      "pricing": {
+        "quarter": 170,
+        "kilo": 680,
+        "half": 340
+      },
+      "hidden": false,
+      "category": "وجبات جاهزة للطهي Frozen",
+      "images": [
+        "https://i.ibb.co/7cg5kjt/IMG-20261013-WA0121.jpg"
+      ],
+      "createdAt": 1791833082111,
+      "id": "5fVgghI7oSIrVvGbnEpH",
+      "name": "اوزي مفرزة",
+      "image": "https://i.ibb.co/7cg5kjt/IMG-20261013-WA0121.jpg",
+      "price": 680
+    },
+    {
+      "pricing": {
+        "kilo": 2450,
+        "quarter": 612.5,
+        "half": 1225
+      },
+      "images": [
+        "https://i.ibb.co/d41FMWD0/IMG-20261013-WA0109.jpg"
+      ],
+      "createdAt": 1791820263831,
+      "saleType": "weight",
+      "name": "آسية بالفستق",
+      "image": "https://i.ibb.co/d41FMWD0/IMG-20261013-WA0109.jpg",
+      "hidden": false,
+      "category": "حلويات شرقية Oriantel sweet",
+      "description": "",
+      "id": "6WoAyQ3mV6SVzxgDEWLP",
+      "price": 2450
+    },
+    {
+      "pricing": {
+        "unitPrice": 2800,
+        "unitLabel": "علبة"
+      },
+      "saleType": "unit",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "createdAt": 1791833398526,
+      "name": "منسف 1 كتف فريكة و رز A+",
+      "description": "بالطلب المسبق",
+      "price": 2800,
+      "id": "6cgB3Rd1LbTDAfpXY5B2",
+      "hidden": false,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+    },
+    {
+      "createdAt": 1791838158559,
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 275
+      },
+      "id": "7Ps6Z3y7waZ3V2LO6RBw",
+      "description": "",
+      "hidden": false,
+      "images": [
+        "https://i.ibb.co/Df53Tc3C/IMG-20261013-WA0053.jpg"
+      ],
+      "category": "قهوة Coffee",
+      "name": "خلطة بن ربع كيلو هال كسترا",
+      "price": 275,
+      "image": "https://i.ibb.co/Df53Tc3C/IMG-20261013-WA0053.jpg",
+      "saleType": "unit"
+    },
+    {
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "createdAt": 1791834525355,
+      "price": 75,
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 75
+      },
+      "name": "محمرة",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "hidden": false,
+      "id": "7Th9ka9QxGL5j1qwUtWd",
+      "saleType": "unit",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "description": ""
+    },
+    {
+      "saleType": "unit",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 750
+      },
+      "category": "معجنات شرقية",
+      "hidden": false,
+      "createdAt": 1791820941245,
+      "images": [
+        "https://i.ibb.co/6R0YRC1Q/IMG-20261013-WA0011.jpg"
+      ],
+      "id": "AinyMq6Smyxt3KA5DEl5",
+      "name": "برازق",
+      "description": "",
+      "image": "https://i.ibb.co/6R0YRC1Q/IMG-20261013-WA0011.jpg",
+      "price": 750
+    },
+    {
+      "pricing": {
+        "quarter": 137.5,
+        "kilo": 550,
+        "half": 275
+      },
+      "images": [
+        "https://i.ibb.co/dJ1h0mnv/IMG-20261013-WA0033.jpg"
+      ],
+      "id": "AkRivoKHIyW2D6wXw64i",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "saleType": "weight",
+      "description": "بالطلب المسبق",
+      "name": "سندوانات",
+      "price": 550,
+      "image": "https://i.ibb.co/dJ1h0mnv/IMG-20261013-WA0033.jpg",
+      "createdAt": 1791835392440,
+      "hidden": false
+    },
+    {
+      "images": [
+        "https://i.ibb.co/kfzHpr9/IMG-20261013-WA0176.jpg"
+      ],
+      "name": "كليجة",
+      "category": "حلويات يومية",
+      "image": "https://i.ibb.co/kfzHpr9/IMG-20261013-WA0176.jpg",
+      "pricing": {
+        "quarter": 120,
+        "half": 240,
+        "kilo": 480
+      },
+      "id": "BCwkTIx8465r6C4dARw3",
+      "createdAt": 1791832907928,
+      "description": "",
+      "price": 480,
+      "hidden": false,
+      "saleType": "weight"
+    },
+    {
+      "image": "https://i.ibb.co/Txh1KHg9/IMG-20261013-WA0039.jpg",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 1200
+      },
+      "price": 1200,
+      "name": "منسف مندي 6 ورك",
+      "images": [
+        "https://i.ibb.co/Txh1KHg9/IMG-20261013-WA0039.jpg"
+      ],
+      "hidden": false,
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "createdAt": 1791833689398,
+      "id": "BlmaXzCeQeCKi3ftL8SL",
+      "saleType": "unit",
+      "description": "بالطلب المسبق"
+    },
+    {
+      "category": "معجنات شرقية",
+      "images": [
+        "https://i.ibb.co/ynfPwD6n/IMG-20261013-WA0012.jpg"
+      ],
+      "price": 1500,
+      "saleType": "unit",
+      "image": "https://i.ibb.co/ynfPwD6n/IMG-20261013-WA0012.jpg",
+      "id": "Bm1B2gnEEdBD44BmIIbO",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 1500
+      },
+      "hidden": false,
+      "name": "غريبة حلبية بالفستق",
+      "description": "",
+      "createdAt": 1791821194924
+    },
+    {
+      "id": "Bw1UwPVAQ2Q733pLGG7O",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "createdAt": 1791834607834,
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "price": 75,
+      "description": "",
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "saleType": "unit",
+      "pricing": {
+        "unitPrice": 75,
+        "unitLabel": "علبة"
+      },
+      "name": "سلطة ناعمة",
+      "hidden": false
+    },
+    {
+      "pricing": {
+        "quarter": 120,
+        "kilo": 480,
+        "half": 240
+      },
+      "description": "",
+      "images": [
+        "https://i.ibb.co/hFZfBL2Q/IMG-20261013-WA0058.jpg"
+      ],
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "saleType": "weight",
+      "createdAt": 1791835500839,
+      "name": "كوسا بلبن",
+      "image": "https://i.ibb.co/hFZfBL2Q/IMG-20261013-WA0058.jpg",
+      "hidden": false,
+      "id": "CKaWJvuxVYbUQuMbaLhd",
+      "price": 480
+    },
+    {
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "createdAt": 1791835005625,
+      "hidden": false,
+      "id": "CXF1XoPgcg861tJW8Wq0",
+      "saleType": "unit",
+      "name": "زلابية قشطة",
+      "image": "https://i.ibb.co/mnrQntD/IMG-20261014-WA0026.jpg",
+      "price": 60,
+      "images": [
+        "https://i.ibb.co/mnrQntD/IMG-20261014-WA0026.jpg"
+      ],
+      "description": "",
+      "pricing": {
+        "unitPrice": 60,
+        "unitLabel": "علبة"
+      }
+    },
+    {
+      "id": "Chr7LlaXA9IwOsPu8HVR",
+      "hidden": false,
+      "name": "قهوة مرة زجاجة",
+      "createdAt": 1791837457113,
+      "image": "https://i.ibb.co/S4wTPm6m/IMG-20261013-WA0116.jpg",
+      "price": 150,
+      "category": "قهوة Coffee",
+      "images": [
+        "https://i.ibb.co/S4wTPm6m/IMG-20261013-WA0116.jpg"
+      ],
+      "pricing": {
+        "unitPrice": 150,
+        "unitLabel": "علبة"
+      },
+      "saleType": "unit",
+      "description": ""
+    },
+    {
+      "name": "اصابع كاجو رفيعة (سكاير)",
+      "price": 1600,
+      "hidden": false,
+      "image": "https://i.ibb.co/wFMys96b/IMG-20261013-WA0027.jpg",
+      "pricing": {
+        "kilo": 1600,
+        "quarter": 400,
+        "half": 800
+      },
+      "id": "DDkzlQtXFTx8fVXDcunX",
+      "createdAt": 1791820608877,
+      "description": "",
+      "category": "حلويات شرقية Oriantel sweet",
+      "images": [
+        "https://i.ibb.co/wFMys96b/IMG-20261013-WA0027.jpg"
+      ],
+      "saleType": "weight"
+    },
+    {
+      "name": "مامونية",
+      "hidden": false,
+      "price": 180,
+      "createdAt": 1791835178513,
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "images": [
+        "https://i.ibb.co/zVbqykxh/image.jpg"
+      ],
+      "image": "https://i.ibb.co/zVbqykxh/image.jpg",
+      "pricing": {
+        "half": 90,
+        "kilo": 180,
+        "quarter": 45
+      },
+      "saleType": "weight",
+      "id": "Ddx9X2ivl91K8CRgDzau",
+      "description": ""
+    },
+    {
+      "description": "بالطلب المسبق",
+      "hidden": false,
+      "id": "EBWJSkxVMB3VFPTwBG8b",
+      "price": 850,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "pricing": {
+        "kilo": 850,
+        "half": 425,
+        "quarter": 212.5
+      },
+      "name": "كباب خخشخاش",
+      "createdAt": 1791836031934,
+      "category": "مشاوي",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "saleType": "weight"
+    },
+    {
+      "images": [
+        "https://i.ibb.co/j9KhY8N8/IMG-20261014-WA0016.jpg"
+      ],
+      "price": 35,
+      "image": "https://i.ibb.co/j9KhY8N8/IMG-20261014-WA0016.jpg",
+      "createdAt": 1791835123649,
+      "name": "كروسان جبنة و فليفللة",
+      "id": "Er6cmSpzk1dzdaVvZ9GQ",
+      "pricing": {
+        "unitPrice": 35,
+        "unitLabel": "علبة"
+      },
+      "hidden": false,
+      "category": "حلويات شرقية Oriantel sweet",
+      "description": "",
+      "saleType": "unit"
+    },
+    {
+      "hidden": false,
+      "saleType": "unit",
+      "id": "GNRFO4iIfDxWPq9NX8EN",
+      "image": "https://i.ibb.co/5hhDZF3T/IMG-20261013-WA0013.jpg",
+      "pricing": {
+        "unitPrice": 750,
+        "unitLabel": "علبة"
+      },
+      "price": 750,
+      "category": "معجنات شرقية",
+      "createdAt": 1791821063596,
+      "description": "",
+      "images": [
+        "https://i.ibb.co/5hhDZF3T/IMG-20261013-WA0013.jpg"
+      ],
+      "name": "عجوة اقراص بالفستق"
+    },
+    {
+      "saleType": "weight",
+      "pricing": {
+        "half": 145,
+        "quarter": 72.5,
+        "kilo": 290
+      },
+      "image": "https://i.ibb.co/hxBjvRvz/IMG-20261014-WA0018.jpg",
+      "category": "حلويات يومية",
+      "images": [
+        "https://i.ibb.co/hxBjvRvz/IMG-20261014-WA0018.jpg"
+      ],
+      "price": 290,
+      "createdAt": 1791832404593,
+      "hidden": false,
+      "description": "",
+      "id": "GsEwLk3w0mXJddHpQeud",
+      "name": "وربات قشطة"
+    },
+    {
+      "saleType": "weight",
+      "images": [
+        "https://i.ibb.co/Gvd2xxm2/IMG-20261013-WA0040.jpg"
+      ],
+      "category": "حلويات شرقية Oriantel sweet",
+      "id": "HQcdDtemNsnSEkjrnsmb",
+      "createdAt": 1791820031639,
+      "description": "",
+      "pricing": {
+        "half": 950,
+        "quarter": 475,
+        "kilo": 2100
+      },
+      "name": "اصابع بالفستق",
+      "price": 2100,
+      "image": "https://i.ibb.co/Gvd2xxm2/IMG-20261013-WA0040.jpg",
+      "hidden": false
+    },
+    {
+      "description": "بالطلب المسبق",
+      "hidden": false,
+      "id": "JEQR9d3jozguuzDnVMgZ",
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "pricing": {
+        "kilo": 900,
+        "half": 450,
+        "quarter": 225
+      },
+      "price": 900,
+      "createdAt": 1791835728863,
+      "saleType": "weight",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "name": "سماقية مع كبة",
+      "category": "مطبخ حلبي ( بالطلب المسبق )"
+    },
+    {
+      "id": "Kkuuffxsdi9E1EpmDaPb",
+      "description": "",
+      "pricing": {
+        "unitPrice": 215,
+        "unitLabel": "علبة"
+      },
+      "hidden": false,
+      "createdAt": 1791837328946,
+      "images": [
+        "https://i.ibb.co/Df53Tc3C/IMG-20261013-WA0053.jpgر"
+      ],
+      "category": "قهوة Coffee",
+      "name": "خلطة بن سادة ربع كيلو",
+      "price": 215,
+      "saleType": "unit",
+      "image": "https://i.ibb.co/Df53Tc3C/IMG-20261013-WA0053.jpgر"
+    },
+    {
+      "price": 40,
+      "id": "KxAznYUszZTXR8CdGlfv",
+      "hidden": false,
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "name": "زلابية سادة",
+      "image": "https://i.ibb.co/mnrQntD/IMG-20261014-WA0026.jpg",
+      "saleType": "unit",
+      "description": "",
+      "createdAt": 1791835043473,
+      "images": [
+        "https://i.ibb.co/mnrQntD/IMG-20261014-WA0026.jpg"
+      ],
+      "pricing": {
+        "unitPrice": 40,
+        "unitLabel": "علبة"
+      }
+    },
+    {
+      "price": 1200,
+      "createdAt": 1791833668326,
+      "saleType": "unit",
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "name": "منسف كبسة دجاج 6 ورك",
+      "id": "L51yucUwBOXujPSfItJs",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "hidden": false,
+      "description": "",
+      "pricing": {
+        "unitPrice": 1200,
+        "unitLabel": "علبة"
+      }
+    },
+    {
+      "saleType": "weight",
+      "description": "",
+      "image": "https://i.ibb.co/MydC6YVw/IMG-20261013-WA0014.jpg",
+      "id": "LBzwYZqRv7QrZNC692Dt",
+      "createdAt": 1791820762557,
+      "images": [
+        "https://i.ibb.co/MydC6YVw/IMG-20261013-WA0014.jpg"
+      ],
+      "category": "معجنات شرقية",
+      "price": 1900,
+      "hidden": false,
+      "pricing": {
+        "quarter": 475,
+        "kilo": 1900,
+        "half": 950
+      },
+      "name": "كرابيج فستق"
+    },
+    {
+      "createdAt": 1791832536913,
+      "name": "بسبوسة سادة",
+      "price": 180,
+      "pricing": {
+        "quarter": 45,
+        "kilo": 180,
+        "half": 90
+      },
+      "image": "https://i.ibb.co/rRg8xsTV/IMG-20261014-WA0027.jpg",
+      "description": "",
+      "images": [
+        "https://i.ibb.co/rRg8xsTV/IMG-20261014-WA0027.jpg"
+      ],
+      "hidden": false,
+      "saleType": "weight",
+      "category": "حلويات يومية",
+      "id": "Lf6NbjJjR11X93lZrkoK"
+    },
+    {
+      "saleType": "unit",
+      "name": "خلطة بن مع هال ربع كيلو",
+      "id": "N6YUXWF2w8q6eLFOSqln",
+      "images": [
+        "https://i.ibb.co/Df53Tc3C/IMG-20261013-WA0053.jpg"
+      ],
+      "category": "قهوة Coffee",
+      "description": "",
+      "price": 250,
+      "createdAt": 1791837351946,
+      "pricing": {
+        "unitPrice": 250,
+        "unitLabel": "علبة"
+      },
+      "image": "https://i.ibb.co/Df53Tc3C/IMG-20261013-WA0053.jpg",
+      "hidden": false
+    },
+    {
+      "name": "منسف مندي 1 كتف",
+      "description": "",
+      "createdAt": 1791833605238,
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "id": "O7BW8SLg4TcWS86BiD39",
+      "saleType": "unit",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 2400
+      },
+      "price": 2400,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "hidden": false
+    },
+    {
+      "saleType": "unit",
+      "pricing": {
+        "unitPrice": 275,
+        "unitLabel": "علبة"
+      },
+      "images": [
+        "https://i.ibb.co/Df53Tc3C/IMG-20261013-WA0053.jpg"
+      ],
+      "category": "حلويات شرقية Oriantel sweet",
+      "createdAt": 1791837379786,
+      "id": "OGL8JBCLYIdgSXvvInlK",
+      "name": "خلطة بن مع هال اكسترا ربع كيلو",
+      "price": 275,
+      "description": "",
+      "image": "https://i.ibb.co/Df53Tc3C/IMG-20261013-WA0053.jpg",
+      "hidden": false
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/j9KhY8N8/IMG-20261014-WA0016.jpg",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 35
+      },
+      "createdAt": 1791835104161,
+      "price": 35,
+      "description": "",
+      "saleType": "unit",
+      "id": "OtLKASM95OZ8xo5PSBO1",
+      "name": "كروسان شوكولا",
+      "images": [
+        "https://i.ibb.co/j9KhY8N8/IMG-20261014-WA0016.jpg"
+      ],
+      "category": "فطور حلبي ( كل  يوم جمعة )"
+    },
+    {
+      "description": "",
+      "pricing": {
+        "unitPrice": 3400,
+        "unitLabel": "علبة"
+      },
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "price": 3400,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "name": "منسسف مندي 2 كتف",
+      "id": "PTvNGACWp6rkQwfHS7NZ",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "createdAt": 1791833623358,
+      "hidden": false,
+      "saleType": "unit"
+    },
+    {
+      "name": "كنافة قشطة و فستق",
+      "pricing": {
+        "kilo": 440,
+        "quarter": 110,
+        "half": 220
+      },
+      "images": [
+        "https://i.ibb.co/m5477jPF/IMG-20261013-WA0179.jpg"
+      ],
+      "description": "",
+      "price": 440,
+      "id": "T3ik2qLznFPzJ3F3R28n",
+      "createdAt": 1791832731408,
+      "saleType": "weight",
+      "image": "https://i.ibb.co/m5477jPF/IMG-20261013-WA0179.jpg",
+      "hidden": false,
+      "category": "حلويات يومية"
+    },
+    {
+      "saleType": "weight",
+      "hidden": false,
+      "pricing": {
+        "quarter": 87.5,
+        "half": 175,
+        "kilo": 350
+      },
+      "id": "V33aNbU7SfLGzaTkIiZM",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "name": "مقلوبة",
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "price": 350,
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "description": "بالطلب المسبق",
+      "createdAt": 1791835808535
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/PsRG34G9/IMG-20261013-WA0018.jpg",
+      "price": 2600,
+      "createdAt": 1791820000208,
+      "description": "",
+      "name": "دولما بالفستق",
+      "id": "VJlekQA46sS6wi0rAI2Z",
+      "category": "حلويات شرقية Oriantel sweet",
+      "saleType": "weight",
+      "images": [
+        "https://i.ibb.co/PsRG34G9/IMG-20261013-WA0018.jpg"
+      ],
+      "pricing": {
+        "kilo": 2600,
+        "quarter": 650,
+        "half": 1300
+      }
+    },
+    {
+      "category": "معجنات شرقية",
+      "name": "كعك حلبي",
+      "price": 350,
+      "description": "",
+      "image": "https://i.ibb.co/Zpfspz08/IMG-20261013-WA0015.jpg",
+      "saleType": "weight",
+      "images": [
+        "https://i.ibb.co/Zpfspz08/IMG-20261013-WA0015.jpg"
+      ],
+      "hidden": false,
+      "pricing": {
+        "kilo": 350,
+        "quarter": 87.5,
+        "half": 175
+      },
+      "id": "WzNOQiBYt0C4i5NZSQEY",
+      "createdAt": 1791821217404
+    },
+    {
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "description": "",
+      "price": 35,
+      "images": [
+        "https://i.ibb.co/nsdRTpWr/IMG-20261013-WA0052.jpg"
+      ],
+      "saleType": "unit",
+      "image": "https://i.ibb.co/nsdRTpWr/IMG-20261013-WA0052.jpg",
+      "id": "XMNma9H39pzKwdQPxmv8",
+      "pricing": {
+        "unitPrice": 35,
+        "unitLabel": "علبة"
+      },
+      "hidden": false,
+      "name": "كروسان جبنة",
+      "createdAt": 1791835083201
+    },
+    {
+      "createdAt": 1791834972129,
+      "id": "Y1KkbtDiOwq1I4nExXNY",
+      "images": [
+        "https://i.ibb.co/GvVVvwMW/IMG-20261014-WA0020.jpg"
+      ],
+      "price": 40,
+      "image": "https://i.ibb.co/GvVVvwMW/IMG-20261014-WA0020.jpg",
+      "saleType": "unit",
+      "description": "",
+      "name": "شعيبيات جبنة",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 40
+      },
+      "hidden": false,
+      "category": "فطور حلبي ( كل  يوم جمعة )"
+    },
+    {
+      "category": "حلويات شرقية Oriantel sweet",
+      "id": "Y8eJ4oiBQ7KT0KJoHJdD",
+      "createdAt": 1791819423033,
+      "image": "https://i.ibb.co/VWkmL5kF/IMG-20261014-WA0025.jpg",
+      "images": [
+        "https://i.ibb.co/VWkmL5kF/IMG-20261014-WA0025.jpg"
+      ],
+      "saleType": "unit",
+      "price": 1700,
+      "pricing": {
+        "unitPrice": 1700,
+        "unitLabel": "علبة"
+      },
+      "hidden": false,
+      "name": "حلو مشكل مكسرات",
+      "description": ""
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/YBB562hX/IMG-20261013-WA0054.jpg",
+      "price": 1600,
+      "description": "",
+      "name": "وربات كاجو",
+      "pricing": {
+        "kilo": 1600,
+        "half": 800,
+        "quarter": 400
+      },
+      "createdAt": 1791820625133,
+      "saleType": "weight",
+      "id": "YVO6TBkUG8vrGK5GKa4G",
+      "category": "حلويات شرقية Oriantel sweet",
+      "images": [
+        "https://i.ibb.co/YBB562hX/IMG-20261013-WA0054.jpg"
+      ]
+    },
+    {
+      "description": "",
+      "category": "حلويات شرقية Oriantel sweet",
+      "images": [
+        "https://i.ibb.co/7x4m4BS9/IMG-20261014-WA0021.jpg"
+      ],
+      "saleType": "unit",
+      "price": 2300,
+      "createdAt": 1791819322178,
+      "image": "https://i.ibb.co/7x4m4BS9/IMG-20261014-WA0021.jpg",
+      "name": "حلو مشكل فساتق",
+      "pricing": {
+        "unitPrice": 2300,
+        "unitLabel": "علبة"
+      },
+      "hidden": false,
+      "id": "YzHvhXWLKWbUuMip13qR"
+    },
+    {
+      "createdAt": 1791832496665,
+      "category": "حلويات يومية",
+      "images": [
+        "https://i.ibb.co/FbpNGMYP/IMG-20261013-WA0050.jpg"
+      ],
+      "image": "https://i.ibb.co/FbpNGMYP/IMG-20261013-WA0050.jpg",
+      "description": "",
+      "price": 450,
+      "saleType": "weight",
+      "pricing": {
+        "kilo": 450,
+        "quarter": 112.5,
+        "half": 225
+      },
+      "hidden": false,
+      "id": "ZVQ4SSNneMqIcOua6kXo",
+      "name": "هريسة بالقشطة"
+    },
+    {
+      "category": "قهوة Coffee",
+      "hidden": false,
+      "createdAt": 1791837472177,
+      "image": "https://i.ibb.co/NnY4Bc6N/IMG-20261014-WA0028.jpg",
+      "description": "",
+      "saleType": "unit",
+      "price": 550,
+      "name": "شراب اللوز",
+      "images": [
+        "https://i.ibb.co/NnY4Bc6N/IMG-20261014-WA0028.jpg"
+      ],
+      "id": "aAMblwct83UyJ35hiE02",
+      "pricing": {
+        "unitPrice": 550,
+        "unitLabel": "علبة"
+      }
+    },
+    {
+      "description": "",
+      "name": "ملوخية",
+      "hidden": false,
+      "id": "aDfHOod7KU0T0IoNO8bk",
+      "price": 350,
+      "images": [
+        "https://i.ibb.co/FjqTgN5/IMG-20261014-WA0017.jpg"
+      ],
+      "image": "https://i.ibb.co/FjqTgN5/IMG-20261014-WA0017.jpg",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "createdAt": 1791835461000,
+      "pricing": {
+        "kilo": 350,
+        "half": 175,
+        "quarter": 87.5
+      },
+      "saleType": "weight"
+    },
+    {
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "saleType": "weight",
+      "hidden": false,
+      "createdAt": 1791833286279,
+      "images": [
+        "https://i.ibb.co/4Zwpmdtk/IMG-20261013-WA0060.jpg"
+      ],
+      "description": "",
+      "id": "ajqp87uWcQsEeo35rxOt",
+      "name": "كبة سوار",
+      "pricing": {
+        "half": 550,
+        "quarter": 275,
+        "kilo": 1100
+      },
+      "image": "https://i.ibb.co/4Zwpmdtk/IMG-20261013-WA0060.jpg",
+      "price": 1100
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/spLFfzk9/IMG-20261014-WA0029.jpg",
+      "price": 2200,
+      "category": "معجنات شرقية",
+      "name": "معمول شامي بالفستق",
+      "saleType": "unit",
+      "description": "",
+      "id": "b6HW9PQ3Xtykew073cjE",
+      "createdAt": 1791821165476,
+      "pricing": {
+        "unitPrice": 2200,
+        "unitLabel": "علبة"
+      },
+      "images": [
+        "https://i.ibb.co/spLFfzk9/IMG-20261014-WA0029.jpg"
+      ]
+    },
+    {
+      "name": "بللورية بالفستق",
+      "createdAt": 1791820244663,
+      "pricing": {
+        "quarter": 612.5,
+        "half": 1225,
+        "kilo": 2450
+      },
+      "hidden": false,
+      "description": "",
+      "price": 2450,
+      "images": [
+        "https://i.ibb.co/Q3tPmNKm/IMG-20261013-WA0017.jpg"
+      ],
+      "saleType": "weight",
+      "image": "https://i.ibb.co/Q3tPmNKm/IMG-20261013-WA0017.jpg",
+      "category": "حلويات شرقية Oriantel sweet",
+      "id": "cJjzJfzZMzH72sVUIklE"
+    },
+    {
+      "saleType": "weight",
+      "description": "",
+      "hidden": false,
+      "category": "حلويات شرقية Oriantel sweet",
+      "image": "https://i.ibb.co/WpBcNQ5x/IMG-20261013-WA0120.jpg",
+      "price": 2100,
+      "createdAt": 1791820308383,
+      "images": [
+        "https://i.ibb.co/WpBcNQ5x/IMG-20261013-WA0120.jpg"
+      ],
+      "name": "عش العصفور بالفستق",
+      "pricing": {
+        "quarter": 475,
+        "kilo": 2100,
+        "half": 950
+      },
+      "id": "d4XR233McoqhkELs7U7j"
+    },
+    {
+      "name": "فيصليات جوز",
+      "saleType": "unit",
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "hidden": false,
+      "pricing": {
+        "unitPrice": 80,
+        "unitLabel": "علبة"
+      },
+      "price": 80,
+      "id": "dZ3iCpVYiXXsWwHOmxDX",
+      "images": [
+        "https://i.ibb.co/spTnQfyC/IMG-20261013-WA0047.jpg"
+      ],
+      "image": "https://i.ibb.co/spTnQfyC/IMG-20261013-WA0047.jpg",
+      "description": "",
+      "createdAt": 1791835217137
+    },
+    {
+      "createdAt": 1791820704309,
+      "saleType": "weight",
+      "id": "dakuQvEQ9717UsPffHTA",
+      "pricing": {
+        "kilo": 1600,
+        "half": 800,
+        "quarter": 400
+      },
+      "price": 1600,
+      "description": "",
+      "images": [
+        "https://i.ibb.co/d0jFm4HH/IMG-20261013-WA0055.jpg"
+      ],
+      "category": "حلويات شرقية Oriantel sweet",
+      "image": "https://i.ibb.co/d0jFm4HH/IMG-20261013-WA0055.jpg",
+      "name": "عش العصفور كاجو",
+      "hidden": false
+    },
+    {
+      "hidden": false,
+      "createdAt": 1791836008614,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "pricing": {
+        "half": 600,
+        "quarter": 300,
+        "kilo": 1200
+      },
+      "price": 1200,
+      "description": "بالطلب المسبق",
+      "saleType": "weight",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "category": "مشاوي",
+      "name": "لحمة شقف",
+      "id": "ddUAYoSIlbF2TVdyvYZv"
+    },
+    {
+      "pricing": {
+        "half": 275,
+        "quarter": 137.5,
+        "kilo": 550
+      },
+      "id": "e3CltZraEZsm64gZ4gC0",
+      "hidden": false,
+      "description": "بالطلب المسبق",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "saleType": "weight",
+      "createdAt": 1791835989310,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "price": 550,
+      "category": "مشاوي",
+      "name": "شيش طاووق"
+    },
+    {
+      "pricing": {
+        "unitPrice": 35,
+        "unitLabel": "علبة"
+      },
+      "images": [
+        "https://i.ibb.co/j9KhY8N8/IMG-20261014-WA0016.jpg"
+      ],
+      "name": "كروسان زعتر",
+      "id": "eKgV0CpomPL8lQrlLubg",
+      "createdAt": 1791835138065,
+      "saleType": "unit",
+      "price": 35,
+      "image": "https://i.ibb.co/j9KhY8N8/IMG-20261014-WA0016.jpg",
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "hidden": false,
+      "description": ""
+    },
+    {
+      "image": "https://i.ibb.co/rRmYVz4s/IMG-20261013-WA0111-1.jpg",
+      "price": 440,
+      "name": "كنافة نابلسية قشطة و فستق",
+      "images": [
+        "https://i.ibb.co/rRmYVz4s/IMG-20261013-WA0111-1.jpg"
+      ],
+      "hidden": false,
+      "description": "بالطلب المسبق",
+      "saleType": "weight",
+      "createdAt": 1791832814496,
+      "id": "fAmFsLwy8x6KrCwMQvfR",
+      "pricing": {
+        "quarter": 110,
+        "kilo": 440,
+        "half": 220
+      },
+      "category": "حلويات شرقية Oriantel sweet"
+    },
+    {
+      "hidden": false,
+      "saleType": "unit",
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "description": "بالطلب المسبق",
+      "pricing": {
+        "unitPrice": 400,
+        "unitLabel": "علبة"
+      },
+      "category": "مشاوي",
+      "price": 400,
+      "id": "fK5wyxV3yTXRfkM12KLA",
+      "name": "قرص معجوقة",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "createdAt": 1791836174158
+    },
+    {
+      "pricing": {
+        "kilo": 900,
+        "quarter": 225,
+        "half": 450
+      },
+      "hidden": false,
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "name": "كبة عالسيخ",
+      "saleType": "weight",
+      "description": "بالطلب المسبق",
+      "price": 900,
+      "createdAt": 1791836129246,
+      "category": "مشاوي",
+      "id": "fK9KAL6hQgDiYnzCdfgj",
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+    },
+    {
+      "createdAt": 1791832895712,
+      "images": [
+        "https://i.ibb.co/771N6Vg/IMG-20261013-WA0030.jpg"
+      ],
+      "name": "تارت مكسرات",
+      "category": "حلويات يومية",
+      "pricing": {
+        "quarter": 212.5,
+        "kilo": 850,
+        "half": 425
+      },
+      "image": "https://i.ibb.co/771N6Vg/IMG-20261013-WA0030.jpg",
+      "description": "",
+      "price": 850,
+      "hidden": false,
+      "saleType": "weight",
+      "id": "g04I6uB2c5CtcConT0Fh"
+    },
+    {
+      "description": "",
+      "hidden": false,
+      "saleType": "weight",
+      "image": "https://i.ibb.co/nsBn3J1C/IMG-20261014-WA0030.jpg",
+      "pricing": {
+        "half": 275,
+        "quarter": 137.5,
+        "kilo": 550
+      },
+      "price": 550,
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "createdAt": 1791833337758,
+      "id": "g6iX836CJ7WBBgzHACND",
+      "name": "كبة مقلوزة",
+      "images": [
+        "https://i.ibb.co/nsBn3J1C/IMG-20261014-WA0030.jpg"
+      ]
+    },
+    {
+      "name": "معمول جبنة",
+      "images": [
+        "https://i.ibb.co/p6hzRcxd/IMG-20261013-WA0057.jpg"
+      ],
+      "pricing": {
+        "kilo": 350,
+        "quarter": 87.5,
+        "half": 175
+      },
+      "price": 350,
+      "saleType": "weight",
+      "image": "https://i.ibb.co/p6hzRcxd/IMG-20261013-WA0057.jpg",
+      "createdAt": 1791832620513,
+      "description": "",
+      "hidden": false,
+      "id": "gFNoVHFKRgjgDI0Tt6hM",
+      "category": "حلويات يومية"
+    },
+    {
+      "hidden": false,
+      "createdAt": 1791832442905,
+      "image": "https://i.ibb.co/pjhLhtSb/IMG-20261013-WA0028.jpg",
+      "pricing": {
+        "quarter": 325,
+        "half": 650,
+        "kilo": 1300
+      },
+      "price": 1300,
+      "saleType": "weight",
+      "description": "",
+      "images": [
+        "https://i.ibb.co/pjhLhtSb/IMG-20261013-WA0028.jpg"
+      ],
+      "name": "بقلاوة  تركية بالفستق",
+      "category": "حلويات شرقية Oriantel sweet",
+      "id": "ln2WW5EqKv3QgMvJ2gWD"
+    },
+    {
+      "createdAt": 1791833258895,
+      "id": "n20cWR53kOC8FO3azZXq",
+      "saleType": "weight",
+      "name": "كبة درويش",
+      "hidden": false,
+      "pricing": {
+        "half": 340,
+        "quarter": 170,
+        "kilo": 680
+      },
+      "category": "",
+      "price": 680,
+      "description": "",
+      "images": [
+        "https://i.ibb.co/SXYnJrLD/IMG-20261013-WA0043.jpg"
+      ],
+      "image": "https://i.ibb.co/SXYnJrLD/IMG-20261013-WA0043.jpg"
+    },
+    {
+      "price": 35,
+      "hidden": false,
+      "image": "https://i.ibb.co/j9KhY8N8/IMG-20261014-WA0016.jpg",
+      "name": "كروسان شوكولا",
+      "createdAt": 1791835098833,
+      "id": "pGzzpueKHfXK7ZfZ6yY7",
+      "description": "",
+      "saleType": "unit",
+      "images": [
+        "https://i.ibb.co/j9KhY8N8/IMG-20261014-WA0016.jpg"
+      ],
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "pricing": {
+        "unitPrice": 35,
+        "unitLabel": "علبة"
+      }
+    },
+    {
+      "id": "rmJqxH3FNNpm6tKGJPo4",
+      "image": "https://i.ibb.co/N2HdN6Pk/IMG-20261013-WA0035.jpg",
+      "images": [
+        "https://i.ibb.co/N2HdN6Pk/IMG-20261013-WA0035.jpg"
+      ],
+      "price": 2450,
+      "description": "",
+      "createdAt": 1791820512822,
+      "saleType": "weight",
+      "hidden": false,
+      "pricing": {
+        "kilo": 2450,
+        "quarter": 612.5,
+        "half": 1225
+      },
+      "category": "حلويات شرقية Oriantel sweet",
+      "name": "عصملية بلفستق"
+    },
+    {
+      "pricing": {
+        "kilo": 2100,
+        "quarter": 525,
+        "half": 1050
+      },
+      "images": [
+        "https://i.ibb.co/h1CSpfGg/IMG-20261013-WA0108.jpg"
+      ],
+      "id": "s08jf4Z1YKmEoO0eGLOv",
+      "saleType": "weight",
+      "description": "",
+      "createdAt": 1791820912253,
+      "image": "https://i.ibb.co/h1CSpfGg/IMG-20261013-WA0108.jpg",
+      "category": "معجنات شرقية",
+      "hidden": false,
+      "price": 2100,
+      "name": "معمو لبناني بالفستق"
+    },
+    {
+      "pricing": {
+        "quarter": 95,
+        "half": 190,
+        "kilo": 380
+      },
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "name": "عش العصفور شوكولا",
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "saleType": "weight",
+      "createdAt": 1791832606545,
+      "price": 380,
+      "hidden": false,
+      "id": "t1APAke0Ctsc0pzFjZZp",
+      "category": "حلويات يومية",
+      "description": ""
+    },
+    {
+      "category": "معجنات شرقية",
+      "createdAt": 1791820972429,
+      "image": "https://i.ibb.co/MyY6Vp3F/IMG-20261013-WA0016.jpg",
+      "saleType": "unit",
+      "images": [
+        "https://i.ibb.co/MyY6Vp3F/IMG-20261013-WA0016.jpg"
+      ],
+      "id": "tbbSCDZLYa0Radf3d3oK",
+      "price": 750,
+      "pricing": {
+        "unitPrice": 750,
+        "unitLabel": "علبة"
+      },
+      "hidden": false,
+      "description": "",
+      "name": "غريبة شامية"
+    },
+    {
+      "pricing": {
+        "unitPrice": 300,
+        "unitLabel": "علبة"
+      },
+      "name": "مكدوس",
+      "images": [
+        "https://i.ibb.co/JwfQqsW9/IMG-20261013-WA0177.jpg"
+      ],
+      "description": "",
+      "price": 300,
+      "category": "منتجات حلبية",
+      "image": "https://i.ibb.co/JwfQqsW9/IMG-20261013-WA0177.jpg",
+      "id": "toyAbMCg972dpjmuXtCD",
+      "hidden": false,
+      "createdAt": 1791834716066,
+      "saleType": "unit"
+    },
+    {
+      "name": "عش البلبل  دبس رمان",
+      "hidden": false,
+      "price": 640,
+      "category": "",
+      "image": "https://i.ibb.co/wrYdBV1d/IMG-20261013-WA0029.jpg",
+      "createdAt": 1791833185743,
+      "saleType": "weight",
+      "pricing": {
+        "kilo": 640,
+        "quarter": 160,
+        "half": 320
+      },
+      "description": "",
+      "id": "uckGZtyIDon1NE9CIywY",
+      "images": [
+        "https://i.ibb.co/wrYdBV1d/IMG-20261013-WA0029.jpg"
+      ]
+    },
+    {
+      "createdAt": 1791833226505,
+      "name": "كبة مبرومة",
+      "hidden": false,
+      "description": "",
+      "image": "https://i.ibb.co/TxRdtX50/IMG-20261013-WA0062.jpg",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "price": 1100,
+      "id": "vBf7jNnfFxpU3nAL3jcB",
+      "images": [
+        "https://i.ibb.co/TxRdtX50/IMG-20261013-WA0062.jpg"
+      ],
+      "pricing": {
+        "kilo": 1100,
+        "quarter": 275,
+        "half": 550
+      },
+      "saleType": "weight"
+    },
+    {
+      "price": 1600,
+      "hidden": false,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "description": "",
+      "saleType": "weight",
+      "name": "آسية كاجو",
+      "id": "wJawLcWwc330A1PyLlNh",
+      "pricing": {
+        "quarter": 400,
+        "half": 800,
+        "kilo": 1600
+      },
+      "category": "حلويات شرقية Oriantel sweet",
+      "createdAt": 1791820656677,
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ]
+    },
+    {
+      "description": "",
+      "hidden": false,
+      "images": [
+        "https://i.ibb.co/4ZsRdcsr/IMG-20261013-WA0051.jpg"
+      ],
+      "category": "حلويات شرقية Oriantel sweet",
+      "createdAt": 1791819900584,
+      "pricing": {
+        "kilo": 2450,
+        "half": 1225,
+        "quarter": 612.5
+      },
+      "name": "مبرومة بالفستق",
+      "image": "https://i.ibb.co/4ZsRdcsr/IMG-20261013-WA0051.jpg",
+      "saleType": "weight",
+      "price": 2450,
+      "id": "yxBvpUK9fwXSYfeNmREz"
+    },
+    {
+      "image": "https://i.ibb.co/yFXG0fhH/IMG-20261012-WA0079.jpg",
+      "price": 35,
+      "id": "zjzQUcQVsyrm3Z5CuUui",
+      "description": "",
+      "name": "سميت",
+      "images": [
+        "https://i.ibb.co/yFXG0fhH/IMG-20261012-WA0079.jpg"
+      ],
+      "hidden": false,
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "pricing": {
+        "unitPrice": 35,
+        "unitLabel": "علبة"
+      },
+      "saleType": "unit",
+      "createdAt": 1791835068457
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/KzQY3K3d/IMG-20261013-WA0034.jpg",
+      "saleType": "weight",
+      "price": 650,
+      "createdAt": 1791832776888,
+      "name": "كنافة مبرومة قشطة و فستق",
+      "category": "حلويات شرقية Oriantel sweet",
+      "description": "بالطلب المسبق",
+      "id": "ztK3UlrOxRjeCjBX3qjf",
+      "pricing": {
+        "kilo": 650,
+        "quarter": 145,
+        "half": 290
+      },
+      "images": [
+        "https://i.ibb.co/KzQY3K3d/IMG-20261013-WA0034.jpg"
+      ]
+    },
+    {
+      "category": "معجنات شرقية",
+      "id": "0Mjow0NJL1w5zf9TYADw",
+      "description": "",
+      "order": 1,
+      "saleType": "unit",
+      "hidden": false,
+      "images": [
+        "https://i.ibb.co/QFB5FRdH/IMG-20261013-WA0115.jpg"
+      ],
+      "name": "تارت تمر بالمكسرات",
+      "pricing": {
+        "unitPrice": 420,
+        "unitLabel": "علبة"
+      },
+      "price": 420,
+      "createdAt": 1791821327548,
+      "image": "https://i.ibb.co/QFB5FRdH/IMG-20261013-WA0115.jpg"
+    },
+    {
+      "saleType": "weight",
+      "pricing": {
+        "kilo": 640,
+        "quarter": 160,
+        "half": 320
+      },
+      "images": [
+        "https://i.ibb.co/N6RhxnMp/IMG-20261013-WA0049.jpg"
+      ],
+      "description": "",
+      "category": "",
+      "order": 1,
+      "id": "2kd1Njj03fx80s34hTSr",
+      "name": "عش لبلبل خضروات",
+      "price": 640,
+      "createdAt": 1791833203711,
+      "image": "https://i.ibb.co/N6RhxnMp/IMG-20261013-WA0049.jpg",
+      "hidden": false
+    },
+    {
+      "order": 2,
+      "name": "سوار الست بالفستق",
+      "images": [
+        "https://i.ibb.co/n8B56h3j/IMG-20261014-WA0115.jpg"
+      ],
+      "createdAt": 1791820422134,
+      "id": "40wPLdIqMDIq0J0DtHN4",
+      "pricing": {
+        "half": 240,
+        "kilo": 480,
+        "quarter": 120
+      },
+      "price": 480,
+      "image": "https://i.ibb.co/n8B56h3j/IMG-20261014-WA0115.jpg",
+      "saleType": "weight",
+      "hidden": false,
+      "description": "",
+      "category": "حلويات شرقية Oriantel sweet"
+    },
+    {
+      "createdAt": 1791834589555,
+      "hidden": false,
+      "id": "3KM0zJRYvXrYz3fsxOpM",
+      "saleType": "unit",
+      "image": "https://i.ibb.co/k22R1gFh/IMG-20261014-WA0113.jpg",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 75
+      },
+      "price": 75,
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "description": "",
+      "images": [
+        "https://i.ibb.co/k22R1gFh/IMG-20261014-WA0113.jpg"
+      ],
+      "name": "سلطة خشنة",
+      "order": 2
+    },
+    {
+      "pricing": {
+        "kilo": 250,
+        "quarter": 62.5,
+        "half": 125
+      },
+      "images": [
+        "https://i.ibb.co/G4R67yrz/IMG-20261014-WA0022.jpg"
+      ],
+      "order": 2,
+      "category": "وجبات جاهزة للطهي Frozen",
+      "id": "2s8HUVjzFjiZqWYnXG6S",
+      "createdAt": 1791833102719,
+      "description": "",
+      "name": "برك جبنة",
+      "saleType": "weight",
+      "image": "https://i.ibb.co/G4R67yrz/IMG-20261014-WA0022.jpg",
+      "hidden": false,
+      "price": 250
+    },
+    {
+      "hidden": false,
+      "category": "معجنات شرقية",
+      "image": "https://i.ibb.co/wFfcDmVy/IMG-20261014-WA0035.jpg",
+      "pricing": {
+        "unitPrice": 1000,
+        "unitLabel": "علبة"
+      },
+      "description": "",
+      "price": 1000,
+      "saleType": "unit",
+      "images": [
+        "https://i.ibb.co/wFfcDmVy/IMG-20261014-WA0035.jpg"
+      ],
+      "name": "معمول شامي بالجوز",
+      "id": "0Cdc2EOEhienmwDhtm5f",
+      "order": 2,
+      "createdAt": 1791821112124
+    },
+    {
+      "hidden": false,
+      "saleType": "unit",
+      "image": "https://i.ibb.co/rKKjZt8G/IMG-20261014-WA0118.jpg",
+      "createdAt": 1791834511531,
+      "price": 75,
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "name": "حمص",
+      "description": "",
+      "order": 2,
+      "id": "2LtfnG0V2q6VOAFSLxw4",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 75
+      },
+      "images": [
+        "https://i.ibb.co/rKKjZt8G/IMG-20261014-WA0118.jpg"
+      ]
+    },
+    {
+      "price": 780,
+      "name": "هريسة بالفستق",
+      "hidden": false,
+      "image": "https://i.ibb.co/Z6nN7Ynr/IMG-20261013-WA0173-1.jpg",
+      "description": "",
+      "pricing": {
+        "half": 380,
+        "kilo": 780,
+        "quarter": 190
+      },
+      "order": 3,
+      "createdAt": 1791832460689,
+      "category": "حلويات يومية",
+      "images": [
+        "https://i.ibb.co/Z6nN7Ynr/IMG-20261013-WA0173-1.jpg"
+      ],
+      "id": "34boKXyL9IAk9wJqDMpk",
+      "saleType": "weight"
+    },
+    {
+      "category": "منتجات حلبية",
+      "order": 4,
+      "name": "قشطة",
+      "images": [
+        "https://i.ibb.co/ycQX5GvL/IMG-20261014-WA0149.jpg"
+      ],
+      "saleType": "weight",
+      "description": "",
+      "createdAt": 1791834799298,
+      "pricing": {
+        "kilo": 400,
+        "half": 200,
+        "quarter": 100
+      },
+      "price": 400,
+      "image": "https://i.ibb.co/ycQX5GvL/IMG-20261014-WA0149.jpg",
+      "id": "50v8Mr9EYJgt6UgNB2YV",
+      "hidden": false
+    },
+    {
+      "image": "https://i.ibb.co/yBSRjJ1V/Screenshot-2026-10-14-22-47-26-13-6012fa4d4ddec268fc5c7112cbb265e7.jpg",
+      "images": [
+        "https://i.ibb.co/yBSRjJ1V/Screenshot-2026-10-14-22-47-26-13-6012fa4d4ddec268fc5c7112cbb265e7.jpg"
+      ],
+      "id": "2zzikwglIyJYWMPKq4tW",
+      "price": 290,
+      "description": "بالطلب المسسبق",
+      "pricing": {
+        "quarter": 72.5,
+        "kilo": 290,
+        "half": 145
+      },
+      "hidden": false,
+      "category": "حلويات يومية",
+      "createdAt": 1791832699753,
+      "order": 4,
+      "saleType": "weight",
+      "name": "كنافة نابلسية بالجبنة"
+    },
+    {
+      "pricing": {
+        "quarter": 120,
+        "kilo": 480,
+        "half": 240
+      },
+      "order": 5,
+      "createdAt": 1791835526231,
+      "images": [
+        "https://i.ibb.co/HTDbfFWG/Screenshot-2026-10-14-17-36-00-68-6012fa4d4ddec268fc5c7112cbb265e7.jpg"
+      ],
+      "name": "مكسيكانو مع رز",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "image": "https://i.ibb.co/HTDbfFWG/Screenshot-2026-10-14-17-36-00-68-6012fa4d4ddec268fc5c7112cbb265e7.jpg",
+      "price": 480,
+      "saleType": "weight",
+      "hidden": false,
+      "description": "",
+      "id": "4rcViUj9T8x3mk0LOpGy"
+    },
+    {
+      "createdAt": 1791818668187,
+      "order": 8,
+      "hidden": false,
+      "images": [
+        "https://i.ibb.co/zhpWgwWV/IMG-20261014-WA0102-1.jpg"
+      ],
+      "category": "حلويات شرقية Oriantel sweet",
+      "description": "",
+      "id": "6RjnN1COwFPEYUHlE0a7",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 1700
+      },
+      "image": "https://i.ibb.co/zhpWgwWV/IMG-20261014-WA0102-1.jpg",
+      "name": "حلو مشكل فستق 600",
+      "saleType": "unit",
+      "price": 1700
+    },
+    {
+      "image": "https://i.ibb.co/fdxtmq3t/IMG-20261014-WA0148-1.jpg",
+      "price": 80,
+      "name": "قشطة علبة 200 غراام",
+      "images": [
+        "https://i.ibb.co/fdxtmq3t/IMG-20261014-WA0148-1.jpg"
+      ],
+      "createdAt": 1791835249776,
+      "hidden": false,
+      "order": 9,
+      "pricing": {
+        "unitPrice": 80,
+        "unitLabel": "علبة"
+      },
+      "description": "",
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "id": "90eYY7vyI1AHUwiBeVLK",
+      "saleType": "unit"
+    },
+    {
+      "price": 300,
+      "id": "5CnvgX1gAUkoCxvBia7c",
+      "hidden": false,
+      "name": "صحن C",
+      "image": "https://i.ibb.co/nM4vgKqs/Screenshot-2026-10-15-16-25-23-11-6012fa4d4ddec268fc5c7112cbb265e7.jpg",
+      "category": "صحن فرنسي",
+      "description": "بطلب المسبق (اقل عدد 6 صحون)",
+      "saleType": "unit",
+      "order": 9,
+      "createdAt": 1791837098348,
+      "images": [
+        "https://i.ibb.co/nM4vgKqs/Screenshot-2026-10-15-16-25-23-11-6012fa4d4ddec268fc5c7112cbb265e7.jpg"
+      ],
+      "pricing": {
+        "unitPrice": 300,
+        "unitLabel": "علبة"
+      }
+    },
+    {
+      "price": 250,
+      "name": "جبنة مسنرة",
+      "hidden": false,
+      "image": "https://i.ibb.co/svHbCbpC/IMG-20261014-WA0127.jpg",
+      "saleType": "weight",
+      "createdAt": 1791835280232,
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "order": 11,
+      "description": "",
+      "images": [
+        "https://i.ibb.co/svHbCbpC/IMG-20261014-WA0127.jpg"
+      ],
+      "id": "ABhYYE12pZYbYrgdsMhU",
+      "pricing": {
+        "half": 125,
+        "kilo": 250,
+        "quarter": 62.5
+      }
+    },
+    {
+      "order": 11,
+      "name": "لحمة بكرز نصف كيلو لحم",
+      "images": [
+        "https://i.ibb.co/VpC9nv9F/Screenshot-2026-10-14-18-03-11-13-6012fa4d4ddec268fc5c7112cbb265e7.jpg"
+      ],
+      "description": "بالطلب المسبق",
+      "saleType": "unit",
+      "price": 1600,
+      "pricing": {
+        "unitPrice": 1600,
+        "unitLabel": "علبة"
+      },
+      "image": "https://i.ibb.co/VpC9nv9F/Screenshot-2026-10-14-18-03-11-13-6012fa4d4ddec268fc5c7112cbb265e7.jpg",
+      "category": "مشاوي",
+      "hidden": false,
+      "createdAt": 1791836269588,
+      "id": "6shGuYDcZg7hTA59lWFk"
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/tpxSBCt9/IMG-20261014-WA0050.jpg",
+      "description": "",
+      "price": 550,
+      "name": "مسخن دجاج",
+      "createdAt": 1791833141951,
+      "id": "932UrswZ4b1cFJY72qRu",
+      "order": 15,
+      "category": "وجبات جاهزة للطهي Frozen",
+      "pricing": {
+        "quarter": 137.5,
+        "kilo": 550,
+        "half": 275
+      },
+      "images": [
+        "https://i.ibb.co/tpxSBCt9/IMG-20261014-WA0050.jpg"
+      ],
+      "saleType": "weight"
+    },
+    {
+      "order": 22,
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "name": "شعيبيات قشطة حلبية",
+      "images": [
+        "https://i.ibb.co/WNRCwtg6/IMG-20261014-WA0033.jpg"
+      ],
+      "saleType": "unit",
+      "createdAt": 1791834907410,
+      "price": 40,
+      "description": "",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 40
+      },
+      "image": "https://i.ibb.co/WNRCwtg6/IMG-20261014-WA0033.jpg",
+      "hidden": false,
+      "id": "DtLcrIiZ2nNush76pvw0"
+    },
+    {
+      "hidden": false,
+      "category": "منتجات حلبية",
+      "image": "https://i.ibb.co/svHbCbpC/IMG-20261014-WA0127.jpg",
+      "price": 250,
+      "saleType": "weight",
+      "createdAt": 1791834770026,
+      "images": [
+        "https://i.ibb.co/svHbCbpC/IMG-20261014-WA0127.jpg"
+      ],
+      "id": "DhFC3MDqGUunvGZhv5GW",
+      "name": "جبنة مسنرة",
+      "pricing": {
+        "quarter": 62.5,
+        "kilo": 250,
+        "half": 125
+      },
+      "order": 22,
+      "description": ""
+    },
+    {
+      "description": "(بطلب المسبق)",
+      "createdAt": 1791833814349,
+      "category": "",
+      "hidden": false,
+      "price": 5200,
+      "image": "https://i.ibb.co/s91nGDzP/IMG-20261013-WA0036.jpg",
+      "saleType": "unit",
+      "name": "منسف يبرق (ورق عنب ) 2 كتف",
+      "id": "F5hauIckbf7SkoiGr1xK",
+      "images": [
+        "https://i.ibb.co/s91nGDzP/IMG-20261013-WA0036.jpg"
+      ],
+      "order": 24,
+      "pricing": {
+        "unitPrice": 5200,
+        "unitLabel": "علبة"
+      }
+    },
+    {
+      "description": "بطلب المسبق (اقل عدد 6 صحون )",
+      "category": "صحن فرنسي",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 370
+      },
+      "id": "H5UUyrURa7fUbJsVjlOQ",
+      "order": 26,
+      "saleType": "unit",
+      "hidden": false,
+      "images": [
+        "https://i.ibb.co/6dm143G/IMG-20261013-WA0114.jpg"
+      ],
+      "name": "صحن E",
+      "price": 370,
+      "createdAt": 1791837143443,
+      "image": "https://i.ibb.co/6dm143G/IMG-20261013-WA0114.jpg"
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/VcJQLBXw/IMG-20261014-WA0031.jpg",
+      "price": 580,
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "name": "لبنية مع كبة",
+      "createdAt": 1791835691815,
+      "saleType": "weight",
+      "pricing": {
+        "half": 290,
+        "quarter": 145,
+        "kilo": 580
+      },
+      "order": 28,
+      "description": "",
+      "id": "DMMF325QObecoAzUT9Lv",
+      "images": [
+        "https://i.ibb.co/VcJQLBXw/IMG-20261014-WA0031.jpg"
+      ]
+    },
+    {
+      "category": "وجبات جاهزة للطهي Frozen",
+      "pricing": {
+        "quarter": 170,
+        "kilo": 680,
+        "half": 340
+      },
+      "order": 31,
+      "hidden": false,
+      "saleType": "weight",
+      "images": [
+        "https://i.ibb.co/nNXckJQL/IMG-20261014-WA0137.jpg"
+      ],
+      "createdAt": 1791833032968,
+      "image": "https://i.ibb.co/nNXckJQL/IMG-20261014-WA0137.jpg",
+      "name": "كبة درويش مفرزة",
+      "price": 680,
+      "description": "",
+      "id": "KKBi5gWHlJGm8Wl9lfHc"
+    },
+    {
+      "order": 31,
+      "category": "وجبات جاهزة للطهي Frozen",
+      "name": "كبة مشوية مفرزة",
+      "description": "",
+      "saleType": "weight",
+      "hidden": false,
+      "price": 680,
+      "images": [
+        "https://i.ibb.co/CsTJzf3M/IMG-20261014-WA0135.jpg"
+      ],
+      "image": "https://i.ibb.co/CsTJzf3M/IMG-20261014-WA0135.jpg",
+      "id": "JdQRLaRcrXikceUsfSHp",
+      "pricing": {
+        "quarter": 170,
+        "half": 340,
+        "kilo": 680
+      },
+      "createdAt": 1791833053887
+    },
+    {
+      "description": "",
+      "hidden": false,
+      "image": "https://i.ibb.co/8DxYYWLn/IMG-20261014-WA0107.jpg",
+      "price": 75,
+      "saleType": "unit",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "images": [
+        "https://i.ibb.co/8DxYYWLn/IMG-20261014-WA0107.jpg"
+      ],
+      "createdAt": 1791834625211,
+      "name": "سلطة جرجير",
+      "id": "EthLQQE7xg6i9zDxvGl9",
+      "order": 31,
+      "pricing": {
+        "unitPrice": 75,
+        "unitLabel": "علبة"
+      }
+    },
+    {
+      "saleType": "weight",
+      "pricing": {
+        "quarter": 62.5,
+        "kilo": 250,
+        "half": 125
+      },
+      "videoUrl": "",
+      "createdAt": 1791835304368,
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "image": "https://i.ibb.co/zWzyNZPh/IMG-20261014-WA0139.jpg",
+      "price": 250,
+      "name": "جبنة مشللة",
+      "description": "",
+      "images": [
+        "https://i.ibb.co/zWzyNZPh/IMG-20261014-WA0139.jpg"
+      ],
+      "hidden": false,
+      "order": 38,
+      "id": "SnxUbWUipEPmcIf9uUbV"
+    },
+    {
+      "description": "بطلب المسبق (اقل عدد 6 صحون)",
+      "id": "SW3ngE5esFbbQzsmYBAh",
+      "pricing": {
+        "unitPrice": 195,
+        "unitLabel": "اقل كمية 6 صحن"
+      },
+      "hidden": false,
+      "order": 38,
+      "createdAt": 1791836719276,
+      "images": [
+        "https://i.ibb.co/Xfp9X0XW/IMG-20261013-WA0113.jpg"
+      ],
+      "saleType": "unit",
+      "image": "https://i.ibb.co/Xfp9X0XW/IMG-20261013-WA0113.jpg",
+      "category": "صحن فرنسي",
+      "price": 195,
+      "name": "صحن A"
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "price": 950,
+      "saleType": "weight",
+      "name": "كباب بانجان",
+      "createdAt": 1791835961982,
+      "category": "مشاوي",
+      "pricing": {
+        "quarter": 237.5,
+        "half": 475,
+        "kilo": 950
+      },
+      "id": "RCVdUvtBSEoxQB6JAwhE",
+      "order": 38,
+      "description": "بالطلب المسبق",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ]
+    },
+    {
+      "pricing": {
+        "unitPrice": 800,
+        "unitLabel": "علبة"
+      },
+      "images": [
+        "https://i.ibb.co/hJbdpDJy/IMG-20261014-WA0119.jpg"
+      ],
+      "description": "",
+      "createdAt": 1791834697898,
+      "order": 39,
+      "saleType": "unit",
+      "image": "https://i.ibb.co/hJbdpDJy/IMG-20261014-WA0119.jpg",
+      "id": "JH1320ri0AyiztReOS8O",
+      "name": "زيت زيتون",
+      "category": "منتجات حلبية",
+      "hidden": false,
+      "price": 800
+    },
+    {
+      "hidden": false,
+      "id": "JEByHEzC6JWbq2vVehSv",
+      "image": "https://i.ibb.co/XP47x0C/IMG-20261013-WA0041.jpg",
+      "createdAt": 1791834410275,
+      "price": 200,
+      "name": "كبة نية زيت",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 200
+      },
+      "order": 40,
+      "saleType": "unit",
+      "description": "",
+      "images": [
+        "https://i.ibb.co/XP47x0C/IMG-20261013-WA0041.jpg"
+      ],
+      "category": "حلويات يومية"
+    },
+    {
+      "name": "صحن F",
+      "hidden": false,
+      "price": 415,
+      "image": "https://i.ibb.co/pj9JhpCq/IMG-20261014-WA0120.jpg",
+      "saleType": "unit",
+      "createdAt": 1791837166458,
+      "category": "صحن فرنسي",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 415
+      },
+      "order": 41,
+      "description": "بطلب المسبق (اقل عدد 6 صحون)",
+      "id": "NnNQ0gBEfggSOCuYjnev",
+      "images": [
+        "https://i.ibb.co/pj9JhpCq/IMG-20261014-WA0120.jpg"
+      ]
+    },
+    {
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "order": 44,
+      "pricing": {
+        "half": 550,
+        "quarter": 275,
+        "kilo": 1100
+      },
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "name": "كبة صينية",
+      "id": "MqEPkhmcAwSvmGioTO9L",
+      "saleType": "weight",
+      "price": 1100,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "description": "",
+      "hidden": false,
+      "createdAt": 1791833276631
+    },
+    {
+      "saleType": "unit",
+      "hidden": false,
+      "createdAt": 1791836208782,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "category": "مشاوي",
+      "pricing": {
+        "unitPrice": 150,
+        "unitLabel": "علبة"
+      },
+      "price": 150,
+      "id": "ZuM5wguT0ZcWGrJWoOP6",
+      "name": "طوشكا",
+      "description": "بالطلب المسبق",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "order": 49
+    },
+    {
+      "image": "https://i.ibb.co/LdNMYRv2/IMG-20261013-WA0042.jpg",
+      "category": "مشاوي",
+      "price": 950,
+      "description": "بالطلب المسبق",
+      "saleType": "weight",
+      "id": "ZmgpU4v4YuBZMt0k4fhz",
+      "images": [
+        "https://i.ibb.co/LdNMYRv2/IMG-20261013-WA0042.jpg"
+      ],
+      "name": "كباب مشوي",
+      "hidden": false,
+      "createdAt": 1791835924183,
+      "order": 49,
+      "pricing": {
+        "kilo": 950,
+        "quarter": 237.5,
+        "half": 475
+      }
+    },
+    {
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "description": "",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 3800
+      },
+      "price": 3800,
+      "name": "منسف 2 كتف فريكة و رز B+",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "id": "ScOj6061v6JlpfHj5mSo",
+      "hidden": false,
+      "saleType": "unit",
+      "createdAt": 1791833438574,
+      "order": 49,
+      "category": "مطبخ حلبي ( بالطلب المسبق )"
+    },
+    {
+      "createdAt": 1791820678701,
+      "description": "",
+      "pricing": {
+        "kilo": 1600,
+        "half": 800,
+        "quarter": 400
+      },
+      "category": "حلويات شرقية Oriantel sweet",
+      "images": [
+        "https://i.ibb.co/cXTPRnGH/IMG-20261014-WA0114.jpg"
+      ],
+      "price": 1600,
+      "saleType": "weight",
+      "image": "https://i.ibb.co/cXTPRnGH/IMG-20261014-WA0114.jpg",
+      "name": "دولما كاجو",
+      "hidden": false,
+      "id": "T4h8L7ooCjFTvY83mQ4Q",
+      "order": 52
+    },
+    {
+      "category": "معجنات شرقية",
+      "hidden": false,
+      "saleType": "weight",
+      "order": 57,
+      "images": [
+        "https://i.ibb.co/MydC6YVw/IMG-20261013-WA0014.jpg"
+      ],
+      "pricing": {
+        "quarter": 250,
+        "half": 500,
+        "kilo": 1000
+      },
+      "id": "Ql30Pyc96Esi1qqs8mXw",
+      "name": "كرابيج بالجوز",
+      "image": "https://i.ibb.co/MydC6YVw/IMG-20261013-WA0014.jpg",
+      "createdAt": 1791821478891,
+      "price": 1000,
+      "description": ""
+    },
+    {
+      "createdAt": 1791834379403,
+      "price": 280,
+      "images": [
+        "https://i.ibb.co/S7wXmyHL/Screenshot-2026-10-14-17-22-32-76-99c04817c0de5652397fc8b56c3b3817.jpg"
+      ],
+      "id": "UKaoVuiGhenwA7b4LAHD",
+      "image": "https://i.ibb.co/S7wXmyHL/Screenshot-2026-10-14-17-22-32-76-99c04817c0de5652397fc8b56c3b3817.jpg",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "description": "",
+      "pricing": {
+        "kilo": 280,
+        "quarter": 70,
+        "half": 140
+      },
+      "name": "يالنجي",
+      "hidden": false,
+      "order": 62,
+      "saleType": "weight"
+    },
+    {
+      "order": 64,
+      "category": "حلويات يومية",
+      "name": "حلاوة الجبن سادة",
+      "images": [
+        "https://i.ibb.co/JjCQHzz8/IMG-20261014-WA0142.jpg"
+      ],
+      "saleType": "weight",
+      "description": "",
+      "createdAt": 1791832966800,
+      "price": 200,
+      "pricing": {
+        "quarter": 50,
+        "half": 100,
+        "kilo": 200
+      },
+      "image": "https://i.ibb.co/JjCQHzz8/IMG-20261014-WA0142.jpg",
+      "hidden": false,
+      "id": "dAFBqRVbdBMYJDLmAkx0"
+    },
+    {
+      "saleType": "unit",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 175
+      },
+      "category": "منتجات حلبية",
+      "hidden": false,
+      "order": 64,
+      "images": [
+        "https://i.ibb.co/39b125LR/IMG-20261013-WA0174.jpg"
+      ],
+      "name": "زيتون مع صلصة",
+      "image": "https://i.ibb.co/39b125LR/IMG-20261013-WA0174.jpg",
+      "id": "Y2Y5Jyyngt9lPBtBD9ix",
+      "price": 175,
+      "description": "",
+      "createdAt": 1791834682682
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "price": 200,
+      "createdAt": 1791836969507,
+      "name": "صحن A+",
+      "order": 66,
+      "saleType": "unit",
+      "description": "بطلب المسبق (اقل عدد 6 صحون)",
+      "category": "صحن فرنسي",
+      "pricing": {
+        "unitPrice": 200,
+        "unitLabel": "علبة"
+      },
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "id": "jNKgg90NU7NXdg4pdMHM"
+    },
+    {
+      "saleType": "weight",
+      "images": [
+        "https://i.ibb.co/pBBcVTPC/IMG-20261014-WA0147.jpg"
+      ],
+      "price": 240,
+      "category": "حلويات يومية",
+      "image": "https://i.ibb.co/pBBcVTPC/IMG-20261014-WA0147.jpg",
+      "name": "بسبوسة بالبندق",
+      "id": "qlMsPua9rmj0lhdudMFG",
+      "pricing": {
+        "half": 120,
+        "kilo": 240,
+        "quarter": 60
+      },
+      "description": "",
+      "hidden": false,
+      "order": 68,
+      "createdAt": 1791832558689
+    },
+    {
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "createdAt": 1791837077674,
+      "price": 245,
+      "id": "nHhl2uQUx4Cp2FEarhig",
+      "name": "صحن B",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "hidden": false,
+      "saleType": "unit",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 245
+      },
+      "order": 68,
+      "description": "بطلب المسبق (اقل عدد 6 صحون)",
+      "category": "صحن فرنسي"
+    },
+    {
+      "createdAt": 1791834785050,
+      "description": "",
+      "pricing": {
+        "kilo": 250,
+        "quarter": 62.5,
+        "half": 125
+      },
+      "hidden": false,
+      "images": [
+        "https://i.ibb.co/zWzyNZPh/IMG-20261014-WA0139.jpg"
+      ],
+      "category": "منتجات حلبية",
+      "name": "جبنة مشللة",
+      "videoUrl": "",
+      "id": "nzu1tfTLWgyZFiynZbrR",
+      "order": 69,
+      "saleType": "weight",
+      "image": "https://i.ibb.co/zWzyNZPh/IMG-20261014-WA0139.jpg",
+      "price": 250
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/nM4vgKqs/Screenshot-2026-10-15-16-25-23-11-6012fa4d4ddec268fc5c7112cbb265e7.jpg",
+      "price": 335,
+      "saleType": "unit",
+      "id": "rufV5q0hQYyBd6hio81P",
+      "category": "صحن فرنسي",
+      "name": "صحن D",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 335
+      },
+      "order": 72,
+      "createdAt": 1791837120899,
+      "description": "بطلب المسبق (اقل عدد 6 صحون)",
+      "images": [
+        "https://i.ibb.co/nM4vgKqs/Screenshot-2026-10-15-16-25-23-11-6012fa4d4ddec268fc5c7112cbb265e7.jpg"
+      ]
+    },
+    {
+      "hidden": false,
+      "id": "n2WIpEbGS8JvX8yAbUPH",
+      "image": "https://i.ibb.co/cS602GSC/IMG-20261014-WA0101.jpg",
+      "price": 1300,
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 1300
+      },
+      "createdAt": 1791819489817,
+      "description": "",
+      "category": "حلويات شرقية Oriantel sweet",
+      "images": [
+        "https://i.ibb.co/cS602GSC/IMG-20261014-WA0101.jpg"
+      ],
+      "name": "حلو مشكل مكسرات 600",
+      "saleType": "unit",
+      "order": 76
+    },
+    {
+      "name": "متبل",
+      "hidden": false,
+      "price": 75,
+      "image": "https://i.ibb.co/zWBTtkNM/IMG-20261014-WA0117.jpg",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "saleType": "unit",
+      "order": 76,
+      "id": "fVv4EuL1IO4K1fpjROVs",
+      "description": "",
+      "createdAt": 1791834495716,
+      "images": [
+        "https://i.ibb.co/zWBTtkNM/IMG-20261014-WA0117.jpg"
+      ],
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 75
+      }
+    },
+    {
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "price": 600,
+      "description": "بالطلب المسبق",
+      "saleType": "weight",
+      "name": "محشي برغل",
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "hidden": false,
+      "order": 78,
+      "pricing": {
+        "quarter": 150,
+        "half": 300,
+        "kilo": 600
+      },
+      "createdAt": 1791835420600,
+      "id": "b19XF18XBnvrgDHpIwkB"
+    },
+    {
+      "order": 79,
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "name": "كبة مشوية",
+      "images": [
+        "https://i.ibb.co/dsf8bs5Y/IMG-20261014-WA0097.jpg"
+      ],
+      "description": "",
+      "saleType": "weight",
+      "createdAt": 1791833241919,
+      "pricing": {
+        "kilo": 680,
+        "half": 340,
+        "quarter": 170
+      },
+      "price": 680,
+      "image": "https://i.ibb.co/dsf8bs5Y/IMG-20261014-WA0097.jpg",
+      "hidden": false,
+      "id": "c1pUmYPo12YrEmvVmbXZ"
+    },
+    {
+      "order": 86,
+      "hidden": false,
+      "createdAt": 1791834938761,
+      "id": "iGCWlZskdl5He5Zwh9VR",
+      "description": "",
+      "name": "شعيبيات اريحا",
+      "image": "https://i.ibb.co/svmC5XDD/Screenshot-2026-10-14-17-50-52-89-6012fa4d4ddec268fc5c7112cbb265e7.jpg",
+      "price": 40,
+      "category": "فطور حلبي ( كل  يوم جمعة )",
+      "images": [
+        "https://i.ibb.co/svmC5XDD/Screenshot-2026-10-14-17-50-52-89-6012fa4d4ddec268fc5c7112cbb265e7.jpg"
+      ],
+      "pricing": {
+        "unitPrice": 40,
+        "unitLabel": "علبة"
+      },
+      "saleType": "unit"
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "price": 2400,
+      "id": "q6T5Wx7CIkmFfaCsvb5s",
+      "name": "منسف كبسة 1 كتف",
+      "saleType": "unit",
+      "order": 88,
+      "createdAt": 1791833562798,
+      "description": "بلطب المسبق",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "pricing": {
+        "unitPrice": 2400,
+        "unitLabel": "علبة"
+      },
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ]
+    },
+    {
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "id": "ynkce7Zo3xGKDiK12NwM",
+      "description": "",
+      "order": 100,
+      "createdAt": 1791833583494,
+      "images": [
+        "https://i.ibb.co/35D1T8m2/IMG-20261013-WA0046.jpg"
+      ],
+      "saleType": "unit",
+      "name": "منسف كبسسة 2 كتف",
+      "image": "https://i.ibb.co/35D1T8m2/IMG-20261013-WA0046.jpg",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 3400
+      },
+      "price": 3400,
+      "hidden": false
+    },
+    {
+      "id": "ypnlNy8R9zgRwaMWCWGw",
+      "images": [
+        "https://i.ibb.co/yFs543Rm/IMG-20261014-WA0116.jpg"
+      ],
+      "order": 101,
+      "name": "منسف يبرق (ورق عنب ) 1 كتف",
+      "image": "https://i.ibb.co/yFs543Rm/IMG-20261014-WA0116.jpg",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "pricing": {
+        "unitLabel": "علبة",
+        "unitPrice": 2800
+      },
+      "createdAt": 1791833787325,
+      "price": 2800,
+      "description": "",
+      "saleType": "unit",
+      "hidden": false
+    },
+    {
+      "order": 102,
+      "name": "معمول حلبي بالفستقق",
+      "pricing": {
+        "kilo": 1900,
+        "quarter": 475,
+        "half": 950
+      },
+      "hidden": false,
+      "description": "",
+      "id": "nve8aChVNRHLKyqMasGo",
+      "price": 1900,
+      "images": [
+        "https://i.ibb.co/HpVbM5zX/IMG-20261013-WA0187.jpg"
+      ],
+      "category": "معجنات شرقية",
+      "createdAt": 1791820783429,
+      "image": "https://i.ibb.co/HpVbM5zX/IMG-20261013-WA0187.jpg",
+      "saleType": "weight"
+    },
+    {
+      "price": 1100,
+      "description": "",
+      "hidden": false,
+      "image": "https://i.ibb.co/nNbMYh0T/IMG-20261014-WA0071.jpg",
+      "name": "لانشون لحم",
+      "id": "rFprMHxn8xIshbdlsGiJ",
+      "createdAt": 1791835777351,
+      "pricing": {
+        "half": 550,
+        "quarter": 275,
+        "kilo": 1100
+      },
+      "order": 109,
+      "saleType": "weight",
+      "images": [
+        "https://i.ibb.co/nNbMYh0T/IMG-20261014-WA0071.jpg"
+      ],
+      "category": "مطبخ حلبي ( بالطلب المسبق )"
+    },
+    {
+      "category": "حلويات يومية",
+      "description": "",
+      "pricing": {
+        "half": 170,
+        "quarter": 85,
+        "kilo": 340
+      },
+      "hidden": false,
+      "order": 118,
+      "createdAt": 1791832948368,
+      "saleType": "weight",
+      "images": [
+        "https://i.ibb.co/WWxhGLG4/IMG-20261014-WA0052.jpg"
+      ],
+      "id": "vEORJxg6FvM6b3gTykMm",
+      "name": "حلاوة الجبن قشطة",
+      "image": "https://i.ibb.co/WWxhGLG4/IMG-20261014-WA0052.jpg",
+      "price": 340
+    },
+    {
+      "hidden": false,
+      "image": "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
+      "price": 480,
+      "name": "كبة نية هبرة",
+      "createdAt": 1791834468514,
+      "order": 120,
+      "description": "",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "id": "zTzzAzdLWPlhqB3STL3o",
+      "pricing": {
+        "unitPrice": 480,
+        "unitLabel": "علبة"
+      },
+      "images": [
+        "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg"
+      ],
+      "saleType": "unit"
+    },
+    {
+      "images": [
+        "https://i.ibb.co/4R72ST6K/IMG-20261013-WA0044.jpg"
+      ],
+      "pricing": {
+        "quarter": 162.5,
+        "kilo": 900,
+        "half": 325
+      },
+      "id": "P44tYVj7e19Tk7EPUKuj",
+      "description": "",
+      "order": 134,
+      "name": "اقرص هبرة نعناع",
+      "saleType": "weight",
+      "price": 900,
+      "image": "https://i.ibb.co/4R72ST6K/IMG-20261013-WA0044.jpg",
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "hidden": false,
+      "createdAt": 1791841977120
+    },
+    {
+      "category": "مطبخ حلبي ( بالطلب المسبق )",
+      "description": "",
+      "order": 135,
+      "images": [
+        "https://i.ibb.co/TMJvF7x7/IMG-20261013-WA0038.jpg"
+      ],
+      "name": "يالنجي باذنجان",
+      "saleType": "weight",
+      "image": "https://i.ibb.co/TMJvF7x7/IMG-20261013-WA0038.jpg",
+      "pricing": {
+        "kilo": 280,
+        "half": 140,
+        "quarter": 70
+      },
+      "id": "Zx8X1TyxJJP0uQqA67KF",
+      "price": 280,
+      "hidden": false,
+      "createdAt": 1791842028136
+    },
+    {
+      "description": "",
+      "id": "p_s9rbuaedv",
+      "createdAt": 1791986634324,
+      "pricing": {
+        "half": 375,
+        "quarter": 187.5,
+        "kilo": 750
+      },
+      "order": 136,
+      "hidden": false,
+      "images": [
+        "https://i.ibb.co/RG0xR8cY/IMG-20261014-WA0058.jpg"
+      ],
+      "name": "عجينة فستق بالقشطة (فستقية)",
+      "category": "حلويات يومية",
+      "price": 750,
+      "saleType": "weight",
+      "image": "https://i.ibb.co/RG0xR8cY/IMG-20261014-WA0058.jpg"
+    },
+    {
+      "name": "مغشوشة",
+      "createdAt": 1791986740990,
+      "price": 650,
+      "image": "https://i.ibb.co/9m7tXpVf/IMG-20261014-WA0078.jpg",
+      "images": [
+        "https://i.ibb.co/9m7tXpVf/IMG-20261014-WA0078.jpg"
+      ],
+      "order": 137,
+      "hidden": false,
+      "id": "p_jbkelsxd7",
+      "saleType": "weight",
+      "pricing": {
+        "quarter": 162.5,
+        "kilo": 650,
+        "half": 325
+      },
+      "category": "حلويات يومية",
+      "description": "توجد يوم الجمعة او بطلب المسبق"
+    },
+    {
+      "pricing": {
+        "unitLabel": "علبة 500 جرام",
+        "unitPrice": 120
+      },
+      "images": [
+        "https://i.ibb.co/KcM7mdgV/IMG-20261014-WA0080.jpg"
+      ],
+      "saleType": "unit",
+      "description": "",
+      "order": 138,
+      "id": "p_v531g6nb5",
+      "category": "مثلجات ice cream",
+      "createdAt": 1791986859658,
+      "name": "ايس كريم مشكل أطعمة",
+      "price": 120,
+      "image": "https://i.ibb.co/KcM7mdgV/IMG-20261014-WA0080.jpg",
+      "hidden": false
+    },
+    {
+      "category": "حلويات يومية",
+      "images": [
+        "https://i.ibb.co/N6Y2YMS7/IMG-20261014-WA0098.jpg"
+      ],
+      "order": 139,
+      "saleType": "weight",
+      "description": "",
+      "createdAt": 1791987970166,
+      "id": "p_8sjv52x2m",
+      "name": "كنافة مفروكة بالمكسرات",
+      "image": "https://i.ibb.co/N6Y2YMS7/IMG-20261014-WA0098.jpg",
+      "pricing": {
+        "kilo": 240,
+        "half": 120,
+        "quarter": 60
+      },
+      "price": 240,
+      "hidden": false
+    },
+    {
+      "images": [
+        "https://i.ibb.co/spG6SZJP/IMG-20261014-WA0108.jpg"
+      ],
+      "id": "p_8u159v3uy",
+      "pricing": {
+        "kilo": 450,
+        "quarter": 112.5,
+        "half": 225
+      },
+      "createdAt": 1791990180123,
+      "order": 140,
+      "category": "حلويات يومية",
+      "name": "معجوقة",
+      "price": 450,
+      "saleType": "weight",
+      "description": "حلويات",
+      "image": "https://i.ibb.co/spG6SZJP/IMG-20261014-WA0108.jpg",
+      "hidden": false
+    }
+  ]
+}

@@ -72,6 +72,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       <h1 style="margin: 0; color: var(--primary); font-size: 22px; font-weight:900;" id="dashboardTitle">لوحة التحكم</h1>
       <div style="display: flex; gap: 8px;">
         <button class="btn btn-warning" id="forceRefreshBtn" style="background: #f59e0b; color: #fff;">🔄 نشر التحديثات للزبائن</button>
+        <button class="btn btn-secondary" id="manualRefreshBtn" style="background: #0284c7; color: #fff;">📥 تحديث البيانات يدويًا</button>
         <button class="btn btn-danger" id="logoutBtn">تسجيل الخروج</button>
       </div>
     </div>
@@ -178,17 +179,20 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       </div>
     </div>
 
-    <!-- 4. الطلبات -->
+    <!-- 4. الطلبات (محدث لتوفير أقصى قدر من القراءات) -->
     <div id="oTab" class="tab-section">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
           <h2 style="margin:0;">الطلبات الواردة</h2>
           <div style="display:flex; gap:8px;">
+            <button class="btn btn-success" onclick="fetchOrdersManual()">📥 تحميل/تحديث الطلبات (20 طلب)</button>
             <button class="btn btn-primary" onclick="exportOrdersBackup()">📥 تنزيل السجل</button>
             <button class="btn btn-danger" onclick="deleteAllOrders()">🗑️ تفريغ الطلبات وتصفير العداد الدوري</button>
           </div>
         </div>
-        <div id="ordersContainer">جاري التحميل...</div>
+        <div id="ordersContainer" style="text-align: center; padding: 25px; color: #64748b; font-weight: bold;">
+          اضغط على زر "تحميل/تحديث الطلبات" أعلاه لجلب أحدث الطلبات وتوفير استهلاك القراءات.
+        </div>
       </div>
     </div>
 
@@ -318,7 +322,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, collection, doc, onSnapshot, setDoc, getDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, setDoc, getDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw",
@@ -380,6 +384,11 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
   });
 
+  document.getElementById("manualRefreshBtn").addEventListener("click", async () => {
+    await loadAllAdminData();
+    alert("🔄 تم تحديث بيانات لوحة التحكم بنجاح!");
+  });
+
   onAuthStateChanged(auth, user => {
     if(user) {
       document.getElementById("authPanel").style.display = "none";
@@ -396,49 +405,13 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     document.getElementById("secondsGroup").style.display = (type === 'auto') ? 'block' : 'none';
   };
 
-  async function loadProductsData() {
+  // دالة الجلب الموفرة (تستهلك قراءتين فقط: إعدادات المتجر + حزمة المنتجات)
+  async function loadAllAdminData() {
     try {
-      const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
-      
-      if (bundleSnap.exists() && bundleSnap.data().productsArray && bundleSnap.data().productsArray.length > 0) {
-        products = bundleSnap.data().productsArray;
-      } else {
-        const oldDocsSnap = await getDocs(collection(db, "products"));
-        products = [];
-        oldDocsSnap.forEach(d => {
-          products.push({ id: d.id, ...d.data() });
-        });
-        
-        if (products.length > 0) {
-          await syncProductsBundle();
-        }
-      }
-      renderProducts();
-      renderReports();
-    } catch(err) {
-      console.error("خطأ في جلب المنتجات:", err);
-    }
-  }
-
-  function initListeners() {
-    loadProductsData();
-
-    onSnapshot(doc(db, "settings", "products_bundle"), snap => {
-      if(snap.exists() && snap.data().productsArray) {
-        products = snap.data().productsArray;
-        renderProducts(); 
-        renderReports();
-      }
-    });
-
-    onSnapshot(collection(db, "orders"), snap => {
-      orders = []; snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
-      renderOrders(); renderReports();
-    });
-
-    onSnapshot(doc(db, "settings", "store"), snap => {
-      if(snap.exists()){
-        const data = snap.data();
+      // 1. جلب إعدادات المتجر (قراءة واحدة)
+      const storeSnap = await getDoc(doc(db, "settings", "store"));
+      if(storeSnap.exists()){
+        const data = storeSnap.data();
         storeSettingsData = data;
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
         if(data.currencySymbol) document.getElementById("currencyInput").value = data.currencySymbol;
@@ -462,17 +435,9 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
           document.getElementById("storeNameInput").value = data.storeName;
           document.getElementById("dashboardTitle").innerText = " " + data.storeName;
         }
-        if(data.categoriesList) {
-          categoriesList = data.categoriesList;
-        } else if(data.categories) {
-          categoriesList = Array.isArray(data.categories) ? data.categories.map(c=>({ name: c, hidden: false })) : [];
-        }
-
-        if(data.branches) {
-          branchesList = data.branches;
-        } else {
-          branchesList = ["الفرع الرئيسي"];
-        }
+        
+        categoriesList = data.categoriesList || (Array.isArray(data.categories) ? data.categories.map(c=>({ name: c, hidden: false })) : []);
+        branchesList = data.branches || ["الفرع الرئيسي"];
 
         renderCategoriesAdmin();
         updateCategorySelectOptions();
@@ -494,11 +459,48 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
           
           document.documentElement.style.setProperty('--custom-font', data.theme.fontFamily + ", Tahoma");
         }
-
-        renderProducts();
-        renderReports();
       }
-    });
+
+      // 2. جلب المنتجات المجمعة (قراءة واحدة)
+      const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
+      if (bundleSnap.exists() && bundleSnap.data().productsArray) {
+        products = bundleSnap.data().productsArray;
+      } else {
+        const oldDocsSnap = await getDocs(collection(db, "products"));
+        products = [];
+        oldDocsSnap.forEach(d => products.push({ id: d.id, ...d.data() }));
+        if (products.length > 0) await syncProductsBundle();
+      }
+      renderProducts();
+
+      // تم إلغاء جلب الطلبات التلقائي هنا لتوفير القراءات
+      renderReports();
+
+    } catch(err) {
+      console.error("خطأ في جلب البيانات:", err);
+    }
+  }
+
+  // دالة مخصصة لجلب الطلبات يدوياً فقط عند الضغط على الزر
+  window.fetchOrdersManual = async function() {
+    const container = document.getElementById("ordersContainer");
+    container.innerHTML = "جاري جلب أحدث 20 طلباً...";
+    try {
+      const ordersQuery = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(20));
+      const ordersSnap = await getDocs(ordersQuery);
+      orders = [];
+      ordersSnap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+      renderOrders();
+      renderReports();
+      alert("✅ تم جلب أحدث الطلبات بنجاح!");
+    } catch (err) {
+      console.error("خطأ في جلب الطلبات:", err);
+      container.innerHTML = "<p style='color:red;'>حدث خطأ أثناء تحميل الطلبات.</p>";
+    }
+  };
+
+  function initListeners() {
+    loadAllAdminData();
   }
 
   window.exportProductsBackup = () => {
@@ -548,17 +550,11 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   window.deleteAllOrders = async () => {
     if(confirm("⚠️ هل أنت متأكد من تفريغ كافة الطلبات وتصفير عداد زوار الفترة الحالية؟")) {
-      try {
-        const batch = writeBatch(db);
-        orders.forEach(o => {
-          batch.delete(doc(db, "orders", o.id));
-        });
-        batch.set(doc(db, "settings", "store"), { visitsSinceLastReset: 0 }, { merge: true });
-        await batch.commit();
-        alert("✨ تم التفريغ وتصفير العداد الدوري بنجاح!");
-      } catch(e) {
-        alert("حدث خطأ أثناء التفريغ.");
+      for(const o of orders) {
+        await deleteDoc(doc(db, "orders", o.id));
       }
+      await setDoc(doc(db, "settings", "store"), { visitsSinceLastReset: 0 }, { merge: true });
+      alert("تم التفريغ وتصفير العداد الدوري للزوار بنجاح!");
     }
   };
 
@@ -816,7 +812,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   function renderOrders() {
     const c = document.getElementById("ordersContainer");
     if(!c) return;
-    if(!orders.length) return c.innerHTML = "<p>لا توجد طلبات.</p>";
+    if(!orders.length) return c.innerHTML = "<p style='text-align:center; padding:20px; color:#64748b;'>لا توجد طلبات حالياً.</p>";
     c.innerHTML = orders.sort((a,b)=>b.createdAt-a.createdAt).map(o => `
       <div class="order-box">
         <div><strong>طلب #${o.id.substring(0,6)}</strong> - ${new Date(o.createdAt).toLocaleString('ar-EG')}</div>
@@ -847,11 +843,11 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
             <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${products.length}</h2>
           </div>
           <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
-            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">📋 الطلبات الحالية</span>
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">📋 الطلبات المحملة</span>
             <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${orders.length}</h2>
           </div>
           <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
-            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">💰 المبيعات الحالية</span>
+            <span style="color: #64748b; font-size: 12.5px; font-weight: 700;">💰 مبيعات الطلبات المحملة</span>
             <h2 style="color: var(--primary); margin: 5px 0 0 0; font-size: 22px;">${orders.reduce((sum,o)=>sum+(o.grandTotal||0),0)} ${storeSettingsData.currencySymbol || 'ج'}</h2>
           </div>
         </div>

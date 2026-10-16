@@ -49,32 +49,34 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 <div class="admin-container">
   <div>
     <div class="card" style="background: #eff6ff; border-color: #bfdbfe;">
-      <h2 style="color: #1e40af; margin-top:0; font-size:16px;"><i class="fa-solid fa-file-import"></i> استيراد ملف products.json</h2>
-      <p style="color: #1e3a8a; font-size:13px; margin-bottom:12px;">قم برفع ملف الأصناف القديم، وستظهر كافة البيانات والصور والفيديوهات فوراً بدون أي مشكلة!</p>
+      <h2 style="color: #1e40af; margin-top:0; font-size:16px;"><i class="fa-solid fa-file-import"></i> استيراد وتصدير ملف products.json</h2>
+      <p style="color: #1e3a8a; font-size:13px; margin-bottom:12px;">قم برفع ملف الأصناف، وعدّل الإعدادات، ثم صدر الملف الجديد لرفع على GitHub!</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <label class="btn btn-import">
           <i class="fa-solid fa-upload"></i> 📥 استيراد ملف الأصناف
           <input type="file" id="importJsonFile" accept=".json" style="display:none;" onchange="importJSONFile(event)">
         </label>
-        <button class="btn btn-export" onclick="exportJSONFile()"><i class="fa-solid fa-download"></i> 📤 تصدير وتنزيل products.json المحدث</button>
+        <button class="btn btn-export" onclick="exportJSONFile()"><i class="fa-solid fa-download"></i> 📤 تصدير وتنزيل products.json</button>
       </div>
     </div>
 
     <div class="admin-tabs">
-      <button class="active" onclick="switchTab('pTab', this)">📦 المنتجات الكاملة</button>
+      <button class="active" onclick="switchTab('pTab', this)">📦 المنتجات</button>
       <button onclick="switchTab('catTab', this)">🏷️ الأقسام</button>
       <button onclick="switchTab('themeTab', this)">🎨 الألوان والمظهر</button>
       <button onclick="switchTab('sTab', this)">⚙️ الإعدادات والسوشيال</button>
     </div>
 
+    <!-- 1. المنتجات -->
     <div id="pTab" class="tab-section active">
       <div class="card"><button class="btn btn-success" onclick="openModal()">➕ إضافة منتج جديد</button></div>
       <div class="card">
-        <h2>قائمة المنتجات (كاملة بالصور والفيديو)</h2>
-        <div id="productsContainer">اضغط "استيراد ملف الأصناف" بالاعلى لرفع ملفك...</div>
+        <h2>قائمة المنتجات</h2>
+        <div id="productsContainer">قم باستيراد ملف الأصناف بالأعلى...</div>
       </div>
     </div>
 
+    <!-- 2. الأقسام -->
     <div id="catTab" class="tab-section">
       <div class="card">
         <h2>➕ إضافة قسم جديد</h2>
@@ -86,6 +88,7 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       <div class="card"><h2>🏷️ الأقسام الحالية</h2><div id="categoriesListContainer">لا توجد أقسام حالياً.</div></div>
     </div>
 
+    <!-- 3. المظهر والألوان -->
     <div id="themeTab" class="tab-section">
       <div class="card">
         <h2>🛍️ الألوان والمظهر</h2>
@@ -102,16 +105,18 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       </div>
     </div>
 
+    <!-- 4. الإعدادات والسوشيال ميديا -->
     <div id="sTab" class="tab-section">
       <div class="card">
-        <h2>⚙️ الإعدادات وسائل التواصل</h2>
+        <h2>⚙️ الإعدادات ووسائل التواصل الاجتماعي</h2>
         <div class="form-group"><label>رقم الواتساب مع كود الدولة:</label><input type="text" id="whatsappInput" value="201011406537"></div>
         <div class="form-group"><label>رابط الصورة الافتراضية:</label><input type="url" id="defaultImageInput"></div>
-        <h3>🌐 روابط التواصل الاجتماعي:</h3>
-        <div class="form-group"><label>فيسبوك:</label><input type="url" id="fbInput"></div>
-        <div class="form-group"><label>إنستغرام:</label><input type="url" id="instaInput"></div>
-        <div class="form-group"><label>تيليجرام:</label><input type="url" id="telegramInput"></div>
-        <div class="form-group"><label>تيك توك:</label><input type="url" id="tiktokInput"></div>
+        <hr style="border:0; border-top:1px solid #e2e8f0; margin: 15px 0;">
+        <h3 style="margin-bottom: 10px; font-size:15px; color:var(--primary);">🌐 روابط منصات التواصل الاجتماعي:</h3>
+        <div class="form-group"><label>رابط فيسبوك (Facebook):</label><input type="url" id="fbInput" placeholder="https://facebook.com/your-page"></div>
+        <div class="form-group"><label>رابط إنستغرام (Instagram):</label><input type="url" id="instaInput" placeholder="https://instagram.com/your-account"></div>
+        <div class="form-group"><label>رابط تيليجرام (Telegram):</label><input type="url" id="telegramInput" placeholder="https://t.me/your-channel"></div>
+        <div class="form-group"><label>رابط تيك توك (TikTok):</label><input type="url" id="tiktokInput" placeholder="https://tiktok.com/@your-account"></div>
       </div>
     </div>
   </div>
@@ -130,20 +135,20 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
   </div>
 </div>
 
-<!-- modal -->
+<!-- نافذة إضافة وتعديل صنف -->
 <div class="modal-overlay" id="productModal">
   <div class="modal-card">
-    <h3 id="modalTitle">تعديل المنتج التفصيلي</h3>
+    <h3 id="modalTitle">إضافة / تعديل منتج</h3>
     <input type="hidden" id="editId">
     <div class="form-group"><label>اسم المنتج *</label><input type="text" id="pName"></div>
     <div class="form-group"><label>القسم *</label><select id="pCategorySelect"></select></div>
-    <div class="form-group"><label>السعر الأساسي *</label><input type="number" id="pKilo"></div>
+    <div class="form-group"><label>السعر الأساسي / الكيلو *</label><input type="number" id="pKilo"></div>
     <div class="form-group"><label>الوصف</label><textarea id="pDesc" rows="2"></textarea></div>
     <div class="form-group"><label>رابط الصورة الرئيسية</label><input type="url" id="pImage"></div>
     <div class="form-group"><label>رابط الصورة الثانية</label><input type="url" id="pImage2"></div>
     <div class="form-group"><label>رابط الفيديو</label><input type="url" id="pVideo"></div>
     <div style="display: flex; gap: 10px; margin-top: 15px;">
-      <button class="btn btn-success" style="flex:1;" onclick="saveProduct()">حفظ التعديلات</button>
+      <button class="btn btn-success" style="flex:1;" onclick="saveProduct()">حفظ المنتج</button>
       <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
     </div>
   </div>
@@ -183,9 +188,9 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
           storeData = importedData;
         }
         applyDataToUI();
-        alert("✨ تم قراءة كافة الأصناف والصور والفيديوهات بنجاح!");
+        alert("✨ تم استيراد الملف وقراءته بنجاح!");
       } catch (err) {
-        alert("خطأ في ملف JSON!");
+        alert("خطأ في قراءة ملف JSON!");
       }
     };
     reader.readAsText(file);
@@ -205,12 +210,14 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     storeData.settings.whatsappNumber = document.getElementById("whatsappInput").value;
     storeData.settings.currencySymbol = document.getElementById("currencyInput").value;
     storeData.settings.defaultImage = document.getElementById("defaultImageInput").value;
+    
     storeData.settings.socialLinks = {
-      facebook: document.getElementById("fbInput").value,
-      instagram: document.getElementById("instaInput").value,
-      telegram: document.getElementById("telegramInput").value,
-      tiktok: document.getElementById("tiktokInput").value
+      facebook: document.getElementById("fbInput").value.trim(),
+      instagram: document.getElementById("instaInput").value.trim(),
+      telegram: document.getElementById("telegramInput").value.trim(),
+      tiktok: document.getElementById("tiktokInput").value.trim()
     };
+
     storeData.settings.theme = {
       primaryColor: document.getElementById("primaryColorInput").value,
       accentColor: document.getElementById("accentColorInput").value,
@@ -226,12 +233,14 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     document.getElementById("whatsappInput").value = s.whatsappNumber || "201011406537";
     document.getElementById("currencyInput").value = s.currencySymbol || "ج";
     document.getElementById("defaultImageInput").value = s.defaultImage || "";
+    
     if (s.socialLinks) {
       document.getElementById("fbInput").value = s.socialLinks.facebook || "";
       document.getElementById("instaInput").value = s.socialLinks.instagram || "";
       document.getElementById("telegramInput").value = s.socialLinks.telegram || "";
       document.getElementById("tiktokInput").value = s.socialLinks.tiktok || "";
     }
+
     if (s.theme) {
       document.getElementById("primaryColorInput").value = s.theme.primaryColor || "#11261d";
       document.getElementById("accentColorInput").value = s.theme.accentColor || "#d4af37";

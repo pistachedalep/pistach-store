@@ -31,16 +31,14 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 .form-group { margin-bottom: 16px; }
 .form-group label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 13.5px; }
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; font-family: var(--custom-font); }
-.color-picker-group { display: flex; align-items: center; gap: 12px; }
-.color-picker-group input[type="color"] { width: 48px; height: 42px; border: none; cursor: pointer; background: transparent; }
-.product-row, .category-row { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 14px 0; justify-content: space-between; flex-wrap: wrap; }
-.product-row img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; background: #f1f5f9; }
+.product-row { display: flex; gap: 12px; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 14px 0; justify-content: space-between; flex-wrap: wrap; }
+.product-row img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; background: #e2e8f0; }
 .preview-sticky { position: sticky; top: 20px; }
-.preview-phone { width: 100%; height: 620px; border: 10px solid #0f172a; border-radius: 30px; overflow: hidden; background: #11261d; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
-.preview-header { padding: 10px 12px; background: rgba(17,38,29,0.95); color: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.preview-body { flex: 1; overflow-y: auto; padding: 10px; background: var(--prev-bg, #11261d); }
-.preview-card { background: var(--prev-card-bg, #ffffff); color: var(--prev-card-text, #0f172a); border-radius: 12px; overflow: hidden; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.4); font-size: 11px; }
-.preview-card img { width: 100%; height: 110px; object-fit: cover; }
+.preview-phone { width: 100%; height: 620px; border: 10px solid #0f172a; border-radius: 30px; overflow: hidden; background: #11261d; display: flex; flex-direction: column; }
+.preview-header { padding: 10px 12px; background: rgba(17,38,29,0.95); color: #fff; display: flex; justify-content: space-between; align-items: center; }
+.preview-body { flex: 1; overflow-y: auto; padding: 10px; }
+.preview-card { background: #ffffff; color: #0f172a; border-radius: 12px; overflow: hidden; margin-bottom: 10px; font-size: 11px; }
+.preview-card img { width: 100%; height: 110px; object-fit: cover; background: #eee; }
 .preview-card-info { padding: 8px; }
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 16px; backdrop-filter: blur(5px); }
 .modal-card { background: #fff; border-radius: 16px; padding: 22px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
@@ -51,35 +49,32 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 <div class="admin-container">
   <div>
     <div class="card" style="background: #eff6ff; border-color: #bfdbfe;">
-      <h2 style="color: #1e40af; margin-top:0; font-size:16px;"><i class="fa-solid fa-file-import"></i> استيراد وتصدير ملف products.json</h2>
-      <p style="color: #1e3a8a; font-size:13px; margin-bottom:12px;">اختر ملفك القديم أو المحدث، وسيحافظ النظام على كافة الصور والفيديوهات والأسعار بدون أي فقدان!</p>
+      <h2 style="color: #1e40af; margin-top:0; font-size:16px;"><i class="fa-solid fa-file-import"></i> استيراد ملف products.json</h2>
+      <p style="color: #1e3a8a; font-size:13px; margin-bottom:12px;">قم برفع ملف الأصناف القديم، وستظهر كافة البيانات والصور والفيديوهات فوراً بدون أي مشكلة!</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <label class="btn btn-import">
           <i class="fa-solid fa-upload"></i> 📥 استيراد ملف الأصناف
           <input type="file" id="importJsonFile" accept=".json" style="display:none;" onchange="importJSONFile(event)">
         </label>
-        <button class="btn btn-export" onclick="exportJSONFile()"><i class="fa-solid fa-download"></i> 📤 تصدير وتنزيل products.json</button>
+        <button class="btn btn-export" onclick="exportJSONFile()"><i class="fa-solid fa-download"></i> 📤 تصدير وتنزيل products.json المحدث</button>
       </div>
     </div>
 
     <div class="admin-tabs">
       <button class="active" onclick="switchTab('pTab', this)">📦 المنتجات الكاملة</button>
-      <button onclick="switchTab('catTab', this)">🏷️ الأقسام والترتيب</button>
+      <button onclick="switchTab('catTab', this)">🏷️ الأقسام</button>
       <button onclick="switchTab('themeTab', this)">🎨 الألوان والمظهر</button>
-      <button onclick="switchTab('dTab', this)">🛵 التوصيل والفروع</button>
       <button onclick="switchTab('sTab', this)">⚙️ الإعدادات والسوشيال</button>
     </div>
 
-    <!-- 1. المنتجات -->
     <div id="pTab" class="tab-section active">
       <div class="card"><button class="btn btn-success" onclick="openModal()">➕ إضافة منتج جديد</button></div>
       <div class="card">
-        <h2>قائمة المنتجات</h2>
-        <div id="productsContainer">قم باستيراد ملف الأصناف...</div>
+        <h2>قائمة المنتجات (كاملة بالصور والفيديو)</h2>
+        <div id="productsContainer">اضغط "استيراد ملف الأصناف" بالاعلى لرفع ملفك...</div>
       </div>
     </div>
 
-    <!-- 2. الأقسام -->
     <div id="catTab" class="tab-section">
       <div class="card">
         <h2>➕ إضافة قسم جديد</h2>
@@ -88,63 +83,30 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
           <button class="btn btn-success" type="button" onclick="addNewCategory()">إضافة القسم</button>
         </div>
       </div>
-      <div class="card"><h2>🏷️ الأقسام الحالية وترتيبها</h2><div id="categoriesListContainer">لا توجد أقسام حالياً.</div></div>
+      <div class="card"><h2>🏷️ الأقسام الحالية</h2><div id="categoriesListContainer">لا توجد أقسام حالياً.</div></div>
     </div>
 
-    <!-- 3. المظهر والألوان -->
     <div id="themeTab" class="tab-section">
       <div class="card">
         <h2>🛍️ الألوان والمظهر</h2>
         <div class="grid-2">
           <div class="form-group"><label>اسم المتجر:</label><input type="text" id="storeNameInput" value="بيستاش دي ألب" oninput="updateLivePreview()"></div>
-          <div class="form-group"><label>نوع الخط:</label>
-            <select id="fontFamilySelect" onchange="updateLivePreview()">
-              <option value="Tajawal">Tajawal</option>
-              <option value="Cairo">Cairo</option>
-              <option value="Almarai">Almarai</option>
-            </select>
-          </div>
+          <div class="form-group"><label>رمز العملة:</label><input type="text" id="currencyInput" value="ج" oninput="updateLivePreview()"></div>
         </div>
         <div class="grid-2">
-          <div class="form-group"><label>اللون الرئيسي:</label><div class="color-picker-group"><input type="color" id="primaryColorInput" value="#11261d" onchange="updateLivePreview()"></div></div>
-          <div class="form-group"><label>لون التمييز (Accent):</label><div class="color-picker-group"><input type="color" id="accentColorInput" value="#d4af37" onchange="updateLivePreview()"></div></div>
-          <div class="form-group"><label>خلفية المتجر العامة:</label><div class="color-picker-group"><input type="color" id="bgColorInput" value="#11261d" onchange="updateLivePreview()"></div></div>
-          <div class="form-group"><label>خلفية كروت الأصناف:</label><div class="color-picker-group"><input type="color" id="cardBgColorInput" value="#ffffff" onchange="updateLivePreview()"></div></div>
-          <div class="form-group"><label>لون نص الأصناف:</label><div class="color-picker-group"><input type="color" id="cardTextColorInput" value="#0f172a" onchange="updateLivePreview()"></div></div>
+          <div class="form-group"><label>اللون الرئيسي:</label><input type="color" id="primaryColorInput" value="#11261d" onchange="updateLivePreview()"></div>
+          <div class="form-group"><label>لون التمييز (Accent):</label><input type="color" id="accentColorInput" value="#d4af37" onchange="updateLivePreview()"></div>
+          <div class="form-group"><label>خلفية المتجر:</label><input type="color" id="bgColorInput" value="#11261d" onchange="updateLivePreview()"></div>
+          <div class="form-group"><label>خلفية الكروت:</label><input type="color" id="cardBgColorInput" value="#ffffff" onchange="updateLivePreview()"></div>
         </div>
       </div>
     </div>
 
-    <!-- 4. التوصيل والفروع -->
-    <div id="dTab" class="tab-section">
-      <div class="card">
-        <h2>🛵 مناطق التوصيل</h2>
-        <div class="grid-2">
-          <input type="text" id="zoneName" placeholder="اسم المنطقة">
-          <input type="number" id="zoneFee" placeholder="التكلفة">
-        </div>
-        <button class="btn btn-primary" style="margin-top: 10px;" onclick="addZone()">إضافة المنطقة</button>
-        <div id="zonesContainer" style="margin-top: 15px;"></div>
-      </div>
-      <div class="card">
-        <h2>🏪 إدارة الفروع</h2>
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-          <input type="text" id="newBranchName" placeholder="اسم الفرع الجديد" style="flex:1;">
-          <button class="btn btn-success" type="button" onclick="addNewBranch()">إضافة الفرع</button>
-        </div>
-        <div id="branchesContainer" style="margin-top: 15px;"></div>
-      </div>
-    </div>
-
-    <!-- 5. الإعدادات والسوشيال -->
     <div id="sTab" class="tab-section">
       <div class="card">
         <h2>⚙️ الإعدادات وسائل التواصل</h2>
         <div class="form-group"><label>رقم الواتساب مع كود الدولة:</label><input type="text" id="whatsappInput" value="201011406537"></div>
-        <div class="form-group"><label>رمز العملة:</label><input type="text" id="currencyInput" value="ج" oninput="updateLivePreview()"></div>
         <div class="form-group"><label>رابط الصورة الافتراضية:</label><input type="url" id="defaultImageInput"></div>
-        <h3>📢 الإعلان المنبثق:</h3>
-        <div class="form-group"><textarea id="adminAnnouncement" placeholder="نص الإعلان..."></textarea></div>
         <h3>🌐 روابط التواصل الاجتماعي:</h3>
         <div class="form-group"><label>فيسبوك:</label><input type="url" id="fbInput"></div>
         <div class="form-group"><label>إنستغرام:</label><input type="url" id="instaInput"></div>
@@ -156,51 +118,32 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 
   <div class="preview-sticky">
     <div class="card" style="padding: 12px; text-align: center; margin-bottom: 10px;">
-      <h3 style="margin:0; font-size:14px; color:var(--primary);"><i class="fa-solid fa-mobile-screen"></i> معاينة شكل المنيو فوري</h3>
+      <h3 style="margin:0; font-size:14px; color:var(--primary);"><i class="fa-solid fa-mobile-screen"></i> المعاينة الحية للمنيو</h3>
     </div>
     <div class="preview-phone">
-      <div class="preview-header" id="prevHeader" style="background:#11261d;">
+      <div class="preview-header" id="prevHeader">
         <span id="prevLogo" style="font-weight:900; font-size:13px; color:#d4af37;">بيستاش دي ألب</span>
-        <span style="font-size:10px; opacity:0.8;">🛒 السلة (0)</span>
+        <span style="font-size:10px; opacity:0.8;">🛒 السلة</span>
       </div>
       <div class="preview-body" id="prevBody"></div>
     </div>
   </div>
 </div>
 
-<!-- نافذة إضافة وتعديل صنف -->
+<!-- modal -->
 <div class="modal-overlay" id="productModal">
   <div class="modal-card">
-    <h3 id="modalTitle">إضافة / تعديل منتج</h3>
+    <h3 id="modalTitle">تعديل المنتج التفصيلي</h3>
     <input type="hidden" id="editId">
     <div class="form-group"><label>اسم المنتج *</label><input type="text" id="pName"></div>
     <div class="form-group"><label>القسم *</label><select id="pCategorySelect"></select></div>
-    <div class="form-group"><label>نوع البيع *</label>
-      <select id="pSaleType" onchange="togglePricing()">
-        <option value="weight">بالكيلو (أوزان)</option>
-        <option value="unit">بالوحدة / علبة</option>
-      </select>
-    </div>
-    <div id="weightFields">
-      <div class="grid-2">
-        <input type="number" id="pQuarter" placeholder="سعر الربع">
-        <input type="number" id="pHalf" placeholder="سعر النصف">
-      </div>
-      <div class="form-group" style="margin-top: 8px;"><input type="number" id="pKilo" placeholder="سعر الكيلو *"></div>
-    </div>
-    <div id="unitFields" style="display:none;">
-      <div class="grid-2">
-        <input type="text" id="pUnitLabel" placeholder="مسمى الوحدة">
-        <input type="number" id="pUnitPrice" placeholder="سعر الوحدة *">
-      </div>
-    </div>
+    <div class="form-group"><label>السعر الأساسي *</label><input type="number" id="pKilo"></div>
     <div class="form-group"><label>الوصف</label><textarea id="pDesc" rows="2"></textarea></div>
     <div class="form-group"><label>رابط الصورة الرئيسية</label><input type="url" id="pImage"></div>
-    <div class="form-group"><label>رابط الصورة الثانية (إضافية)</label><input type="url" id="pImage2"></div>
-    <div class="form-group"><label>رابط الفيديو (Video URL)</label><input type="url" id="pVideo"></div>
-
+    <div class="form-group"><label>رابط الصورة الثانية</label><input type="url" id="pImage2"></div>
+    <div class="form-group"><label>رابط الفيديو</label><input type="url" id="pVideo"></div>
     <div style="display: flex; gap: 10px; margin-top: 15px;">
-      <button class="btn btn-success" style="flex:1;" onclick="saveProduct()">حفظ المنتج</button>
+      <button class="btn btn-success" style="flex:1;" onclick="saveProduct()">حفظ التعديلات</button>
       <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
     </div>
   </div>
@@ -212,13 +155,10 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       storeName: "بيستاش دي ألب | Pistache D'Alep",
       whatsappNumber: "201011406537",
       currencySymbol: "ج",
-      defaultImage: "",
-      announcement: "",
-      branches: ["الفرع الرئيسي"],
-      deliveryZones: [],
+      defaultImage: "https://i.ibb.co/1pQq8Cc/IMG-20261012-WA0057.jpg",
       categoriesList: [],
       socialLinks: { facebook: "", instagram: "", telegram: "", tiktok: "" },
-      theme: { primaryColor: "#11261d", accentColor: "#d4af37", bgColor: "#11261d", cardBgColor: "#ffffff", cardTextColor: "#0f172a", fontFamily: "Tajawal" }
+      theme: { primaryColor: "#11261d", accentColor: "#d4af37", bgColor: "#11261d", cardBgColor: "#ffffff", cardTextColor: "#0f172a" }
     },
     products: []
   };
@@ -243,9 +183,9 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
           storeData = importedData;
         }
         applyDataToUI();
-        alert("✨ تم استيراد وقراءة الملف بنجاح!");
+        alert("✨ تم قراءة كافة الأصناف والصور والفيديوهات بنجاح!");
       } catch (err) {
-        alert("خطأ في قراءة الملف!");
+        alert("خطأ في ملف JSON!");
       }
     };
     reader.readAsText(file);
@@ -265,7 +205,6 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     storeData.settings.whatsappNumber = document.getElementById("whatsappInput").value;
     storeData.settings.currencySymbol = document.getElementById("currencyInput").value;
     storeData.settings.defaultImage = document.getElementById("defaultImageInput").value;
-    storeData.settings.announcement = document.getElementById("adminAnnouncement").value;
     storeData.settings.socialLinks = {
       facebook: document.getElementById("fbInput").value,
       instagram: document.getElementById("instaInput").value,
@@ -277,8 +216,7 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       accentColor: document.getElementById("accentColorInput").value,
       bgColor: document.getElementById("bgColorInput").value,
       cardBgColor: document.getElementById("cardBgColorInput").value,
-      cardTextColor: document.getElementById("cardTextColorInput").value,
-      fontFamily: document.getElementById("fontFamilySelect").value
+      cardTextColor: "#0f172a"
     };
   }
 
@@ -288,7 +226,6 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     document.getElementById("whatsappInput").value = s.whatsappNumber || "201011406537";
     document.getElementById("currencyInput").value = s.currencySymbol || "ج";
     document.getElementById("defaultImageInput").value = s.defaultImage || "";
-    document.getElementById("adminAnnouncement").value = s.announcement || "";
     if (s.socialLinks) {
       document.getElementById("fbInput").value = s.socialLinks.facebook || "";
       document.getElementById("instaInput").value = s.socialLinks.instagram || "";
@@ -300,14 +237,16 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       document.getElementById("accentColorInput").value = s.theme.accentColor || "#d4af37";
       document.getElementById("bgColorInput").value = s.theme.bgColor || "#11261d";
       document.getElementById("cardBgColorInput").value = s.theme.cardBgColor || "#ffffff";
-      document.getElementById("cardTextColorInput").value = s.theme.cardTextColor || "#0f172a";
-      document.getElementById("fontFamilySelect").value = s.theme.fontFamily || "Tajawal";
     }
     renderProducts();
     renderCategories();
-    renderZones();
-    renderBranches();
     updateLivePreview();
+  }
+
+  function getImgSrc(p) {
+    if (p.image) return p.image;
+    if (p.images && p.images.length > 0) return p.images[0];
+    return storeData.settings.defaultImage || '';
   }
 
   function updateLivePreview() {
@@ -321,43 +260,37 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 
     const visibleProds = storeData.products.filter(p => !p.hidden);
     if (!visibleProds.length) {
-      body.innerHTML = "<p style='color:#fff; text-align:center; font-size:11px; padding:20px;'>لا توجد منتجات ظاهرة</p>";
+      body.innerHTML = "<p style='color:#fff; text-align:center; padding:20px;'>لا توجد منتجات ظاهرة</p>";
       return;
     }
-    body.innerHTML = visibleProds.map(p => {
-      const imgSrc = p.image || (p.images && p.images[0]) || s.defaultImage || '';
-      return `
-        <div class="preview-card" style="background: ${s.theme.cardBgColor}; color: ${s.theme.cardTextColor};">
-          <img src="${imgSrc}" onerror="this.src=''">
-          <div class="preview-card-info">
-            <strong>${p.name || ''}</strong>
-            <div style="color: ${s.theme.primaryColor}; font-weight:900; margin-top:2px;">${p.price || 0} ${s.currencySymbol}</div>
-          </div>
+    body.innerHTML = visibleProds.map(p => `
+      <div class="preview-card" style="background: ${s.theme.cardBgColor};">
+        <img src="${getImgSrc(p)}" onerror="this.src='https://via.placeholder.com/150'">
+        <div class="preview-card-info">
+          <strong>${p.name || ''}</strong>
+          <div style="color: ${s.theme.primaryColor}; font-weight:900; margin-top:2px;">${p.price || 0} ${s.currencySymbol}</div>
         </div>
-      `;
-    }).join("");
+      </div>
+    `).join("");
   }
 
   function renderProducts() {
     const container = document.getElementById("productsContainer");
     if (!storeData.products.length) { container.innerHTML = "<p>لا توجد منتجات حالياً.</p>"; updateLivePreview(); return; }
-    container.innerHTML = storeData.products.map(p => {
-      const imgSrc = p.image || (p.images && p.images[0]) || '';
-      return `
-        <div class="product-row" style="${p.hidden ? 'opacity:0.5; background:#fff5f5;' : ''}">
-          <img src="${imgSrc}">
-          <div style="flex:1;">
-            <strong>${p.name}</strong> ${p.hidden ? '<small style="color:red;">(مخفي)</small>' : ''}<br>
-            <small>${p.category || ''} - ${p.price || 0} ${storeData.settings.currencySymbol || 'ج'}</small>
-          </div>
-          <div style="display:flex; gap:4px; align-items:center;">
-            <button class="btn ${p.hidden ? 'btn-success' : 'btn-secondary'}" onclick="toggleProductVisibility('${p.id}')">${p.hidden ? 'إظهار' : 'إخفاء'}</button>
-            <button class="btn btn-warning" onclick="editProduct('${p.id}')">تعديل</button>
-            <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف</button>
-          </div>
+    container.innerHTML = storeData.products.map(p => `
+      <div class="product-row" style="${p.hidden ? 'opacity:0.5; background:#fff5f5;' : ''}">
+        <img src="${getImgSrc(p)}" onerror="this.src='https://via.placeholder.com/60'">
+        <div style="flex:1;">
+          <strong>${p.name}</strong> ${p.hidden ? '<small style="color:red;">(مخفي)</small>' : ''}<br>
+          <small>${p.category || ''} - ${p.price || 0} ${storeData.settings.currencySymbol || 'ج'} ${(p.images && p.images.length > 1) ? '🖼️ (صور متعددة)' : ''} ${p.videoUrl ? '🎥 (فيديو)' : ''}</small>
         </div>
-      `;
-    }).join("");
+        <div style="display:flex; gap:4px; align-items:center;">
+          <button class="btn ${p.hidden ? 'btn-success' : 'btn-secondary'}" onclick="toggleProductVisibility('${p.id}')">${p.hidden ? 'إظهار' : 'إخفاء'}</button>
+          <button class="btn btn-warning" onclick="editProduct('${p.id}')">تعديل</button>
+          <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف</button>
+        </div>
+      </div>
+    `).join("");
     updateLivePreview();
   }
 
@@ -371,32 +304,19 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     if (!input.value.trim()) return;
     if (!storeData.settings.categoriesList) storeData.settings.categoriesList = [];
     storeData.settings.categoriesList.push({ name: input.value.trim(), hidden: false });
-    input.value = "";
-    renderCategories();
+    input.value = ""; renderCategories();
   }
 
   function renderCategories() {
     const container = document.getElementById("categoriesListContainer");
     const list = storeData.settings.categoriesList || [];
     container.innerHTML = list.map((cat, idx) => `
-      <div class="category-row">
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
         <span><strong>${idx + 1}. ${cat.name}</strong></span>
-        <div style="display:flex; gap:4px;">
-          <button class="btn btn-secondary" onclick="moveCategory(${idx}, -1)">⬆️</button>
-          <button class="btn btn-secondary" onclick="moveCategory(${idx}, 1)">⬇️</button>
-          <button class="btn btn-danger" onclick="deleteCategory(${idx})">حذف</button>
-        </div>
+        <button class="btn btn-danger" onclick="deleteCategory(${idx})">حذف</button>
       </div>
     `).join("");
     updateCategorySelectOptions();
-  }
-
-  function moveCategory(idx, direction) {
-    const list = storeData.settings.categoriesList;
-    const targetIdx = idx + direction;
-    if(targetIdx < 0 || targetIdx >= list.length) return;
-    const temp = list[idx]; list[idx] = list[targetIdx]; list[targetIdx] = temp;
-    renderCategories();
   }
 
   function deleteCategory(idx) { storeData.settings.categoriesList.splice(idx, 1); renderCategories(); }
@@ -406,68 +326,16 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     select.innerHTML = list.map(c => `<option value="${c.name}">${c.name}</option>`).join("");
   }
 
-  function addZone() {
-    const name = document.getElementById("zoneName").value.trim();
-    const fee = Number(document.getElementById("zoneFee").value);
-    if (!name) return;
-    if (!storeData.settings.deliveryZones) storeData.settings.deliveryZones = [];
-    storeData.settings.deliveryZones.push({ name, fee });
-    document.getElementById("zoneName").value = ""; document.getElementById("zoneFee").value = "";
-    renderZones();
-  }
-
-  function renderZones() {
-    const zones = storeData.settings.deliveryZones || [];
-    document.getElementById("zonesContainer").innerHTML = zones.map((z, idx) => `
-      <div style="display:flex; justify-content:space-between; margin-top:5px; background:#f9f9f9; padding:8px;">
-        <span>${z.name} - ${z.fee} ج</span>
-        <button class="btn btn-danger" onclick="deleteZone(${idx})">حذف</button>
-      </div>
-    `).join("");
-  }
-
-  function deleteZone(idx) { storeData.settings.deliveryZones.splice(idx, 1); renderZones(); }
-
-  function addNewBranch() {
-    const input = document.getElementById("newBranchName");
-    if (!input.value.trim()) return;
-    if (!storeData.settings.branches) storeData.settings.branches = [];
-    storeData.settings.branches.push(input.value.trim());
-    input.value = ""; renderBranches();
-  }
-
-  function renderBranches() {
-    const branches = storeData.settings.branches || [];
-    document.getElementById("branchesContainer").innerHTML = branches.map((b, idx) => `
-      <div style="display:flex; justify-content:space-between; margin-top:5px; background:#f9f9f9; padding:8px;">
-        <span>${b}</span>
-        <button class="btn btn-danger" onclick="deleteBranch(${idx})">حذف</button>
-      </div>
-    `).join("");
-  }
-
-  function deleteBranch(idx) { storeData.settings.branches.splice(idx, 1); renderBranches(); }
-
   function switchTab(tabId, btn) {
     document.querySelectorAll(".admin-tabs button").forEach(b => b.classList.remove("active"));
     document.querySelectorAll(".tab-section").forEach(s => s.classList.remove("active"));
     btn.classList.add("active"); document.getElementById(tabId).classList.add("active");
   }
 
-  function togglePricing() {
-    const type = document.getElementById("pSaleType").value;
-    document.getElementById("weightFields").style.display = type === 'weight' ? 'block' : 'none';
-    document.getElementById("unitFields").style.display = type === 'unit' ? 'block' : 'none';
-  }
-
   function openModal() {
     document.getElementById("editId").value = "";
     document.getElementById("pName").value = "";
     document.getElementById("pKilo").value = "";
-    document.getElementById("pQuarter").value = "";
-    document.getElementById("pHalf").value = "";
-    document.getElementById("pUnitPrice").value = "";
-    document.getElementById("pUnitLabel").value = "";
     document.getElementById("pDesc").value = "";
     document.getElementById("pImage").value = "";
     document.getElementById("pImage2").value = "";
@@ -480,7 +348,7 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     const id = document.getElementById("editId").value;
     const name = document.getElementById("pName").value.trim();
     const category = document.getElementById("pCategorySelect").value;
-    const saleType = document.getElementById("pSaleType").value;
+    const price = Number(document.getElementById("pKilo").value) || 0;
     const desc = document.getElementById("pDesc").value;
     const image = document.getElementById("pImage").value.trim();
     const image2 = document.getElementById("pImage2").value.trim();
@@ -494,27 +362,17 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 
     let payload = {
       id: id || 'p_' + Date.now(),
-      name, category, saleType, description: desc, videoUrl,
+      name, category, price, description: desc, videoUrl,
       image: image || (imagesArr[0] || ""),
       images: imagesArr.length ? imagesArr : [image],
       hidden: false
     };
 
-    if(saleType === 'weight') {
-      const kilo = Number(document.getElementById("pKilo").value);
-      payload.price = kilo;
-      payload.pricing = { kilo, half: Number(document.getElementById("pHalf").value) || kilo/2, quarter: Number(document.getElementById("pQuarter").value) || kilo/4 };
-    } else {
-      const uPrice = Number(document.getElementById("pUnitPrice").value);
-      payload.price = uPrice;
-      payload.pricing = { unitPrice: uPrice, unitLabel: document.getElementById("pUnitLabel").value || "علبة" };
-    }
-
     if(id) {
       const index = storeData.products.findIndex(item => item.id === id);
       if(index !== -1) {
         payload.hidden = storeData.products[index].hidden || false;
-        storeData.products[index] = payload;
+        storeData.products[index] = Object.assign({}, storeData.products[index], payload);
       }
     } else {
       storeData.products.push(payload);
@@ -530,20 +388,11 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     document.getElementById("editId").value = id;
     document.getElementById("pName").value = p.name || "";
     document.getElementById("pCategorySelect").value = p.category || "";
-    document.getElementById("pSaleType").value = p.saleType || "weight";
+    document.getElementById("pKilo").value = p.price || "";
     document.getElementById("pDesc").value = p.description || "";
     document.getElementById("pVideo").value = p.videoUrl || "";
     document.getElementById("pImage").value = p.image || (p.images && p.images[0]) || "";
     document.getElementById("pImage2").value = (p.images && p.images[1]) ? p.images[1] : "";
-
-    if(p.pricing) {
-      document.getElementById("pKilo").value = p.pricing.kilo || p.price || "";
-      document.getElementById("pHalf").value = p.pricing.half || "";
-      document.getElementById("pQuarter").value = p.pricing.quarter || "";
-      document.getElementById("pUnitPrice").value = p.pricing.unitPrice || p.price || "";
-      document.getElementById("pUnitLabel").value = p.pricing.unitLabel || "";
-    }
-    togglePricing();
   }
 
   function deleteProduct(id) {

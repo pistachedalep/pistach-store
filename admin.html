@@ -7,17 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-:root { 
-  --primary: #122b20; 
-  --border-color: #e2e8f0; 
-  --text-dark: #0f172a; 
-  --custom-font: 'Tajawal', Tahoma, Arial, sans-serif; 
-}
+:root { --primary: #122b20; --border-color: #e2e8f0; --text-dark: #0f172a; --custom-font: 'Tajawal', sans-serif; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-dark); }
 .admin-container { max-width: 1350px; margin: 25px auto; padding: 0 16px; display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
 @media(max-width: 900px) { .admin-container { grid-template-columns: 1fr; } }
-
 .card { background: #ffffff; border-radius: 16px; padding: 22px; margin-bottom: 22px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
 .admin-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 22px; border-bottom: 2px solid var(--border-color); }
 .admin-tabs button { background: #f1f5f9; color: var(--text-dark); padding: 11px 20px; border-radius: 30px; font-weight: 800; white-space: nowrap; border: none; cursor: pointer; transition: all 0.2s; font-family: var(--custom-font); }
@@ -26,16 +20,14 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 .tab-section.active { display: block; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media(max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
-
-.btn { padding: 8px 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; color: #fff; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--custom-font); font-size: 13px; text-decoration: none; }
+.btn { padding: 8px 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; color: #fff; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--custom-font); font-size: 13px; }
 .btn-primary { background: var(--primary); }
 .btn-success { background: #10b981; }
 .btn-danger { background: #ef4444; }
 .btn-warning { background: #f59e0b; color: #fff; }
 .btn-secondary { background: #64748b; }
-.btn-export { background: #059669; color: #fff; font-size: 15px; padding: 12px 20px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
-.btn-import { background: #2563eb; color: #fff; font-size: 15px; padding: 12px 20px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); cursor: pointer; }
-
+.btn-export { background: #059669; color: #fff; font-size: 15px; padding: 12px 20px; }
+.btn-import { background: #2563eb; color: #fff; font-size: 15px; padding: 12px 20px; cursor: pointer; }
 .form-group { margin-bottom: 16px; }
 .form-group label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 13.5px; }
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; outline: none; font-family: var(--custom-font); }
@@ -43,7 +35,6 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 .color-picker-group input[type="color"] { width: 48px; height: 42px; border: none; cursor: pointer; background: transparent; }
 .product-row, .category-row { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 14px 0; justify-content: space-between; flex-wrap: wrap; }
 .product-row img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; background: #f1f5f9; }
-
 .preview-sticky { position: sticky; top: 20px; }
 .preview-phone { width: 100%; height: 620px; border: 10px solid #0f172a; border-radius: 30px; overflow: hidden; background: #11261d; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
 .preview-header { padding: 10px 12px; background: rgba(17,38,29,0.95); color: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -51,7 +42,6 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 .preview-card { background: var(--prev-card-bg, #ffffff); color: var(--prev-card-text, #0f172a); border-radius: 12px; overflow: hidden; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.4); font-size: 11px; }
 .preview-card img { width: 100%; height: 110px; object-fit: cover; }
 .preview-card-info { padding: 8px; }
-
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 16px; backdrop-filter: blur(5px); }
 .modal-card { background: #fff; border-radius: 16px; padding: 22px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
 </style>
@@ -59,14 +49,13 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
 <body>
 
 <div class="admin-container">
-
   <div>
     <div class="card" style="background: #eff6ff; border-color: #bfdbfe;">
       <h2 style="color: #1e40af; margin-top:0; font-size:16px;"><i class="fa-solid fa-file-import"></i> استيراد وتصدير ملف products.json</h2>
-      <p style="color: #1e3a8a; font-size:13px; margin-bottom:12px;">يمكنك اختيار ملفك القديم فوراً، وسيقوم النظام بتنسيقه وتجهيزه تلقائياً!</p>
+      <p style="color: #1e3a8a; font-size:13px; margin-bottom:12px;">اختر ملفك القديم أو المحدث، وسيحافظ النظام على كافة الصور والفيديوهات والأسعار بدون أي فقدان!</p>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <label class="btn btn-import">
-          <i class="fa-solid fa-upload"></i> 📥 استيراد ملف (القديم أو الجديد)
+          <i class="fa-solid fa-upload"></i> 📥 استيراد ملف الأصناف
           <input type="file" id="importJsonFile" accept=".json" style="display:none;" onchange="importJSONFile(event)">
         </label>
         <button class="btn btn-export" onclick="exportJSONFile()"><i class="fa-solid fa-download"></i> 📤 تصدير وتنزيل products.json</button>
@@ -74,8 +63,8 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     </div>
 
     <div class="admin-tabs">
-      <button class="active" onclick="switchTab('pTab', this)">📦 المنتجات</button>
-      <button onclick="switchTab('catTab', this)">🏷️ الأقسام</button>
+      <button class="active" onclick="switchTab('pTab', this)">📦 المنتجات الكاملة</button>
+      <button onclick="switchTab('catTab', this)">🏷️ الأقسام والترتيب</button>
       <button onclick="switchTab('themeTab', this)">🎨 الألوان والمظهر</button>
       <button onclick="switchTab('dTab', this)">🛵 التوصيل والفروع</button>
       <button onclick="switchTab('sTab', this)">⚙️ الإعدادات والسوشيال</button>
@@ -85,8 +74,8 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     <div id="pTab" class="tab-section active">
       <div class="card"><button class="btn btn-success" onclick="openModal()">➕ إضافة منتج جديد</button></div>
       <div class="card">
-        <h2>قائمة المنتجات الحالية</h2>
-        <div id="productsContainer">اضغط "استيراد ملف" وقم برفع ملفك القديم...</div>
+        <h2>قائمة المنتجات</h2>
+        <div id="productsContainer">قم باستيراد ملف الأصناف...</div>
       </div>
     </div>
 
@@ -117,7 +106,7 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
           </div>
         </div>
         <div class="grid-2">
-          <div class="form-group"><label>اللون الرئيسي (الهيدر والسلة):</label><div class="color-picker-group"><input type="color" id="primaryColorInput" value="#11261d" onchange="updateLivePreview()"></div></div>
+          <div class="form-group"><label>اللون الرئيسي:</label><div class="color-picker-group"><input type="color" id="primaryColorInput" value="#11261d" onchange="updateLivePreview()"></div></div>
           <div class="form-group"><label>لون التمييز (Accent):</label><div class="color-picker-group"><input type="color" id="accentColorInput" value="#d4af37" onchange="updateLivePreview()"></div></div>
           <div class="form-group"><label>خلفية المتجر العامة:</label><div class="color-picker-group"><input type="color" id="bgColorInput" value="#11261d" onchange="updateLivePreview()"></div></div>
           <div class="form-group"><label>خلفية كروت الأصناف:</label><div class="color-picker-group"><input type="color" id="cardBgColorInput" value="#ffffff" onchange="updateLivePreview()"></div></div>
@@ -157,10 +146,10 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
         <h3>📢 الإعلان المنبثق:</h3>
         <div class="form-group"><textarea id="adminAnnouncement" placeholder="نص الإعلان..."></textarea></div>
         <h3>🌐 روابط التواصل الاجتماعي:</h3>
-        <div class="form-group"><label>فيسبوك:</label><input type="url" id="fbInput" placeholder="https://facebook.com/..."></div>
-        <div class="form-group"><label>إنستغرام:</label><input type="url" id="instaInput" placeholder="https://instagram.com/..."></div>
-        <div class="form-group"><label>تيليجرام:</label><input type="url" id="telegramInput" placeholder="https://t.me/..."></div>
-        <div class="form-group"><label>تيك توك:</label><input type="url" id="tiktokInput" placeholder="https://tiktok.com/@..."></div>
+        <div class="form-group"><label>فيسبوك:</label><input type="url" id="fbInput"></div>
+        <div class="form-group"><label>إنستغرام:</label><input type="url" id="instaInput"></div>
+        <div class="form-group"><label>تيليجرام:</label><input type="url" id="telegramInput"></div>
+        <div class="form-group"><label>تيك توك:</label><input type="url" id="tiktokInput"></div>
       </div>
     </div>
   </div>
@@ -177,9 +166,9 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       <div class="preview-body" id="prevBody"></div>
     </div>
   </div>
-
 </div>
 
+<!-- نافذة إضافة وتعديل صنف -->
 <div class="modal-overlay" id="productModal">
   <div class="modal-card">
     <h3 id="modalTitle">إضافة / تعديل منتج</h3>
@@ -207,6 +196,8 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     </div>
     <div class="form-group"><label>الوصف</label><textarea id="pDesc" rows="2"></textarea></div>
     <div class="form-group"><label>رابط الصورة الرئيسية</label><input type="url" id="pImage"></div>
+    <div class="form-group"><label>رابط الصورة الثانية (إضافية)</label><input type="url" id="pImage2"></div>
+    <div class="form-group"><label>رابط الفيديو (Video URL)</label><input type="url" id="pVideo"></div>
 
     <div style="display: flex; gap: 10px; margin-top: 15px;">
       <button class="btn btn-success" style="flex:1;" onclick="saveProduct()">حفظ المنتج</button>
@@ -227,14 +218,7 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       deliveryZones: [],
       categoriesList: [],
       socialLinks: { facebook: "", instagram: "", telegram: "", tiktok: "" },
-      theme: {
-        primaryColor: "#11261d",
-        accentColor: "#d4af37",
-        bgColor: "#11261d",
-        cardBgColor: "#ffffff",
-        cardTextColor: "#0f172a",
-        fontFamily: "Tajawal"
-      }
+      theme: { primaryColor: "#11261d", accentColor: "#d4af37", bgColor: "#11261d", cardBgColor: "#ffffff", cardTextColor: "#0f172a", fontFamily: "Tajawal" }
     },
     products: []
   };
@@ -246,11 +230,8 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     reader.onload = function(event) {
       try {
         const importedData = JSON.parse(event.target.result);
-        
-        // ذكاء التوافق: يدعم الصيغة القديمة (Array) والصيغة الجديدة (Object)
         if (Array.isArray(importedData)) {
           storeData.products = importedData;
-          // استخراج الأقسام تلقائياً من الملف القديم
           const extractedCats = [];
           importedData.forEach(p => {
             if(p.category && !extractedCats.some(c => c.name === p.category)) {
@@ -261,11 +242,10 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
         } else {
           storeData = importedData;
         }
-
         applyDataToUI();
-        alert("✨ تم استيراد وقراءة بيانات الملف بنجاح!");
+        alert("✨ تم استيراد وقراءة الملف بنجاح!");
       } catch (err) {
-        alert("خطأ في قراءة الملف! تأكد من أنه بصيغة JSON سليم.");
+        alert("خطأ في قراءة الملف!");
       }
     };
     reader.readAsText(file);
@@ -286,14 +266,12 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     storeData.settings.currencySymbol = document.getElementById("currencyInput").value;
     storeData.settings.defaultImage = document.getElementById("defaultImageInput").value;
     storeData.settings.announcement = document.getElementById("adminAnnouncement").value;
-
     storeData.settings.socialLinks = {
       facebook: document.getElementById("fbInput").value,
       instagram: document.getElementById("instaInput").value,
       telegram: document.getElementById("telegramInput").value,
       tiktok: document.getElementById("tiktokInput").value
     };
-
     storeData.settings.theme = {
       primaryColor: document.getElementById("primaryColorInput").value,
       accentColor: document.getElementById("accentColorInput").value,
@@ -311,14 +289,12 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     document.getElementById("currencyInput").value = s.currencySymbol || "ج";
     document.getElementById("defaultImageInput").value = s.defaultImage || "";
     document.getElementById("adminAnnouncement").value = s.announcement || "";
-
     if (s.socialLinks) {
       document.getElementById("fbInput").value = s.socialLinks.facebook || "";
       document.getElementById("instaInput").value = s.socialLinks.instagram || "";
       document.getElementById("telegramInput").value = s.socialLinks.telegram || "";
       document.getElementById("tiktokInput").value = s.socialLinks.tiktok || "";
     }
-
     if (s.theme) {
       document.getElementById("primaryColorInput").value = s.theme.primaryColor || "#11261d";
       document.getElementById("accentColorInput").value = s.theme.accentColor || "#d4af37";
@@ -327,7 +303,6 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       document.getElementById("cardTextColorInput").value = s.theme.cardTextColor || "#0f172a";
       document.getElementById("fontFamilySelect").value = s.theme.fontFamily || "Tajawal";
     }
-
     renderProducts();
     renderCategories();
     renderZones();
@@ -338,60 +313,57 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
   function updateLivePreview() {
     collectUIData();
     const s = storeData.settings;
-    
     document.getElementById("prevLogo").innerText = s.storeName;
     document.getElementById("prevLogo").style.color = s.theme.accentColor;
     document.getElementById("prevHeader").style.backgroundColor = s.theme.primaryColor;
-    
     const body = document.getElementById("prevBody");
     body.style.backgroundColor = s.theme.bgColor;
 
     const visibleProds = storeData.products.filter(p => !p.hidden);
-
     if (!visibleProds.length) {
-      body.innerHTML = "<p style='color:#fff; text-align:center; font-size:11px; padding:20px;'>لا توجد منتجات ظاهرة للعرض</p>";
+      body.innerHTML = "<p style='color:#fff; text-align:center; font-size:11px; padding:20px;'>لا توجد منتجات ظاهرة</p>";
       return;
     }
-
-    body.innerHTML = visibleProds.map(p => `
-      <div class="preview-card" style="background: ${s.theme.cardBgColor}; color: ${s.theme.cardTextColor};">
-        <img src="${p.image || s.defaultImage || ''}" onerror="this.src=''">
-        <div class="preview-card-info">
-          <strong>${p.name || 'بدون اسم'}</strong>
-          <div style="color: ${s.theme.primaryColor}; font-weight:900; margin-top:2px;">${p.price || 0} ${s.currencySymbol}</div>
+    body.innerHTML = visibleProds.map(p => {
+      const imgSrc = p.image || (p.images && p.images[0]) || s.defaultImage || '';
+      return `
+        <div class="preview-card" style="background: ${s.theme.cardBgColor}; color: ${s.theme.cardTextColor};">
+          <img src="${imgSrc}" onerror="this.src=''">
+          <div class="preview-card-info">
+            <strong>${p.name || ''}</strong>
+            <div style="color: ${s.theme.primaryColor}; font-weight:900; margin-top:2px;">${p.price || 0} ${s.currencySymbol}</div>
+          </div>
         </div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
   }
 
   function renderProducts() {
     const container = document.getElementById("productsContainer");
     if (!storeData.products.length) { container.innerHTML = "<p>لا توجد منتجات حالياً.</p>"; updateLivePreview(); return; }
-    container.innerHTML = storeData.products.map(p => `
-      <div class="product-row" style="${p.hidden ? 'opacity:0.5; background:#fff5f5;' : ''}">
-        <img src="${p.image || ''}">
-        <div style="flex:1;">
-          <strong>${p.name}</strong> ${p.hidden ? '<small style="color:red;">(مخفي)</small>' : ''}<br>
-          <small>${p.category || ''} - ${p.price || 0} ${storeData.settings.currencySymbol || 'ج'}</small>
+    container.innerHTML = storeData.products.map(p => {
+      const imgSrc = p.image || (p.images && p.images[0]) || '';
+      return `
+        <div class="product-row" style="${p.hidden ? 'opacity:0.5; background:#fff5f5;' : ''}">
+          <img src="${imgSrc}">
+          <div style="flex:1;">
+            <strong>${p.name}</strong> ${p.hidden ? '<small style="color:red;">(مخفي)</small>' : ''}<br>
+            <small>${p.category || ''} - ${p.price || 0} ${storeData.settings.currencySymbol || 'ج'}</small>
+          </div>
+          <div style="display:flex; gap:4px; align-items:center;">
+            <button class="btn ${p.hidden ? 'btn-success' : 'btn-secondary'}" onclick="toggleProductVisibility('${p.id}')">${p.hidden ? 'إظهار' : 'إخفاء'}</button>
+            <button class="btn btn-warning" onclick="editProduct('${p.id}')">تعديل</button>
+            <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف</button>
+          </div>
         </div>
-        <div style="display:flex; gap:4px; align-items:center;">
-          <button class="btn ${p.hidden ? 'btn-success' : 'btn-secondary'}" onclick="toggleProductVisibility('${p.id}')">
-            ${p.hidden ? 'إظهار' : 'إخفاء'}
-          </button>
-          <button class="btn btn-warning" onclick="editProduct('${p.id}')">تعديل</button>
-          <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف</button>
-        </div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
     updateLivePreview();
   }
 
   function toggleProductVisibility(id) {
     const p = storeData.products.find(item => item.id === id);
-    if(p) {
-      p.hidden = !p.hidden;
-      renderProducts();
-    }
+    if(p) { p.hidden = !p.hidden; renderProducts(); }
   }
 
   function addNewCategory() {
@@ -423,17 +395,11 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     const list = storeData.settings.categoriesList;
     const targetIdx = idx + direction;
     if(targetIdx < 0 || targetIdx >= list.length) return;
-    const temp = list[idx];
-    list[idx] = list[targetIdx];
-    list[targetIdx] = temp;
+    const temp = list[idx]; list[idx] = list[targetIdx]; list[targetIdx] = temp;
     renderCategories();
   }
 
-  function deleteCategory(idx) {
-    storeData.settings.categoriesList.splice(idx, 1);
-    renderCategories();
-  }
-
+  function deleteCategory(idx) { storeData.settings.categoriesList.splice(idx, 1); renderCategories(); }
   function updateCategorySelectOptions() {
     const select = document.getElementById("pCategorySelect");
     const list = storeData.settings.categoriesList || [];
@@ -446,8 +412,7 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     if (!name) return;
     if (!storeData.settings.deliveryZones) storeData.settings.deliveryZones = [];
     storeData.settings.deliveryZones.push({ name, fee });
-    document.getElementById("zoneName").value = "";
-    document.getElementById("zoneFee").value = "";
+    document.getElementById("zoneName").value = ""; document.getElementById("zoneFee").value = "";
     renderZones();
   }
 
@@ -461,18 +426,14 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     `).join("");
   }
 
-  function deleteZone(idx) {
-    storeData.settings.deliveryZones.splice(idx, 1);
-    renderZones();
-  }
+  function deleteZone(idx) { storeData.settings.deliveryZones.splice(idx, 1); renderZones(); }
 
   function addNewBranch() {
     const input = document.getElementById("newBranchName");
     if (!input.value.trim()) return;
     if (!storeData.settings.branches) storeData.settings.branches = [];
     storeData.settings.branches.push(input.value.trim());
-    input.value = "";
-    renderBranches();
+    input.value = ""; renderBranches();
   }
 
   function renderBranches() {
@@ -485,16 +446,12 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     `).join("");
   }
 
-  function deleteBranch(idx) {
-    storeData.settings.branches.splice(idx, 1);
-    renderBranches();
-  }
+  function deleteBranch(idx) { storeData.settings.branches.splice(idx, 1); renderBranches(); }
 
   function switchTab(tabId, btn) {
     document.querySelectorAll(".admin-tabs button").forEach(b => b.classList.remove("active"));
     document.querySelectorAll(".tab-section").forEach(s => s.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById(tabId).classList.add("active");
+    btn.classList.add("active"); document.getElementById(tabId).classList.add("active");
   }
 
   function togglePricing() {
@@ -507,7 +464,14 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     document.getElementById("editId").value = "";
     document.getElementById("pName").value = "";
     document.getElementById("pKilo").value = "";
+    document.getElementById("pQuarter").value = "";
+    document.getElementById("pHalf").value = "";
+    document.getElementById("pUnitPrice").value = "";
+    document.getElementById("pUnitLabel").value = "";
+    document.getElementById("pDesc").value = "";
     document.getElementById("pImage").value = "";
+    document.getElementById("pImage2").value = "";
+    document.getElementById("pVideo").value = "";
     document.getElementById("productModal").style.display = "flex";
   }
   function closeModal() { document.getElementById("productModal").style.display = "none"; }
@@ -517,14 +481,22 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     const name = document.getElementById("pName").value.trim();
     const category = document.getElementById("pCategorySelect").value;
     const saleType = document.getElementById("pSaleType").value;
+    const desc = document.getElementById("pDesc").value;
     const image = document.getElementById("pImage").value.trim();
+    const image2 = document.getElementById("pImage2").value.trim();
+    const videoUrl = document.getElementById("pVideo").value.trim();
     
     if(!name) return alert("أدخل اسم المنتج!");
 
+    let imagesArr = [];
+    if(image) imagesArr.push(image);
+    if(image2) imagesArr.push(image2);
+
     let payload = {
       id: id || 'p_' + Date.now(),
-      name, category, saleType, image,
-      images: [image],
+      name, category, saleType, description: desc, videoUrl,
+      image: image || (imagesArr[0] || ""),
+      images: imagesArr.length ? imagesArr : [image],
       hidden: false
     };
 
@@ -547,7 +519,6 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     } else {
       storeData.products.push(payload);
     }
-
     renderProducts();
     closeModal();
   }
@@ -560,8 +531,19 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
     document.getElementById("pName").value = p.name || "";
     document.getElementById("pCategorySelect").value = p.category || "";
     document.getElementById("pSaleType").value = p.saleType || "weight";
-    document.getElementById("pKilo").value = p.price || "";
-    document.getElementById("pImage").value = p.image || "";
+    document.getElementById("pDesc").value = p.description || "";
+    document.getElementById("pVideo").value = p.videoUrl || "";
+    document.getElementById("pImage").value = p.image || (p.images && p.images[0]) || "";
+    document.getElementById("pImage2").value = (p.images && p.images[1]) ? p.images[1] : "";
+
+    if(p.pricing) {
+      document.getElementById("pKilo").value = p.pricing.kilo || p.price || "";
+      document.getElementById("pHalf").value = p.pricing.half || "";
+      document.getElementById("pQuarter").value = p.pricing.quarter || "";
+      document.getElementById("pUnitPrice").value = p.pricing.unitPrice || p.price || "";
+      document.getElementById("pUnitLabel").value = p.pricing.unitLabel || "";
+    }
+    togglePricing();
   }
 
   function deleteProduct(id) {
@@ -570,7 +552,6 @@ body { font-family: var(--custom-font); background: #f8fafc; color: var(--text-d
       renderProducts();
     }
   }
-
   updateLivePreview();
 </script>
 </body>

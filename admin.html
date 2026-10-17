@@ -72,13 +72,12 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       <h1 style="margin: 0; color: var(--primary); font-size: 22px; font-weight:900;" id="dashboardTitle">لوحة التحكم</h1>
       <div style="display: flex; gap: 8px;">
         <button class="btn btn-warning" id="forceRefreshBtn" style="background: #f59e0b; color: #fff;">🔄 نشر التحديثات للزبائن</button>
-        <button class="btn btn-secondary" id="manualRefreshBtn" style="background: #0284c7; color: #fff;">📥 تحديث البيانات يدويًا</button>
         <button class="btn btn-danger" id="logoutBtn">تسجيل الخروج</button>
       </div>
     </div>
 
     <div class="admin-tabs">
-      <button class="active" onclick="switchTab('pTab', this)">📦 المنتجات</button>
+      <button class="active" onclick="switchTab('pTab', this)">📦 المنتجات والنسخ الشامل</button>
       <button onclick="switchTab('catTab', this)">🏷️ الأقسام</button>
       <button onclick="switchTab('themeTab', this)">🎨 الأبعاد والألوان</button>
       <button onclick="switchTab('oTab', this)">📋 الطلبات</button>
@@ -87,16 +86,16 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       <button onclick="switchTab('rTab', this)">📊 التقارير</button>
     </div>
 
-    <!-- 1. المنتجات -->
+    <!-- 1. المنتجات والنسخ الاحتياطي الشامل -->
     <div id="pTab" class="tab-section active">
       <div class="card">
         <button class="btn btn-success" onclick="openModal()">➕ إضافة منتج جديد</button>
         <div class="backup-tools" style="margin-top: 15px;">
-          <strong style="width:100%; font-size:13px; margin-bottom:5px;">💾 النسخ الاحتياطي وإدارة المنتجات:</strong>
-          <button class="btn btn-primary" onclick="exportProductsBackup()">📥 تنزيل نسخة احتياطية</button>
+          <strong style="width:100%; font-size:14px; margin-bottom:8px; color:var(--primary);">💾 النسخ الاحتياطي الشامل للمتجر (Full Store Backup):</strong>
+          <button class="btn btn-primary" onclick="exportFullStoreBackup()">📥 تنزيل نسخة احتياطية شاملة للمتجر</button>
           <label class="btn btn-secondary" style="cursor:pointer; margin:0;">
-            📤 استعادة نسخة
-            <input type="file" id="importProductsFile" accept=".json" style="display:none;" onchange="importProductsBackup(event)">
+            📤 استعادة نسخة احتياطية شاملة
+            <input type="file" id="importFullStoreFile" accept=".json" style="display:none;" onchange="importFullStoreBackup(event)">
           </label>
           <button class="btn btn-danger" onclick="deleteAllProducts()">🗑️ حذف كافة المنتجات</button>
         </div>
@@ -179,7 +178,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       </div>
     </div>
 
-    <!-- 4. الطلبات (محدث لتوفير أقصى قدر من القراءات) -->
+    <!-- 4. الطلبات -->
     <div id="oTab" class="tab-section">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
@@ -339,6 +338,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   let currentDefaultImage = "";
   let products = [], orders = [], categoriesList = [], branchesList = [], uploadedBase64Image = "", storeSettingsData = {};
+  let currentDeliveryZones = [];
 
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = document.getElementById("adminEmail").value.trim();
@@ -384,11 +384,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
   });
 
-  document.getElementById("manualRefreshBtn").addEventListener("click", async () => {
-    await loadAllAdminData();
-    alert("🔄 تم تحديث بيانات لوحة التحكم بنجاح!");
-  });
-
   onAuthStateChanged(auth, user => {
     if(user) {
       document.getElementById("authPanel").style.display = "none";
@@ -405,10 +400,8 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     document.getElementById("secondsGroup").style.display = (type === 'auto') ? 'block' : 'none';
   };
 
-  // دالة الجلب الموفرة (تستهلك قراءتين فقط: إعدادات المتجر + حزمة المنتجات)
   async function loadAllAdminData() {
     try {
-      // 1. جلب إعدادات المتجر (قراءة واحدة)
       const storeSnap = await getDoc(doc(db, "settings", "store"));
       if(storeSnap.exists()){
         const data = storeSnap.data();
@@ -438,10 +431,11 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         
         categoriesList = data.categoriesList || (Array.isArray(data.categories) ? data.categories.map(c=>({ name: c, hidden: false })) : []);
         branchesList = data.branches || ["الفرع الرئيسي"];
+        currentDeliveryZones = data.deliveryZones || [];
 
         renderCategoriesAdmin();
         updateCategorySelectOptions();
-        if(data.deliveryZones) renderZones(data.deliveryZones);
+        renderZones(currentDeliveryZones);
         renderBranchesAdmin(branchesList);
 
         if(data.theme) {
@@ -461,7 +455,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         }
       }
 
-      // 2. جلب المنتجات المجمعة (قراءة واحدة)
       const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
       if (bundleSnap.exists() && bundleSnap.data().productsArray) {
         products = bundleSnap.data().productsArray;
@@ -472,8 +465,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         if (products.length > 0) await syncProductsBundle();
       }
       renderProducts();
-
-      // تم إلغاء جلب الطلبات التلقائي هنا لتوفير القراءات
       renderReports();
 
     } catch(err) {
@@ -481,7 +472,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
   }
 
-  // دالة مخصصة لجلب الطلبات يدوياً فقط عند الضغط على الزر
   window.fetchOrdersManual = async function() {
     const container = document.getElementById("ordersContainer");
     container.innerHTML = "جاري جلب أحدث 20 طلباً...";
@@ -503,32 +493,64 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     loadAllAdminData();
   }
 
-  window.exportProductsBackup = () => {
-    if(!products.length) return alert("لا توجد منتجات لتصديرها!");
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
+  // --- دالة النسخ الاحتياطي الشامل بالكامل ---
+  window.exportFullStoreBackup = () => {
+    const fullBackupData = {
+      backupVersion: "2.0",
+      exportDate: new Date().toISOString(),
+      storeSettings: storeSettingsData,
+      products: products
+    };
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullBackupData, null, 2));
     const dl = document.createElement('a');
     dl.setAttribute("href", dataStr);
-    dl.setAttribute("download", `products_bundle_backup_${new Date().toISOString().slice(0,10)}.json`);
+    dl.setAttribute("download", `full_store_backup_${storeSettingsData.storeName || 'store'}_${new Date().toISOString().slice(0,10)}.json`);
     dl.click();
   };
 
-  window.importProductsBackup = (e) => {
+  // --- دالة استعادة النسخة الاحتياطية الشاملة بالكامل ---
+  window.importFullStoreBackup = (e) => {
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
     reader.onload = async function(event) {
       try {
-        const imported = JSON.parse(event.target.result);
-        if(confirm(`استعادة وتحديث ${imported.length} منتج داخل الحزمة؟`)) {
-          products = imported.map((item, idx) => ({
+        const importedData = JSON.parse(event.target.result);
+        
+        let importedProducts = [];
+        let importedSettings = {};
+
+        if (importedData.products && importedData.storeSettings) {
+          importedProducts = importedData.products;
+          importedSettings = importedData.storeSettings;
+        } else if (Array.isArray(importedData)) {
+          importedProducts = importedData;
+        } else {
+          return alert("ملف النسخة الاحتياطية غير صالح!");
+        }
+
+        if(confirm(`هل أنت متأكد من استعادة كافة بيانات المتجر بالكامل؟ (سيتم تحديث الإعدادات، الألوان، الأقسام، و ${importedProducts.length} منتج)`)) {
+          
+          products = importedProducts.map((item, idx) => ({
             ...item,
             id: item.id || 'p_' + Math.random().toString(36).substr(2, 9),
-            order: idx
+            order: item.order !== undefined ? item.order : idx
           }));
           await syncProductsBundle();
-          alert("تمت الاستعادة بنجاح ونشر التحديثات!");
+
+          if (Object.keys(importedSettings).length > 0) {
+            importedSettings.lastUpdated = Date.now();
+            await setDoc(doc(db, "settings", "store"), importedSettings, { merge: true });
+          }
+
+          await loadAllAdminData();
+          alert("✨ تم استعادة النسخة الاحتياطية الشاملة وتحديث كافة بيانات المتجر بنجاح!");
         }
-      } catch(err) { alert("خطأ في قراءة الملف!"); }
+      } catch(err) { 
+        console.error(err);
+        alert("خطأ في قراءة ملف النسخة الاحتياطية!"); 
+      }
     };
     reader.readAsText(file);
   };
@@ -537,6 +559,8 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     if(confirm("⚠️ حذف كافة المنتجات من الحزمة؟")) {
       products = [];
       await syncProductsBundle();
+      renderProducts();
+      renderReports();
       alert("تم الحذف بنجاح!");
     }
   };
@@ -553,7 +577,11 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       for(const o of orders) {
         await deleteDoc(doc(db, "orders", o.id));
       }
+      orders = [];
+      storeSettingsData.visitsSinceLastReset = 0;
       await setDoc(doc(db, "settings", "store"), { visitsSinceLastReset: 0 }, { merge: true });
+      renderOrders();
+      renderReports();
       alert("تم التفريغ وتصفير العداد الدوري للزوار بنجاح!");
     }
   };
@@ -587,12 +615,19 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       bgColor: document.getElementById("bgColorInput").value,
       cardBgColor: document.getElementById("cardBgColorInput").value,
       cardTextColor: document.getElementById("cardTextColorInput").value,
-      menuBgImage: uploadedBase64Image || "",
+      menuBgImage: uploadedBase64Image || storeSettingsData.theme?.menuBgImage || "",
       fontFamily: selectedFont
     };
+    
+    storeSettingsData.storeName = storeName;
+    storeSettingsData.theme = theme;
+
     await setDoc(doc(db, "settings", "store"), { storeName, theme, lastUpdated: Date.now() }, { merge: true });
     document.documentElement.style.setProperty('--custom-font', selectedFont + ", Tahoma");
-    alert("✨ تم الحفظ وتطبيق الخط بنجاح!");
+    if(document.getElementById("storeNameInput").value.trim()) {
+      document.getElementById("dashboardTitle").innerText = " " + storeName;
+    }
+    alert("✨ تم الحفظ وتطبيق الخط والألوان بنجاح!");
   });
 
   document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
@@ -611,6 +646,14 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       tiktok: document.getElementById("tiktokInput").value.trim()
     };
 
+    storeSettingsData.whatsappNumber = whatsappNumber;
+    storeSettingsData.currencySymbol = currencySymbol;
+    storeSettingsData.defaultImage = defaultImage;
+    storeSettingsData.announcement = announcement;
+    storeSettingsData.announcementCloseType = announcementCloseType;
+    storeSettingsData.announcementSeconds = announcementSeconds;
+    storeSettingsData.socialLinks = socialLinks;
+
     await setDoc(doc(db, "settings", "store"), { 
       whatsappNumber, 
       currencySymbol, 
@@ -622,6 +665,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       lastUpdated: Date.now() 
     }, { merge: true });
     
+    renderReports();
     alert("✨ تم حفظ الإعدادات وإعدادات النافذة المنبثقة بنجاح!");
   });
 
@@ -662,6 +706,9 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   window.saveCategoriesToFirebase = async () => {
     const catNamesOnly = categoriesList.filter(c => !c.hidden).map(c => c.name);
+    storeSettingsData.categoriesList = categoriesList;
+    storeSettingsData.categories = catNamesOnly;
+
     await setDoc(doc(db, "settings", "store"), { 
       categoriesList: categoriesList, 
       categories: catNamesOnly,
@@ -673,6 +720,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   function renderCategoriesAdmin() {
     const container = document.getElementById("categoriesListContainer");
+    if(!container) return;
     if(!categoriesList.length) return container.innerHTML = "<p>لا توجد أقسام.</p>";
     container.innerHTML = categoriesList.map((cat, idx) => `
       <div class="category-row">
@@ -706,6 +754,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   };
 
   window.saveBranchesToFirebase = async () => {
+    storeSettingsData.branches = branchesList;
     await setDoc(doc(db, "settings", "store"), { branches: branchesList, lastUpdated: Date.now() }, { merge: true });
     renderBranchesAdmin(branchesList);
   };
@@ -799,6 +848,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     products.forEach((p, idx) => { p.order = idx; });
 
     await syncProductsBundle();
+    renderProducts();
   };
 
   window.toggleProductVisibility = async (id, makeHidden) => {
@@ -806,6 +856,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     if(p) {
       p.hidden = makeHidden;
       await syncProductsBundle();
+      renderProducts();
     }
   };
 
@@ -942,7 +993,10 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
 
     await syncProductsBundle();
+    renderProducts();
+    renderReports();
     closeModal();
+    alert("✨ تم حفظ المنتج وتحديث القائمة بنجاح!");
   });
 
   window.editProduct = (id) => {
@@ -977,6 +1031,9 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     if(confirm("حذف المنتج؟")) {
       products = products.filter(item => item.id !== id);
       await syncProductsBundle();
+      renderProducts();
+      renderReports();
+      alert("✨ تم حذف المنتج بنجاح!");
     }
   };
 
@@ -984,19 +1041,28 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const name = document.getElementById("zoneName").value.trim();
     const fee = Number(document.getElementById("zoneFee").value);
     if(!name || isNaN(fee)) return alert("أدخل اسم المنطقة والتكلفة!");
+    
     const storeRef = doc(db, "settings", "store");
-    const docSnap = await getDoc(storeRef);
-    let zones = docSnap.exists() && docSnap.data().deliveryZones ? docSnap.data().deliveryZones : [];
-    zones.push({ name, fee });
-    await setDoc(storeRef, { deliveryZones: zones }, { merge: true });
-    document.getElementById("zoneName").value = ""; document.getElementById("zoneFee").value = "";
+    currentDeliveryZones.push({ name, fee });
+    storeSettingsData.deliveryZones = currentDeliveryZones;
+
+    await setDoc(storeRef, { deliveryZones: currentDeliveryZones }, { merge: true });
+    
+    document.getElementById("zoneName").value = ""; 
+    document.getElementById("zoneFee").value = "";
+    renderZones(currentDeliveryZones);
+    alert("✨ تم إضافة المنطقة بنجاح!");
   });
 
   function renderZones(zones) {
     const container = document.getElementById("zonesContainer");
     if(container) {
+      if(!zones || !zones.length) {
+        container.innerHTML = "<p style='color:#64748b; font-size:13px;'>لا توجد مناطق توصيل مضافة حالياً.</p>";
+        return;
+      }
       container.innerHTML = zones.map((z, idx) => `
-        <div style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f9f9f9; padding:8px; border-radius:5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; background:#f9f9f9; padding:8px; border-radius:5px; border:1px solid #e2e8f0;">
           <span>${z.name}: <strong>${z.fee}</strong></span>
           <button class="btn btn-danger" style="padding:2px 8px;" onclick="window.deleteZone(${idx})">حذف</button>
         </div>
@@ -1005,12 +1071,13 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   }
 
   window.deleteZone = async (idx) => {
-    const storeRef = doc(db, "settings", "store");
-    const docSnap = await getDoc(storeRef);
-    if(docSnap.exists() && docSnap.data().deliveryZones) {
-      let zones = docSnap.data().deliveryZones;
-      zones.splice(idx, 1);
-      await setDoc(storeRef, { deliveryZones: zones }, { merge: true });
+    if(confirm("هل أنت متأكد من حذف منطقة التوصيل؟")) {
+      const storeRef = doc(db, "settings", "store");
+      currentDeliveryZones.splice(idx, 1);
+      storeSettingsData.deliveryZones = currentDeliveryZones;
+      await setDoc(storeRef, { deliveryZones: currentDeliveryZones }, { merge: true });
+      renderZones(currentDeliveryZones);
+      alert("✨ تم حذف المنطقة بنجاح!");
     }
   };
 

@@ -944,7 +944,6 @@
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
 
-    // سجل المحادثة الذكي لضمان استمرارية السياق بدون تكرار الترحيب
     let chatHistory = [];
 
     const translationCache = JSON.parse(localStorage.getItem('pista_trans_cache') || '{}');
@@ -1975,7 +1974,7 @@
       modal.style.display = modal.style.display === "flex" ? "none" : "flex";
     };
 
-    // الدالة الذكية والاقتصادية المحدثة للاتصال بـ Gemini API مع توفير استهلاك التوكنز والالتزام بالأسعار
+    // الدالة الخالصة للاتصال بـ Gemini API بدون أي نظام طوارئ محلي
     window.sendAIMessage = async () => {
       const input = document.getElementById("aiUserInput");
       const msgContainer = document.getElementById("aiChatMessages");
@@ -1998,22 +1997,21 @@
       let reply = "";
 
       try {
-        const aiConf = storeSettings.aiConfig || {};
-        const apiKey = aiConf.apiKey || localStorage.getItem('gemini_api_key') || "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
-        const temp = 0.1; // حرارة دقيقة لمنع التأليف
+        const apiKey = "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
+        const temp = 0.1;
         
-        // قائمة مختصرة للأسماء والأسعار فقط لتوفير التوكنز واستهلاك القراءة
         const shortMenuSummary = allProducts.map(p => `- ${p.name}: ${p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0} ${window.getCurrency()}`).join("\n");
 
         const systemInstruction = `
-أنت مساعد المبيعات الذكي لمتجر "بيستاش دي ألب" (Pistache D'Alep) للمكسرات والحلويات الحلبية.
+أنت مساعد المبيعات الذكي لمتجر "بيستاش دي ألب" (Pistache D'Alep) للمكسرات والحلويات الحلبية في القاهرة (الرحاب).
 
 قائمة الأسعار المختصرة:
 ${shortMenuSummary}
 
 القواعد الأساسية:
 1. التزم بالأسعار المذكورة أعلاه بدقة تامة ولا تألف أي سعر أو صنف غير موجود.
-2. كن لطيفاً ومختصراً ومساعداً للزبون، وتذكر سياق الحوار السابق.
+2. كن لطيفاً ومختصراً ومساعداً للزبون. تذكر دائماً كل ما دار في الحوار السابق (Chat History) ولا تبدأ الترحيب من جديد أبداً إذا كانت المحادثة مستمرة.
+3. إذا سأل الزبون عن صنف (مثل الكنافة)، اعرض له الأصناف المتطابقة وأسعارها من القائمة، واسأله إن كان يريد إضافتها أو تحديد الوزن.
 `;
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -2031,7 +2029,7 @@ ${shortMenuSummary}
 
         const data = await response.json();
         
-        if (data.candidates && data.candidates[0].content) {
+        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
           reply = data.candidates[0].content.parts[0].text;
         } else {
           throw new Error("Invalid Gemini response structure");
@@ -2039,24 +2037,7 @@ ${shortMenuSummary}
 
       } catch(e) {
         console.error("Gemini API Error:", e);
-        const queryLower = text.toLowerCase().trim();
-        const curr = window.getCurrency();
-
-        let matched = allProducts.filter(p => {
-          const pName = p.name.toLowerCase();
-          return queryLower.split(" ").some(word => word.length > 1 && pName.includes(word));
-        });
-
-        if (matched.length > 0) {
-          reply = `إليك الأصناف المتوفرة:\n\n`;
-          matched.slice(0, 3).forEach(p => {
-            const priceVal = p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0;
-            reply += `✨ **${p.name}** - ${priceVal} ${curr}\n`;
-          });
-          reply += `\nهل تحب أضيفها لسلتك؟`;
-        } else {
-          reply = `عذراً، لم أجد طلباً مطابقاً. يمكنك تصفح الأقسام أو إخباري باسم صنف آخر!`;
-        }
+        reply = "عذراً يا غالي، حدث خطأ مؤقت في الاتصال بالمساعد الذكي. يرجى المحاولة مرة أخرى بعد قليل.";
       }
 
       chatHistory.push({
@@ -2064,7 +2045,9 @@ ${shortMenuSummary}
         parts: [{ text: reply }]
       });
 
-      document.getElementById(loadingId).remove();
+      const loadingEl = document.getElementById(loadingId);
+      if(loadingEl) loadingEl.remove();
+      
       msgContainer.innerHTML += `<div class="ai-message bot">${escapeHtml(reply)}</div>`;
       msgContainer.scrollTop = msgContainer.scrollHeight;
     };

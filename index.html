@@ -98,7 +98,8 @@
     }
     body.dark-mode .product-card, 
     body.dark-mode .modal-drawer,
-    body.dark-mode .social-modal-card {
+    body.dark-mode .social-modal-card,
+    body.dark-mode .ai-chat-modal {
       background-color: #1e293b !important;
       color: #f8fafc !important;
       border-color: #334155 !important;
@@ -597,6 +598,119 @@
     }
     .cart-total-text { font-size: 9px; font-weight: 900; margin-top: 3px; color: #f8fafc; white-space: nowrap; }
 
+    /* أنماط المساعد الذكي العائم والقابل للسحب */
+    #aiFloatingBtn {
+      position: fixed;
+      bottom: 100px;
+      left: 20px;
+      width: 60px;
+      height: 60px;
+      background: var(--primary);
+      color: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      cursor: grab;
+      z-index: 998;
+      border: 2px solid var(--accent);
+      user-select: none;
+      touch-action: none;
+      transition: transform 0.2s;
+    }
+    #aiFloatingBtn:active { cursor: grabbing; transform: scale(0.95); }
+
+    .ai-chat-modal {
+      position: fixed;
+      bottom: 90px;
+      left: 20px;
+      width: 350px;
+      max-width: calc(100vw - 40px);
+      height: 480px;
+      max-height: 70vh;
+      background: var(--card-bg, #fff);
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+      border: 2px solid var(--accent);
+      display: none;
+      flex-direction: column;
+      z-index: 1001;
+      overflow: hidden;
+      animation: popUp 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    .ai-chat-header {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 900;
+    }
+    .ai-chat-body {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .ai-message {
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 80%;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .ai-message.bot {
+      background: #f1f5f9;
+      color: #0f172a;
+      align-self: flex-start;
+      border-bottom-right-radius: 4px;
+    }
+    body.dark-mode .ai-message.bot {
+      background: #334155;
+      color: #f8fafc;
+    }
+    .ai-message.user {
+      background: var(--primary);
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-left-radius: 4px;
+    }
+    .ai-chat-footer {
+      padding: 10px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 8px;
+    }
+    body.dark-mode .ai-chat-footer {
+      background: #1e293b;
+      border-color: #334155;
+    }
+    .ai-chat-footer input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      outline: none;
+      font-size: 13px;
+    }
+    .ai-chat-footer button {
+      background: var(--primary);
+      color: var(--accent);
+      border: none;
+      padding: 0 16px;
+      border-radius: 10px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; display: none; justify-content: flex-end; backdrop-filter: blur(6px); }
     .modal-drawer { background: #fff; width: 100%; max-width: 420px; height: 100%; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.3); }
     .drawer-header { padding: 18px; background: var(--primary); color: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
@@ -659,6 +773,26 @@
       <span class="cart-badge" id="cartCount">0</span>
     </div>
     <div class="cart-total-text" id="cartTotal">0</div>
+  </div>
+
+  <!-- زر المساعد الذكي العائم والقابل للسحب -->
+  <div id="aiFloatingBtn" onclick="toggleAIChat()" title="المساعد الذكي">
+    🤖
+  </div>
+
+  <!-- نافذة محادثة المساعد الذكي التفاعلية -->
+  <div class="ai-chat-modal" id="aiChatModal">
+    <div class="ai-chat-header">
+      <span>🤖 مساعد المنيو الذكي</span>
+      <button onclick="toggleAIChat()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">✕</button>
+    </div>
+    <div class="ai-chat-body" id="aiChatMessages">
+      <div class="ai-message bot">أهلاً بك! أنا مساعدك الذكي لمتجر بيستاش دي ألب. كيف يمكنني مساعدتك في اختيار الحلويات اليوم؟ ✨</div>
+    </div>
+    <div class="ai-chat-footer">
+      <input type="text" id="aiUserInput" placeholder="اكتب سؤالك هنا..." onkeypress="if(event.key==='Enter') sendAIMessage()">
+      <button onclick="sendAIMessage()">إرسال</button>
+    </div>
   </div>
 
   <div class="image-lightbox-overlay" id="imageLightbox" onclick="window.closeLightbox()">
@@ -1091,18 +1225,15 @@
       }
     }
 
-    // 🔥 دالة الجلب المباشر والمستقر بقراءتين فقط بدون تعقيدات كاش زائل
     async function fetchStoreData() {
       try {
         renderSkeletons();
         
-        // 1. قراءة إعدادات المتجر (قراءة واحدة فقط)
         const settingsSnap = await getDoc(doc(db, "settings", "store"));
         if (settingsSnap.exists()) {
           storeSettings = settingsSnap.data();
         }
 
-        // 2. قراءة الحزمة المجمعة للمنتجات (قراءة واحدة فقط للمستند المجمع)
         const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
         if (bundleSnap.exists() && bundleSnap.data().productsArray) {
           allProducts = bundleSnap.data().productsArray;
@@ -1687,9 +1818,126 @@
       return clean;
     }
 
+    // --- منطق السحب والإفلات وعمل المساعد الذكي العائم ---
+    const aiBtn = document.getElementById("aiFloatingBtn");
+    let isDragging = false, initialX, initialY;
+
+    aiBtn.addEventListener("touchstart", dragStart, {passive: true});
+    aiBtn.addEventListener("touchmove", drag, {passive: true});
+    aiBtn.addEventListener("touchend", dragEnd);
+
+    // لدعم السحب بالماوس أيضاً على شاشات الكمبيوتر
+    aiBtn.addEventListener("mousedown", dragStartMouse);
+    document.addEventListener("mousemove", dragMouse);
+    document.addEventListener("mouseup", dragEndMouse);
+
+    function dragStart(e) {
+      initialX = e.touches[0].clientX - aiBtn.offsetLeft;
+      initialY = e.touches[0].clientY - aiBtn.offsetTop;
+      isDragging = true;
+    }
+
+    function drag(e) {
+      if (!isDragging) return;
+      let currentX = e.touches[0].clientX - initialX;
+      let currentY = e.touches[0].clientY - initialY;
+      
+      currentX = Math.max(10, Math.min(window.innerWidth - 70, currentX));
+      currentY = Math.max(70, Math.min(window.innerHeight - 130, currentY));
+      
+      aiBtn.style.left = currentX + "px";
+      aiBtn.style.top = currentY + "px";
+      aiBtn.style.bottom = "auto";
+      aiBtn.style.right = "auto";
+    }
+
+    function dragEnd() { isDragging = false; }
+
+    function dragStartMouse(e) {
+      initialX = e.clientX - aiBtn.offsetLeft;
+      initialY = e.clientY - aiBtn.offsetTop;
+      isDragging = true;
+    }
+
+    function dragMouse(e) {
+      if (!isDragging) return;
+      let currentX = e.clientX - initialX;
+      let currentY = e.clientY - initialY;
+      
+      currentX = Math.max(10, Math.min(window.innerWidth - 70, currentX));
+      currentY = Math.max(70, Math.min(window.innerHeight - 130, currentY));
+      
+      aiBtn.style.left = currentX + "px";
+      aiBtn.style.top = currentY + "px";
+      aiBtn.style.bottom = "auto";
+      aiBtn.style.right = "auto";
+    }
+
+    function dragEndMouse() { isDragging = false; }
+
+    window.toggleAIChat = () => {
+      const modal = document.getElementById("aiChatModal");
+      modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+    };
+
+    window.sendAIMessage = async () => {
+      const input = document.getElementById("aiUserInput");
+      const msgContainer = document.getElementById("aiChatMessages");
+      const text = input.value.trim();
+      if(!text) return;
+
+      msgContainer.innerHTML += `<div class="ai-message user">${escapeHtml(text)}</div>`;
+      input.value = "";
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+
+      const loadingId = "loading_" + Date.now();
+      msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري التفكير... ⏳</div>`;
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+
+      try {
+        const aiConf = storeSettings.aiConfig || {};
+        if (aiConf.enabled === false) {
+          document.getElementById(loadingId).remove();
+          msgContainer.innerHTML += `<div class="ai-message bot">عذراً، المساعد الذكي معطل حالياً من إدارة المتجر.</div>`;
+          return;
+        }
+
+        const apiKey = aiConf.apiKey || "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
+        const temp = aiConf.temperature !== undefined ? aiConf.temperature : 0.1;
+        
+        const menuSummary = allProducts.map(p => `- ${p.name} (${p.category}): السعر ${p.price || p.pricing?.kilo || 0} ${window.getCurrency()}, الوصف: ${p.description || 'لا يوجد وصف'}`).join("\n");
+
+        const prompt = `أنت مساعد ذكي لمتجر حلويات ومكسرات فاخر اسمه "${storeSettings.storeName || 'بيستاش دي ألب'}".
+هذه هي قائمة المنتجات المتوفرة في المتجر حالياً:
+${menuSummary}
+
+أجب على سؤال الزبون التالي بدقة واختصار بناءً على المنتجات المذكورة فقط ولا تقترح أي شيء غير موجود:
+سؤال الزبون: "${text}"`;
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { temperature: temp }
+          })
+        });
+
+        const data = await response.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "عذراً، لم أستطع الإجابة في الوقت الحالي.";
+
+        document.getElementById(loadingId).remove();
+        msgContainer.innerHTML += `<div class="ai-message bot">${escapeHtml(reply)}</div>`;
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+
+      } catch(e) {
+        document.getElementById(loadingId).remove();
+        msgContainer.innerHTML += `<div class="ai-message bot">عذراً، حدث خطأ في الاتصال بالمساعد الذكي.</div>`;
+      }
+    };
+
     function escapeHtml(s) { return String(s||'').replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   </script>
 </body>
 </html>
-
-

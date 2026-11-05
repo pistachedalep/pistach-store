@@ -1974,7 +1974,7 @@
       modal.style.display = modal.style.display === "flex" ? "none" : "flex";
     };
 
-    // الدالة الخالصة للاتصال المباشر بنموذج Gemini 1.5 Flash المستقر
+    // الدالة النهائية والمضبوطة تماماً للاتصال بـ Gemini 1.5 Flash
     window.sendAIMessage = async () => {
       const input = document.getElementById("aiUserInput");
       const msgContainer = document.getElementById("aiChatMessages");
@@ -2002,7 +2002,7 @@
         
         const shortMenuSummary = allProducts.map(p => `- ${p.name}: ${p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0} ${window.getCurrency()}`).join("\n");
 
-        const systemInstruction = `
+        const systemInstructionText = `
 أنت مساعد المبيعات الذكي لمتجر "بيستاش دي ألب" (Pistache D'Alep) للمكسرات والحلويات الحلبية في القاهرة (الرحاب).
 
 قائمة الأسعار المختصرة:
@@ -2010,17 +2010,18 @@ ${shortMenuSummary}
 
 القواعد الأساسية:
 1. التزم بالأسعار المذكورة أعلاه بدقة تامة ولا تألف أي سعر أو صنف غير موجود.
-2. كن لطيفاً ومختصراً ومساعداً للزبون. تذكر دائماً كل ما دار في الحوار السابق (Chat History) ولا تبدأ الترحيب من جديد أبداً إذا كانت المحادثة مستمرة.
+2. كن لطيفاً ومختصراً ومساعداً للزبون. تذكر دائماً كل ما دار في الحوار السابق ولا تبدأ الترحيب من جديد أبداً إذا كانت المحادثة مستمرة.
 3. إذا سأل الزبون عن صنف (مثل الكنافة)، اعرض له الأصناف المتطابقة وأسعارها من القائمة، واسأله إن كان يريد إضافتها أو تحديد الوزن.
 `;
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             system_instruction: {
-              parts: [{ text: systemInstruction }]
+              parts: [{ text: systemInstructionText }]
             },
             contents: chatHistory,
             generationConfig: { temperature: temp }
@@ -2034,12 +2035,12 @@ ${shortMenuSummary}
         } else if (data.error) {
           throw new Error(data.error.message || "Gemini API Error");
         } else {
-          throw new Error("Invalid Gemini response structure");
+          throw new Error("Invalid response structure");
         }
 
       } catch(e) {
         console.error("Gemini API Error:", e);
-        reply = `عذراً يا غالي، حدث خطأ في الاتصال بالمساعد (${e.message}). يرجى التأكد من الإنترنت أو المحاولة لاحقاً.`;
+        reply = `عذراً يا غالي، حدث خطأ تقني (${e.message}). يرجى التأكد من الإنترنت أو المحاولة لاحقاً.`;
       }
 
       chatHistory.push({

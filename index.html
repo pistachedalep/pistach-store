@@ -1974,7 +1974,7 @@
       modal.style.display = modal.style.display === "flex" ? "none" : "flex";
     };
 
-    // الدالة الخالصة للاتصال بـ Gemini API بدون أي نظام طوارئ محلي
+    // الدالة الخالصة للاتصال المباشر بنموذج Gemini 1.5 Flash المستقر
     window.sendAIMessage = async () => {
       const input = document.getElementById("aiUserInput");
       const msgContainer = document.getElementById("aiChatMessages");
@@ -2014,7 +2014,7 @@ ${shortMenuSummary}
 3. إذا سأل الزبون عن صنف (مثل الكنافة)، اعرض له الأصناف المتطابقة وأسعارها من القائمة، واسأله إن كان يريد إضافتها أو تحديد الوزن.
 `;
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -2031,13 +2031,15 @@ ${shortMenuSummary}
         
         if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
           reply = data.candidates[0].content.parts[0].text;
+        } else if (data.error) {
+          throw new Error(data.error.message || "Gemini API Error");
         } else {
           throw new Error("Invalid Gemini response structure");
         }
 
       } catch(e) {
         console.error("Gemini API Error:", e);
-        reply = "عذراً يا غالي، حدث خطأ مؤقت في الاتصال بالمساعد الذكي. يرجى المحاولة مرة أخرى بعد قليل.";
+        reply = `عذراً يا غالي، حدث خطأ في الاتصال بالمساعد (${e.message}). يرجى التأكد من الإنترنت أو المحاولة لاحقاً.`;
       }
 
       chatHistory.push({

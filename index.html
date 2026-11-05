@@ -944,7 +944,7 @@
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
 
-    // مصفوفة لتخزين تاريخ المحادثة لضمان استمرارية السياق وعدم تكرار الترحيب
+    // سجل المحادثة الذكي لضمان استمرارية السياق بدون تكرار الترحيب
     let chatHistory = [];
 
     const translationCache = JSON.parse(localStorage.getItem('pista_trans_cache') || '{}');
@@ -1975,14 +1975,13 @@
       modal.style.display = modal.style.display === "flex" ? "none" : "flex";
     };
 
-    // الدالة الذكية المحدثة للاستعلام عبر Gemini API مع تمرير المنيو وتاريخ المحادثة ودعم درجات حرارة دقيقة 0.1
+    // الدالة الذكية والاقتصادية المحدثة للاتصال بـ Gemini API مع توفير استهلاك التوكنز والالتزام بالأسعار
     window.sendAIMessage = async () => {
       const input = document.getElementById("aiUserInput");
       const msgContainer = document.getElementById("aiChatMessages");
       const text = input.value.trim();
       if(!text) return;
 
-      // إضافة رسالة العميل الحالية للسجل
       chatHistory.push({
         role: "user",
         parts: [{ text: text }]
@@ -1993,33 +1992,28 @@
       msgContainer.scrollTop = msgContainer.scrollHeight;
 
       const loadingId = "loading_" + Date.now();
-      msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري التفكير في أفضل خيار لك... ⏳</div>`;
+      msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري التفكير... ⏳</div>`;
       msgContainer.scrollTop = msgContainer.scrollHeight;
 
       let reply = "";
 
       try {
         const aiConf = storeSettings.aiConfig || {};
-        if (aiConf.enabled === false) {
-          throw new Error("AI disabled");
-        }
-
-        const apiKey = aiConf.apiKey || "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
-        const temp = 0.1; // حرارة منخفضة لضمان الالتزام الدقيق بالمنيو والأسعار بدون أي تأليف
+        const apiKey = aiConf.apiKey || localStorage.getItem('gemini_api_key') || "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
+        const temp = 0.1; // حرارة دقيقة لمنع التأليف
         
-        // استخراج المنيو كاملة من بيانات المتجر المحملة تلقائياً
-        const menuSummary = allProducts.map(p => `- ${p.name} (${p.category || 'أصناف'}): السعر ${p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0} ${window.getCurrency()}, الوصف: ${p.description || 'لا يوجد وصف'}`).join("\n");
+        // قائمة مختصرة للأسماء والأسعار فقط لتوفير التوكنز واستهلاك القراءة
+        const shortMenuSummary = allProducts.map(p => `- ${p.name}: ${p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0} ${window.getCurrency()}`).join("\n");
 
         const systemInstruction = `
-أنت مساعد المبيعات الذكي والودود لمتجر "بيستاش دي ألب" (Pistache D'Alep) للمكسرات والحلويات الحلبية الفاخرة.
+أنت مساعد المبيعات الذكي لمتجر "بيستاش دي ألب" (Pistache D'Alep) للمكسرات والحلويات الحلبية.
 
-📋 قائمة منتجات وأسعار متجرك الحالية:
-${menuSummary}
+قائمة الأسعار المختصرة:
+${shortMenuSummary}
 
-🎯 قواعد سلوكك:
-1. استخدم الأسماء والأسعار المذكورة في المنيو أعلاه بدقة تامة. ممنوع منعاً باتاً اختراع أو تأليف أسعار أو منتجات غير موجودة.
-2. كن بائعاً ذكياً ومحترفاً، وبعد إجابة الزبون وإعطائه تفاصيل الصنف، اطرح عليه سؤالاً تفاعلياً للمتابعة (مثل: "حبوب، تحب أوزن لك كيلو ولا نصف كيلو؟" أو "هل أضيفه لك لسلة التسوق؟").
-3. تذكر سياق المحادثة السابقة ولا تكرر عبارات الترحيب الطويلة بلا داعٍ.
+القواعد الأساسية:
+1. التزم بالأسعار المذكورة أعلاه بدقة تامة ولا تألف أي سعر أو صنف غير موجود.
+2. كن لطيفاً ومختصراً ومساعداً للزبون، وتذكر سياق الحوار السابق.
 `;
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -2030,46 +2024,41 @@ ${menuSummary}
             system_instruction: {
               parts: [{ text: systemInstruction }]
             },
-            contents: chatHistory, // تمرير سجل المحادثة بالكامل لضمان التسلسل والذاكرة المتصلة
+            contents: chatHistory,
             generationConfig: { temperature: temp }
           })
         });
 
         const data = await response.json();
-        reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (!reply) throw new Error("No response from AI");
+        
+        if (data.candidates && data.candidates[0].content) {
+          reply = data.candidates[0].content.parts[0].text;
+        } else {
+          throw new Error("Invalid Gemini response structure");
+        }
 
       } catch(e) {
-        // بديل احتياطي ذكي في حال انقطاع الإنترنت أو خطأ الـ API يعتمد على البحث داخل المنتجات الفعلية
+        console.error("Gemini API Error:", e);
         const queryLower = text.toLowerCase().trim();
         const curr = window.getCurrency();
 
-        const greetings = ["هلا", "مرحبا", "أهلا", "اهلا", "سلام", "السلام عليكم", "صباح الخير", "مساء الخير", "هاي", "hi", "hello"];
-        
-        if (greetings.some(g => queryLower === g || queryLower.startsWith(g + " "))) {
-          reply = `أهلاً وسهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! ✨\nما الذي تود طلبه اليوم من حلوياتنا ومكسراتنا الفاخرة؟`;
-        } else {
-          let matched = allProducts.filter(p => {
-            const pName = p.name.toLowerCase();
-            const pCat = (p.category || "").toLowerCase();
-            return pName.includes(queryLower) || pCat.includes(queryLower);
-          });
+        let matched = allProducts.filter(p => {
+          const pName = p.name.toLowerCase();
+          return queryLower.split(" ").some(word => word.length > 1 && pName.includes(word));
+        });
 
-          if (matched.length > 0) {
-            reply = `وجدت لك هذه الأصناف المطابقة لطلبك:\n\n`;
-            matched.slice(0, 4).forEach(p => {
-              const priceVal = p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0;
-              reply += `✨ **${p.name}** - السعر: ${priceVal} ${curr}\n`;
-            });
-            reply += `\nهل تحب أن أساعدك بإضافة أي منها لسلتك؟`;
-          } else {
-            reply = `أهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! تفضل بإخباري بالصنف الذي تبحث عنه (مثل: كنافة، بقلاوة، فطور جمعة، وجبات) وسأرشدك إليه فوراً.`;
-          }
+        if (matched.length > 0) {
+          reply = `إليك الأصناف المتوفرة:\n\n`;
+          matched.slice(0, 3).forEach(p => {
+            const priceVal = p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0;
+            reply += `✨ **${p.name}** - ${priceVal} ${curr}\n`;
+          });
+          reply += `\nهل تحب أضيفها لسلتك؟`;
+        } else {
+          reply = `عذراً، لم أجد طلباً مطابقاً. يمكنك تصفح الأقسام أو إخباري باسم صنف آخر!`;
         }
       }
 
-      // تخزين رد المساعد في سجل المحادثة لضمان استمرارية الذاكرة
       chatHistory.push({
         role: "model",
         parts: [{ text: reply }]

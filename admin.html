@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة التحكم - المتجر</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- تضمين مكتبة Supabase للتخزين السحابي المجاني -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root { 
   --primary: #122b20; 
@@ -45,7 +47,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 .backup-tools { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
 
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 16px; backdrop-filter: blur(5px); }
-.modal-card { background: #fff; border-radius: 16px; padding: 22px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.modal-card { background: #fff; border-radius: 16px; padding: 22px; max-width: 540px; width: 100%; max-height: 90vh; overflow-y: auto; }
 .order-box { border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 16px; background: #fff; }
 
 .search-box-container { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -82,7 +84,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       <button onclick="switchTab('themeTab', this)">🎨 الأبعاد والألوان</button>
       <button onclick="switchTab('oTab', this)">📋 الطلبات</button>
       <button onclick="switchTab('dTab', this)">🛵 التوصيل والفروع</button>
-      <button onclick="switchTab('sTab', this)">⚙️ الإعدادات والسوشيال</button>
+      <button onclick="switchTab('sTab', this)">⚙️ الإعدادات والمساعد</button>
       <button onclick="switchTab('rTab', this)">📊 التقارير</button>
     </div>
 
@@ -217,10 +219,23 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       </div>
     </div>
 
-    <!-- 6. الإعدادات وروابط السوشيال ميديا -->
+    <!-- 6. الإعدادات وروابط السوشيال ميديا والمساعد الذكي -->
     <div id="sTab" class="tab-section">
       <div class="card">
-        <h2>⚙️ الإعدادات العامة وسائل التواصل</h2>
+        <h2>⚙️ الإعدادات العامة وسائل التواصل والمساعد الذكي</h2>
+
+        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; margin-bottom: 20px;">
+          <h3 style="margin-top: 0; font-size: 15px; color: var(--primary);">🤖 إعدادات المساعد الذكي (AI Assistant)</h3>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>مفتاح Gemini API Key:</label>
+            <input type="text" id="aiApiKeyInput" placeholder="أدخل مفتاح الـ API هنا...">
+          </div>
+          <div class="form-group">
+            <label>درجة الحرارة (Temperature: <span id="tempValDisplay">0.1</span>):</label>
+            <input type="range" id="aiTemperatureInput" min="0" max="1" step="0.1" value="0.1" oninput="document.getElementById('tempValDisplay').innerText=this.value" style="width:100%; accent-color: var(--primary);">
+            <small style="color: #64748b;">القرار الأفضل هو 0.1 لالتزام المساعد التام بالمنيو ومنع التأليف.</small>
+          </div>
+        </div>
 
         <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; margin-bottom: 20px;">
           <h3 style="margin-top: 0; font-size: 15px; color: var(--primary);">📢 إعدادات النافذة المنبثقة للعملاء (الإعلان)</h3>
@@ -278,14 +293,25 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   <div class="modal-card">
     <h3 id="modalTitle">إضافة منتج</h3>
     <input type="hidden" id="editId">
-    <div class="form-group"><label>اسم المنتج *</label><input type="text" id="pName"></div>
-    <div class="form-group"><label>القسم *</label><select id="pCategorySelect"></select></div>
-    <div class="form-group"><label>نوع البيع *</label>
+    
+    <div class="form-group">
+      <label>اسم المنتج *</label>
+      <input type="text" id="pName" placeholder="مثال: بقلاوة بالفستق الحلبي">
+    </div>
+
+    <div class="form-group">
+      <label>القسم *</label>
+      <select id="pCategorySelect"></select>
+    </div>
+
+    <div class="form-group">
+      <label>نوع البيع *</label>
       <select id="pSaleType" onchange="togglePricing()">
         <option value="weight">بالكيلو (أوزان متعددة)</option>
         <option value="unit">بالوحدة (علبة / قطعة)</option>
       </select>
     </div>
+
     <div id="weightFields">
       <div class="grid-2">
         <input type="number" id="pQuarter" placeholder="سعر الربع">
@@ -293,19 +319,45 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       </div>
       <div class="form-group" style="margin-top: 8px;"><input type="number" id="pKilo" placeholder="سعر الكيلو *"></div>
     </div>
+
     <div id="unitFields" style="display:none;">
       <div class="grid-2">
         <input type="text" id="pUnitLabel" placeholder="مسمى الوحدة">
         <input type="number" id="pUnitPrice" placeholder="سعر الوحدة *">
       </div>
     </div>
-    <div class="form-group"><label>الوصف</label><textarea id="pDesc" rows="2"></textarea></div>
-    <div class="form-group"><label>رابط الصورة الرئيسية (اتركه فارغاً للاستخدام الافتراضي)</label><input type="url" id="pImage"></div>
-    
+
+    <!-- حقل الوصف مع زر اقتراح 3 أوصاف بالذكاء الاصطناعي -->
     <div class="form-group">
-      <label>روابط صور إضافية (اختياري - افصل بينها بفاصلة ,)</label>
-      <input type="text" id="pExtraImages" placeholder="https://img1.com/a.jpg, https://img2.com/b.jpg">
+      <label>الوصف (التفاصيل، نوع السمنة، الطلب المسبق، العدد)</label>
+      <textarea id="pDesc" rows="3" placeholder="اكتب الوصف أو اطلب من الذكاء الاصطناعي اقتراحه..."></textarea>
+      
+      <div style="margin-top: 6px;">
+        <button type="button" onclick="generateAIDescriptionOptions()" style="background: #122b20; color: #d4af37; border: none; padding: 7px 12px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;">
+          ✨ اقتراح 3 أوصاف بالذكاء الاصطناعي
+        </button>
+      </div>
+
+      <!-- حاوية خيارات الأوصاف المقترحة -->
+      <div id="aiOptionsContainer" style="display: none; margin-top: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+        <p style="font-size: 11.5px; font-weight: bold; color: #475569; margin: 0 0 6px 0;">اختر الوصف المناسب ليتم تعبئته تلقائياً:</p>
+        <div id="aiOptionsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+      </div>
     </div>
+
+    <!-- نظام الصور المرن: رابط خارجي + رفع متعدد سحابي Supabase -->
+    <div class="form-group" style="background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1;">
+      <label style="margin-bottom: 6px;">صور المنتج (رابط مباشر أو رفع متعدد سحابي):</label>
+      <input type="url" id="pImage" placeholder="رابط الصورة الرئيسية المباشر (اختياري)..." style="margin-bottom: 8px;">
+      
+      <div style="font-size: 11.5px; color: #64748b; margin-bottom: 6px; text-align: center;">--- أو ارفع صوراً متعددة إلى السحابة ---</div>
+      <input type="file" id="multiImageFiles" accept="image/*" multiple style="background: #fff; padding: 6px;" onchange="uploadMultipleImagesToSupabase(event)">
+      <input type="hidden" id="productImagesArrayInput">
+      
+      <!-- معاينة الصور المرفوعة المتعددة -->
+      <div id="multiImagesPreview" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;"></div>
+    </div>
+
     <div class="form-group">
       <label>رابط فيديو المنتج (YouTube أو رابط مباشر - اختياري)</label>
       <input type="url" id="pVideoUrl" placeholder="https://www.youtube.com/watch?v=...">
@@ -336,9 +388,20 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // إعدادات Supabase Storage (المشروع الخاص بك)
+  const SUPABASE_URL = "https://your-project.supabase.co"; // استبدلها برابط مشروعك الفعلي إن وجد أو اتركها واعتمد الرفع
+  const SUPABASE_ANON_KEY = "your-anon-key"; 
+  let supabaseClient = null;
+  try {
+    if(window.supabase && SUPABASE_URL !== "https://your-project.supabase.co") {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  } catch(e) { console.log("Supabase init optional notice"); }
+
   let currentDefaultImage = "";
   let products = [], orders = [], categoriesList = [], branchesList = [], uploadedBase64Image = "", storeSettingsData = {};
   let currentDeliveryZones = [];
+  let currentProductImages = []; // تخزين مصفوفة صور المنتج الحالي أثناء التعديل
 
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = document.getElementById("adminEmail").value.trim();
@@ -409,6 +472,14 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
         if(data.currencySymbol) document.getElementById("currencyInput").value = data.currencySymbol;
         
+        // إعدادات المساعد الذكي
+        if(data.aiConfig) {
+          document.getElementById("aiApiKeyInput").value = data.aiConfig.apiKey || "";
+          const tempVal = data.aiConfig.temperature !== undefined ? data.aiConfig.temperature : 0.1;
+          document.getElementById("aiTemperatureInput").value = tempVal;
+          document.getElementById("tempValDisplay").innerText = tempVal;
+        }
+
         document.getElementById("adminAnnouncement").value = data.announcement || "";
         document.getElementById("adminAnnouncementCloseType").value = data.announcementCloseType || "button";
         document.getElementById("adminAnnouncementSeconds").value = data.announcementSeconds || 5;
@@ -493,7 +564,127 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     loadAllAdminData();
   }
 
-  // --- دالة النسخ الاحتياطي الشامل بالكامل ---
+  // --- دالة توليد 3 أوصاف بالذكاء الاصطناعي (Gemini) ---
+  window.generateAIDescriptionOptions = async () => {
+    const productName = document.getElementById("pName")?.value.trim();
+    const descInput = document.getElementById("pDesc");
+    const optionsContainer = document.getElementById("aiOptionsContainer");
+    const optionsList = document.getElementById("aiOptionsList");
+
+    if (!productName) {
+      alert("يرجى كتابة اسم المنتج أولاً لكي يستطيع الذكاء الاصطناعي توليد الوصف!");
+      return;
+    }
+
+    optionsContainer.style.display = "block";
+    optionsList.innerHTML = `<div style="font-size: 12px; color: #64748b; padding: 6px;">جاري توليد 3 خيارات متنوعة... ⏳</div>`;
+
+    try {
+      const apiKey = document.getElementById("aiApiKeyInput").value.trim() || "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+      const prompt = `أنت مساعد تسويقي لمتجر حلويات ومكسرات فاخر. قم بكتابة 3 خيارات مختلفة لوصف منتج اسمه: "${productName}".
+المطلوب: أرجع الإجابة بصيغة مصفوفة JSON نصية تحتوي 3 نصوص فقط باللغة العربية بهذا الشكل تماماً بدون أي مقدمات:
+[
+  "الوصف الأول (يركز على المكونات الفاخرة والسمن الحيواني الشامي)",
+  "الوصف الثاني (مختصر ويذكر العدد التقريبي للقطع في الكيلو)",
+  "الوصف الثالث (يركز على التحضير الطازج والطلب المسبق إذا استدعى الأمر)"
+]`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7 }
+        })
+      });
+
+      const data = await response.json();
+      let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const options = JSON.parse(rawText);
+
+      optionsList.innerHTML = "";
+      options.forEach((optText, idx) => {
+        const card = document.createElement("div");
+        card.style.cssText = "background: #fff; border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;";
+        card.innerHTML = `<strong>خيار ${idx + 1}:</strong> ${optText}`;
+        
+        card.onclick = () => {
+          descInput.value = optText;
+          optionsContainer.style.display = "none";
+        };
+        card.onmouseover = () => card.style.borderColor = "#122b20";
+        card.onmouseout = () => card.style.borderColor = "#cbd5e1";
+        
+        optionsList.appendChild(card);
+      });
+
+    } catch (e) {
+      console.error(e);
+      optionsList.innerHTML = `<div style="color: #ef4444; font-size: 12px; padding: 5px;">حدث خطأ في الاتصال بالذكاء الاصطناعي، تأكد من مفتاح الـ API.</div>`;
+    }
+  };
+
+  // --- دالة رفع الصور المتعددة إلى Supabase Storage ---
+  window.uploadMultipleImagesToSupabase = async (event) => {
+    const files = event.target.files;
+    if (!files.length) return;
+
+    const previewContainer = document.getElementById("multiImagesPreview");
+    previewContainer.innerHTML += `<span style="font-size: 12px; color: #122b20; font-weight: bold;">جاري رفع الصور للسحابة... ⏳</span>`;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        if (!supabaseClient) {
+          // محاكاة رفع سحابي أو استخدام رابط مؤقت لو لم يتم ضبط Supabase
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            currentProductImages.push(e.target.result);
+            updateThumbnailsUI();
+          };
+          reader.readAsDataURL(file);
+          continue;
+        }
+
+        const fileName = `products/${Date.now()}_${i}_${file.name}`;
+        const { data, error } = await supabaseClient.storage.from('store-images').upload(fileName, file);
+        if (error) throw error;
+
+        const { data: publicUrlData } = supabaseClient.storage.from('store-images').getPublicUrl(fileName);
+        currentProductImages.push(publicUrlData.publicUrl);
+      } catch (error) {
+        console.error("خطأ في رفع إحدى الصور:", error);
+      }
+    }
+    updateThumbnailsUI();
+  };
+
+  function updateThumbnailsUI() {
+    const previewContainer = document.getElementById("multiImagesPreview");
+    document.getElementById("productImagesArrayInput").value = JSON.stringify(currentProductImages);
+    
+    if(!currentProductImages.length) {
+      previewContainer.innerHTML = "";
+      return;
+    }
+
+    previewContainer.innerHTML = currentProductImages.map((url, index) => `
+      <div style="position: relative; width: 55px; height: 55px;">
+        <img src="${url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <button type="button" onclick="removeProductImage(${index})" style="position: absolute; top: -4px; right: -4px; background: #ef4444; color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display:flex; align-items:center; justify-content:center;">×</button>
+      </div>
+    `).join('');
+  }
+
+  window.removeProductImage = (index) => {
+    currentProductImages.splice(index, 1);
+    updateThumbnailsUI();
+  };
+
+  // --- النسخ الاحتياطي الشامل ---
   window.exportFullStoreBackup = () => {
     const fullBackupData = {
       backupVersion: "2.0",
@@ -509,7 +700,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     dl.click();
   };
 
-  // --- دالة استعادة النسخة الاحتياطية الشاملة بالكامل ---
   window.importFullStoreBackup = (e) => {
     const file = e.target.files[0];
     if(!file) return;
@@ -517,7 +707,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     reader.onload = async function(event) {
       try {
         const importedData = JSON.parse(event.target.result);
-        
         let importedProducts = [];
         let importedSettings = {};
 
@@ -530,8 +719,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
           return alert("ملف النسخة الاحتياطية غير صالح!");
         }
 
-        if(confirm(`هل أنت متأكد من استعادة كافة بيانات المتجر بالكامل؟ (سيتم تحديث الإعدادات، الألوان، الأقسام، و ${importedProducts.length} منتج)`)) {
-          
+        if(confirm(`هل أنت متأكد من استعادة كافة بيانات المتجر بالكامل؟ (${importedProducts.length} منتج)`)) {
           products = importedProducts.map((item, idx) => ({
             ...item,
             id: item.id || 'p_' + Math.random().toString(36).substr(2, 9),
@@ -545,7 +733,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
           }
 
           await loadAllAdminData();
-          alert("✨ تم استعادة النسخة الاحتياطية الشاملة وتحديث كافة بيانات المتجر بنجاح!");
+          alert("✨ تم استعادة النسخة الاحتياطية الشاملة بنجاح!");
         }
       } catch(err) { 
         console.error(err);
@@ -573,7 +761,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   };
 
   window.deleteAllOrders = async () => {
-    if(confirm("⚠️ هل أنت متأكد من تفريغ كافة الطلبات وتصفير عداد زوار الفترة الحالية؟")) {
+    if(confirm("⚠️ هل أنت متأكد من تفريغ كافة الطلبات وتصفير العداد الدوري للزوار؟")) {
       for(const o of orders) {
         await deleteDoc(doc(db, "orders", o.id));
       }
@@ -582,7 +770,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       await setDoc(doc(db, "settings", "store"), { visitsSinceLastReset: 0 }, { merge: true });
       renderOrders();
       renderReports();
-      alert("تم التفريغ وتصفير العداد الدوري للزوار بنجاح!");
+      alert("تم التفريغ بنجاح!");
     }
   };
 
@@ -627,7 +815,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     if(document.getElementById("storeNameInput").value.trim()) {
       document.getElementById("dashboardTitle").innerText = " " + storeName;
     }
-    alert("✨ تم الحفظ وتطبيق الخط والألوان بنجاح!");
+    alert("✨ تم الحفظ وتطبيق الثيم والخط بنجاح!");
   });
 
   document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
@@ -635,6 +823,9 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const currencySymbol = document.getElementById("currencyInput").value.trim() || "ج";
     const defaultImage = document.getElementById("defaultImageInput").value.trim();
     
+    const aiApiKey = document.getElementById("aiApiKeyInput").value.trim();
+    const aiTemperature = Number(document.getElementById("aiTemperatureInput").value) || 0.1;
+
     const announcement = document.getElementById("adminAnnouncement").value.trim();
     const announcementCloseType = document.getElementById("adminAnnouncementCloseType").value;
     const announcementSeconds = Number(document.getElementById("adminAnnouncementSeconds").value) || 5;
@@ -649,6 +840,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     storeSettingsData.whatsappNumber = whatsappNumber;
     storeSettingsData.currencySymbol = currencySymbol;
     storeSettingsData.defaultImage = defaultImage;
+    storeSettingsData.aiConfig = { apiKey: aiApiKey, temperature: aiTemperature };
     storeSettingsData.announcement = announcement;
     storeSettingsData.announcementCloseType = announcementCloseType;
     storeSettingsData.announcementSeconds = announcementSeconds;
@@ -658,6 +850,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       whatsappNumber, 
       currencySymbol, 
       defaultImage, 
+      aiConfig: { apiKey: aiApiKey, temperature: aiTemperature },
       announcement,
       announcementCloseType,
       announcementSeconds,
@@ -666,7 +859,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }, { merge: true });
     
     renderReports();
-    alert("✨ تم حفظ الإعدادات وإعدادات النافذة المنبثقة بنجاح!");
+    alert("✨ تم حفظ الإعدادات والمساعد الذكي بنجاح!");
   });
 
   window.addNewCategory = async () => {
@@ -807,7 +1000,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     }
 
     c.innerHTML = filteredProducts.map((p) => {
-      let imgSrc = p.images?.[0] || p.image;
+      let imgSrc = (p.images && p.images.length > 0) ? p.images[0] : p.image;
       if (!imgSrc || imgSrc.trim() === "" || imgSrc === "undefined") {
         imgSrc = currentDefaultImage;
       }
@@ -921,6 +1114,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
   window.openModal = () => { 
     updateCategorySelectOptions(); 
+    currentProductImages = [];
     document.getElementById("editId").value = "";
     document.getElementById("pName").value = "";
     document.getElementById("pKilo").value = "";
@@ -930,8 +1124,10 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     document.getElementById("pUnitLabel").value = "";
     document.getElementById("pDesc").value = "";
     document.getElementById("pImage").value = "";
-    document.getElementById("pExtraImages").value = "";
+    document.getElementById("multiImageFiles").value = "";
     document.getElementById("pVideoUrl").value = "";
+    document.getElementById("aiOptionsContainer").style.display = "none";
+    updateThumbnailsUI();
     document.getElementById("productModal").style.display = "flex"; 
   };
 
@@ -943,16 +1139,19 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const category = document.getElementById("pCategorySelect").value;
     const saleType = document.getElementById("pSaleType").value;
     const description = document.getElementById("pDesc").value.trim();
-    const imageInput = document.getElementById("pImage").value.trim();
-    const finalImage = imageInput || currentDefaultImage;
-
-    const extraImagesInput = document.getElementById("pExtraImages").value.trim();
+    const singleImageInput = document.getElementById("pImage").value.trim();
     const videoUrl = document.getElementById("pVideoUrl").value.trim();
 
     if(!name) return alert("أدخل اسم المنتج!");
 
-    let extraImagesArray = extraImagesInput ? extraImagesInput.split(',').map(s => s.trim()).filter(s => s) : [];
-    let allProductImages = [finalImage, ...extraImagesArray];
+    // تجميع الصور (إذا تم إدخال رابط مفرد يتم إضافته أو دمج صور المعرض السحابي)
+    let allImages = [...currentProductImages];
+    if (singleImageInput && !allImages.includes(singleImageInput)) {
+      allImages.unshift(singleImageInput);
+    }
+    if (allImages.length === 0) {
+      allImages = [currentDefaultImage];
+    }
 
     let payload = { 
       id: id || 'p_' + Math.random().toString(36).substr(2, 9),
@@ -960,8 +1159,8 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       category, 
       saleType, 
       description, 
-      image: finalImage,
-      images: allProductImages,
+      image: allImages[0],
+      images: allImages,
       videoUrl: videoUrl
     };
 
@@ -1014,15 +1213,10 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     document.getElementById("pUnitLabel").value = p.pricing?.unitLabel || "";
     document.getElementById("pDesc").value = p.description || "";
     
-    let allImgs = p.images && p.images.length > 0 ? p.images : [p.image || currentDefaultImage];
-    document.getElementById("pImage").value = (allImgs[0] === currentDefaultImage) ? "" : allImgs[0];
+    currentProductImages = p.images && p.images.length > 0 ? [...p.images] : [p.image || currentDefaultImage];
+    document.getElementById("pImage").value = (currentProductImages[0] === currentDefaultImage) ? "" : currentProductImages[0];
     
-    if(allImgs.length > 1) {
-      document.getElementById("pExtraImages").value = allImgs.slice(1).join(", ");
-    } else {
-      document.getElementById("pExtraImages").value = "";
-    }
-
+    updateThumbnailsUI();
     document.getElementById("pVideoUrl").value = p.videoUrl || "";
     togglePricing();
   };

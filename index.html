@@ -783,15 +783,6 @@
     .announcement-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
     .announcement-card { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2.5px solid var(--accent); animation: popUp 0.35s ease; position: relative; color: #0f172a; }
   </style>
-
-  <!-- استيراد مكتبة Google Gen AI الرسمية للتعامل مع الـ SDK بأمان -->
-  <script type="importmap">
-    {
-      "imports": {
-        "@google/genai": "https://esm.run/@google/genai"
-      }
-    }
-  </script>
 </head>
 <body>
 
@@ -843,10 +834,10 @@
       <button onclick="toggleAIChat()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">✕</button>
     </div>
     <div class="ai-chat-body" id="aiChatMessages">
-      <div class="ai-message bot">أهلاً بك! أنا مساعدك الذكي لمتجر بيستاش دي ألب. كيف يمكنني مساعدتك في اختيار الحلويات اليوم؟ ✨</div>
+      <div class="ai-message bot">أهلاً بك في بيستاش دي ألب! كيف يمكنني مساعدتك اليوم في اختيار المكسرات والحلويات الحلبية؟ ✨</div>
     </div>
     <div class="ai-chat-footer">
-      <input type="text" id="aiUserInput" placeholder="اكتب سؤالك هنا..." onkeypress="if(event.key==='Enter') sendAIMessage()">
+      <input type="text" id="aiUserInput" placeholder="اكتب سؤالك أو طلبك هنا..." onkeypress="if(event.key==='Enter') sendAIMessage()">
       <button onclick="sendAIMessage()">إرسال</button>
     </div>
   </div>
@@ -934,7 +925,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
     import { getFirestore, collection, doc, getDoc, addDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-    import { GoogleGenAI } from "@google/genai";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw",
@@ -948,16 +938,11 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // تهيئة عميل Google Gen AI الرسمي
-    const ai = new GoogleGenAI({ apiKey: "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw" });
-
     let allProducts = [], cart = [], deliveryZones = [], storeSettings = {};
     let selectedCat = "الكل", currentFee = 0, dynamicCategories = [];
     let isScrollingProgrammatically = false;
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
-
-    let chatSession = null;
 
     const translationCache = JSON.parse(localStorage.getItem('pista_trans_cache') || '{}');
 
@@ -1733,7 +1718,7 @@
               <button class="qty-btn" onclick="window.changeQty(${idx}, 1)">+</button>
             </div>
           </div>
-          <input type="text" placeholder="${currentLang === 'en' ? 'Item note (optional)...' : 'ملاحظة لهذا الصنف (اختياري이)...'}" value="${item.note || ''}" oninput="window.updateItemNote(${idx}, this.value)" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background: #f8fafc;">
+          <input type="text" placeholder="${currentLang === 'en' ? 'Item note (optional)...' : 'ملاحظة لهذا الصنف (اختياري)...'}" value="${item.note || ''}" oninput="window.updateItemNote(${idx}, this.value)" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background: #f8fafc;">
         </div>
       `).join("");
     }
@@ -1987,61 +1972,104 @@
       modal.style.display = modal.style.display === "flex" ? "none" : "flex";
     };
 
-    // الدالة الآمنة للاتصال بجيميناي عبر الحزمة الرسمية Google Gen AI SDK
+    // ==========================================
+    // المساعد الذكي المحلي - متجر بيستاش دي ألب
+    // ==========================================
     window.sendAIMessage = async () => {
       const input = document.getElementById("aiUserInput");
       const msgContainer = document.getElementById("aiChatMessages");
-      const text = input.value.trim();
+      const text = input ? input.value.trim() : "";
       if(!text) return;
 
-      msgContainer.innerHTML += `<div class="ai-message user">${escapeHtml(text)}</div>`;
-      input.value = "";
-      msgContainer.scrollTop = msgContainer.scrollHeight;
-
-      const loadingId = "loading_" + Date.now();
-      msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري التفكير... ⏳</div>`;
-      msgContainer.scrollTop = msgContainer.scrollHeight;
-
-      let reply = "";
-
-      try {
-        const shortMenuSummary = allProducts.map(p => `- ${p.name}: ${p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0} ${window.getCurrency()}`).join("\n");
-
-        const systemInstruction = `
-أنت مساعد المبيعات الذكي لمتجر "بيستاش دي ألب" (Pistache D'Alep) للمكسرات والحلويات الحلبية في القاهرة (الرحاب).
-
-قائمة الأسعار المختصرة:
-${shortMenuSummary}
-
-القواعد الأساسية:
-1. التزم بالأسعار المذكورة أعلاه بدقة تامة ولا تألف أي سعر أو صنف غير موجود.
-2. كن لطيفاً ومختصراً ومساعداً للزبون.
-3. إذا سأل الزبون عن صنف (مثل الكنافة)، اعرض له الأصناف المتطابقة وأسعارها من القائمة، واسأله إن كان يريد إضافتها أو تحديد الوزن.
-`;
-
-        if (!chatSession) {
-          chatSession = ai.chats.create({
-            model: 'gemini-2.5-flash',
-            config: {
-              systemInstruction: systemInstruction,
-              temperature: 0.1,
-            }
-          });
-        }
-
-        const result = await chatSession.sendMessage({ message: text });
-        reply = result.text;
-
-      } catch(e) {
-        console.error("AI SDK Error:", e);
-        reply = `عذراً يا غالي، واجهنا مشكلة بسيطة في الرد (${e.message}). يرجى المحاولة مرة أخرى.`;
+      if(msgContainer) {
+        msgContainer.innerHTML += `<div class="ai-message user">${escapeHtml(text)}</div>`;
+        input.value = "";
+        msgContainer.scrollTop = msgContainer.scrollHeight;
       }
 
-      const loadingEl = document.getElementById(loadingId);
-      if(loadingEl) loadingEl.remove();
-      
-      msgContainer.innerHTML += `<div class="ai-message bot">${escapeHtml(reply)}</div>`;
-      msgContainer.scrollTop = msgContainer.scrollHeight;
+      const loadingId = "loading_" + Date.now();
+      if(msgContainer) {
+        msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري البحث في المنيو... ⏳</div>`;
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 250));
+
+      let reply = "";
+      const t = text.toLowerCase();
+
+      // دالة توحيد الحروف لتجاوز الأخطاء الإملائية (الهاء والتاء، الألفات)
+      const normalizeArabic = (str) => {
+        if (!str) return "";
+        return str
+          .replace(/[إأآا]/g, "ا")
+          .replace(/ة/g, "ه")
+          .replace(/ى/g, "ي")
+          .replace(/ؤ/g, "و")
+          .replace(/ئ/g, "ي");
+      };
+
+      const cleanText = normalizeArabic(t);
+      const userWords = cleanText.split(/\s+/).filter(w => w.length > 1);
+
+      // البحث الذكي في منتجات المنيو الحقيقي (allProducts)
+      let foundProducts = [];
+      if (typeof allProducts !== 'undefined' && Array.isArray(allProducts)) {
+        foundProducts = allProducts.filter(p => {
+          const pName = normalizeArabic((p.name || "").toLowerCase());
+          const pDesc = normalizeArabic((p.desc || "").toLowerCase());
+          
+          return userWords.some(word => {
+            const baseWord = word.length > 3 ? word.substring(0, word.length - 1) : word;
+            return pName.includes(word) || pName.includes(baseWord) || pDesc.includes(word);
+          });
+        });
+      }
+
+      // تحليل نية الزبون وصياغة الرد المناسب
+      if (userWords.some(w => ["طلب", "اطلب", "اشتري", "شراء", "عايز", "بدي"].some(k => w.includes(k))) && foundProducts.length > 0) {
+        const curr = typeof window.getCurrency === 'function' ? window.getCurrency() : "جنيه";
+        const items = foundProducts.slice(0, 3).map(p => {
+          const price = p.price || p.pricing?.kilo || p.pricing?.unitPrice || "حسب الطلب";
+          return `🔹 <b>${p.name}</b> - السعر: ${price} ${curr}`;
+        }).join("<br>");
+
+        reply = `تكرم عينك! لتأكيد طلبك للأصناف التالية:<br><br>${items}<br><br>🛒 اضغط على زر <b>"إضافة للسلة"</b> الموجود تحت المنتج في الصفحة الرئيسية، ثم افتح السلة لإرسال الطلب فوراً عبر الواتساب! 📦`;
+
+      } else if (foundProducts.length > 0) {
+        const curr = typeof window.getCurrency === 'function' ? window.getCurrency() : "جنيه";
+        const items = foundProducts.slice(0, 3).map(p => {
+          const price = p.price || p.pricing?.kilo || p.pricing?.unitPrice || "حسب الطلب";
+          return `🔹 <b>${p.name}</b> - السعر: ${price} ${curr}`;
+        }).join("<br>");
+
+        reply = `لقد وجدت لك في منيو بيستاش دي ألب:<br><br>${items}<br><br>🛒 تقدر تضيفه للسلة مباشرة من المتجر وتطلب بكل سهولة، أو قل لي <b>"بدي أطلب"</b>!`;
+
+      } else if (userWords.some(w => ["توصيل", "وين", "مكان", "عنوان", "رحاب", "قاهره", "محل", "فرع"].some(k => w.includes(k)))) {
+        reply = "📍 محلنا ومطبخنا في <b>القاهرة - الرحاب</b>. نوفر توصيل سريع لجميع مناطق وضواحي القاهرة. تفضل بطلبك من المتجر وسيصلك لحد باب البيت!";
+
+      } else if (userWords.some(w => ["مرحب", "سلام", "اهل", "هلا", "هاى", "صباح", "مساء"].some(k => w.includes(k)))) {
+        reply = "أهلاً بك في <b>بيستاش دي ألب (Pistache D'Alep)</b> للمكسرات والحلويات الحلبية في الرحاب 🌰✨ كيف أقدر أساعدك اليوم بالمنيو أو الأسعار؟";
+
+      } else if (userWords.some(w => ["سعر", "بكم", "قائم", "منيو", "اسعار", "بكام"].some(k => w.includes(k)))) {
+        let sampleProducts = "";
+        if (typeof allProducts !== 'undefined' && allProducts.length > 0) {
+          sampleProducts = allProducts.slice(0, 4).map(p => `- ${p.name}`).join("<br>");
+        }
+        reply = `نقدم أطيب المكسرات والحلويات الحلبية الفاخرة! يمكنك تصفح الأقسام والأسعار مباشرة من المتجر، ومن أبرز منتجاتنا:<br><br>${sampleProducts || "المكسرات والحلويات الفاخرة"}<br><br>عن أي صنف تحب تسأل بالتحديد؟ 🌰`;
+
+      } else if (userWords.some(w => ["شكر", "تسلم", "يعطيك", "تمام", "عافية"].some(k => w.includes(k)))) {
+        reply = "عفواً يا غالي! يسعدنا خدمتكم دائماً في بيستاش دي ألب 🤍";
+
+      } else {
+        reply = `أهلاً بك يا غالي! أقدر أساعدك بمعرفة أسعار المكسرات والحلويات أو طريقة الطلب. يمكنك تصفح المنتجات بالأعلى أو كتابة اسم الصنف الذي تبحث عنه 🌰✨`;
+      }
+
+      document.getElementById(loadingId)?.remove();
+      if(msgContainer) {
+        msgContainer.innerHTML += `<div class="ai-message bot">${reply}</div>`;
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+      }
     };
 
     function escapeHtml(s) { return String(s||'').replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }

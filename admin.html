@@ -388,8 +388,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // إعدادات Supabase Storage (المشروع الخاص بك)
-  const SUPABASE_URL = "https://your-project.supabase.co"; // استبدلها برابط مشروعك الفعلي إن وجد أو اتركها واعتمد الرفع
+  const SUPABASE_URL = "https://your-project.supabase.co";
   const SUPABASE_ANON_KEY = "your-anon-key"; 
   let supabaseClient = null;
   try {
@@ -401,7 +400,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
   let currentDefaultImage = "";
   let products = [], orders = [], categoriesList = [], branchesList = [], uploadedBase64Image = "", storeSettingsData = {};
   let currentDeliveryZones = [];
-  let currentProductImages = []; // تخزين مصفوفة صور المنتج الحالي أثناء التعديل
+  let currentProductImages = [];
 
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = document.getElementById("adminEmail").value.trim();
@@ -472,7 +471,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
         if(data.currencySymbol) document.getElementById("currencyInput").value = data.currencySymbol;
         
-        // إعدادات المساعد الذكي
         if(data.aiConfig) {
           document.getElementById("aiApiKeyInput").value = data.aiConfig.apiKey || "";
           const tempVal = data.aiConfig.temperature !== undefined ? data.aiConfig.temperature : 0.1;
@@ -564,7 +562,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     loadAllAdminData();
   }
 
-  // --- دالة توليد 3 أوصاف بالذكاء الاصطناعي (Gemini) ---
+  // --- دالة توليد 3 أوصاف بالذكاء الاصطناعي مع المفتاح الاحتياطي المضمون ---
   window.generateAIDescriptionOptions = async () => {
     const productName = document.getElementById("pName")?.value.trim();
     const descInput = document.getElementById("pDesc");
@@ -580,11 +578,14 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     optionsList.innerHTML = `<div style="font-size: 12px; color: #64748b; padding: 6px;">جاري توليد 3 خيارات متنوعة... ⏳</div>`;
 
     try {
-      const apiKey = document.getElementById("aiApiKeyInput").value.trim() || "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
+      // استخدام المفتاح المدخل أو المفتاح الاحتياطي المضمون تلقائياً
+      const inputApiKey = document.getElementById("aiApiKeyInput")?.value.trim();
+      const apiKey = (inputApiKey && inputApiKey.length > 10) ? inputApiKey : "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
+      
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
       const prompt = `أنت مساعد تسويقي لمتجر حلويات ومكسرات فاخر. قم بكتابة 3 خيارات مختلفة لوصف منتج اسمه: "${productName}".
-المطلوب: أرجع الإجابة بصيغة مصفوفة JSON نصية تحتوي 3 نصوص فقط باللغة العربية بهذا الشكل تماماً بدون أي مقدمات:
+المطلوب: أرجع الإجابة بصيغة مصفوفة JSON نصية تحتوي 3 نصوص فقط باللغة العربية بهذا الشكل تماماً بدون أي مقدمات أو شرح:
 [
   "الوصف الأول (يركز على المكونات الفاخرة والسمن الحيواني الشامي)",
   "الوصف الثاني (مختصر ويذكر العدد التقريبي للقطع في الكيلو)",
@@ -601,6 +602,11 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       });
 
       const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || "خطأ من خادم جوجل");
+      }
+
       let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
       const options = JSON.parse(rawText);
@@ -623,11 +629,10 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
     } catch (e) {
       console.error(e);
-      optionsList.innerHTML = `<div style="color: #ef4444; font-size: 12px; padding: 5px;">حدث خطأ في الاتصال بالذكاء الاصطناعي، تأكد من مفتاح الـ API.</div>`;
+      optionsList.innerHTML = `<div style="color: #ef4444; font-size: 12px; padding: 5px;">حدث خطأ في الاتصال بالذكاء الاصطناعي، تأكد من الاتصال أو المفتاح.</div>`;
     }
   };
 
-  // --- دالة رفع الصور المتعددة إلى Supabase Storage ---
   window.uploadMultipleImagesToSupabase = async (event) => {
     const files = event.target.files;
     if (!files.length) return;
@@ -639,7 +644,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       const file = files[i];
       try {
         if (!supabaseClient) {
-          // محاكاة رفع سحابي أو استخدام رابط مؤقت لو لم يتم ضبط Supabase
           const reader = new FileReader();
           reader.onload = function(e) {
             currentProductImages.push(e.target.result);
@@ -684,7 +688,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     updateThumbnailsUI();
   };
 
-  // --- النسخ الاحتياطي الشامل ---
   window.exportFullStoreBackup = () => {
     const fullBackupData = {
       backupVersion: "2.0",
@@ -692,7 +695,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
       storeSettings: storeSettingsData,
       products: products
     };
-
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(fullBackupData, null, 2));
     const dl = document.createElement('a');
     dl.setAttribute("href", dataStr);
@@ -1144,7 +1146,6 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
 
     if(!name) return alert("أدخل اسم المنتج!");
 
-    // تجميع الصور (إذا تم إدخال رابط مفرد يتم إضافته أو دمج صور المعرض السحابي)
     let allImages = [...currentProductImages];
     if (singleImageInput && !allImages.includes(singleImageInput)) {
       allImages.unshift(singleImageInput);
@@ -1252,7 +1253,7 @@ body { font-family: var(--custom-font); background: #f8fafc; margin: 0; padding:
     const container = document.getElementById("zonesContainer");
     if(container) {
       if(!zones || !zones.length) {
-        container.innerHTML = "<p style='color:#64748b; font-size:13px;'>لا توجد مناطق توصيل مضافة حالياً.</p>";
+        container.innerHTML = "<p style='color:#64748b; font-size:13.5px;'>لا توجد مناطق توصيل مضافة حالياً.</p>";
         return;
       }
       container.innerHTML = zones.map((z, idx) => `

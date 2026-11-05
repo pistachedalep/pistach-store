@@ -598,7 +598,6 @@
     }
     .cart-total-text { font-size: 9px; font-weight: 900; margin-top: 3px; color: #f8fafc; white-space: nowrap; }
 
-    /* تأثير الوميض عند فتح المتجر لعدة مرات ثم يتوقف */
     @keyframes entryPulse {
       0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
       50% { transform: scale(1.12); box-shadow: 0 0 20px 10px rgba(212, 175, 55, 0.5); }
@@ -608,7 +607,6 @@
       animation: entryPulse 1.2s ease-in-out 3;
     }
 
-    /* زر المساعد الذكي العائم وقابل للسحب */
     #aiFloatingBtn {
       position: fixed;
       bottom: 100px;
@@ -632,7 +630,6 @@
     }
     #aiFloatingBtn:active { cursor: grabbing; }
 
-    /* منطقة الإخفاء بعلامة (X) التي تظهر عند سحب المساعد */
     #aiDropZone {
       position: fixed;
       bottom: 25px;
@@ -662,7 +659,6 @@
       border-style: solid;
     }
 
-    /* نافذة الدردشة الدائرية الحديثة */
     .ai-chat-modal {
       position: fixed;
       bottom: 90px;
@@ -823,17 +819,14 @@
     <div class="cart-total-text" id="cartTotal">0</div>
   </div>
 
-  <!-- زر المساعد الذكي العائم مع ومض عند التحميل -->
   <div id="aiFloatingBtn" class="pulse-animation" onclick="toggleAIChat()" title="المساعد الذكي">
     <i class="fa-solid fa-headset"></i>
   </div>
 
-  <!-- منطقة الإخفاء بعلامة (X) عند سحب الأيقونة -->
   <div id="aiDropZone">
     <i class="fa-solid fa-xmark"></i>
   </div>
 
-  <!-- نافذة محادثة المساعد الذكي التفاعلية الدائرية -->
   <div class="ai-chat-modal" id="aiChatModal">
     <div class="ai-chat-header">
       <span><i class="fa-solid fa-robot"></i> مساعد المنيو الذكي</span>
@@ -1871,7 +1864,6 @@
       return clean;
     }
 
-    // --- منطق السحب والإفلات ومنطقة الإخفاء بعلامة (X) والرد الذكي ---
     const aiBtn = document.getElementById("aiFloatingBtn");
     const dropZone = document.getElementById("aiDropZone");
     let isDragging = false, initialX, initialY, hasMoved = false;
@@ -1955,7 +1947,6 @@
         clientY <= rect.bottom
       ) {
         dropZone.classList.add("highlight-drop");
-        // إخفاء الزر نهائياً إذا تم إسقاطه على علامة (X)
         aiBtn.style.display = "none";
         document.getElementById("aiChatModal").style.display = "none";
         dropZone.classList.remove("active-drop", "highlight-drop");
@@ -1966,7 +1957,7 @@
     }
 
     window.toggleAIChat = () => {
-      if (hasMoved) return; // منع فتح الدردشة إذا كان المستخدم يقوم بسحب الزر فقط
+      if (hasMoved) return;
       const modal = document.getElementById("aiChatModal");
       modal.style.display = modal.style.display === "flex" ? "none" : "flex";
     };
@@ -2022,16 +2013,26 @@ ${menuSummary}
 
       } catch(e) {
         const queryLower = text.toLowerCase();
-        const matchedProducts = allProducts.filter(p => p.name.toLowerCase().includes(queryLower) || (p.category && p.category.toLowerCase().includes(queryLower)));
+        const searchWords = queryLower.split(/\s+/);
+
+        const matchedProducts = allProducts.filter(p => {
+          const pName = p.name.toLowerCase();
+          const pCat = (p.category || "").toLowerCase();
+          const pDesc = (p.description || "").toLowerCase();
+          return searchWords.some(word => word.length > 1 && (pName.includes(word) || pCat.includes(word) || pDesc.includes(word)));
+        });
 
         if (matchedProducts.length > 0) {
-          reply = `وجدت لك هذه المنتجات المطابقة في منيو ${storeSettings.storeName || 'بيستاش دي ألب'}:\n` + matchedProducts.map(p => `▪️ ${p.name} - السعر: ${p.price || p.pricing?.kilo || 0} ${window.getCurrency()}`).join("\n");
-        } else if (queryLower.includes("سعر") || queryLower.includes("بكم") || queryLower.includes("كام")) {
-          reply = `لدينا تشكيلة رائعة من الحلويات والمكسرات الطازجة! يمكنك تصفح المنتجات في المنيو أعلاه لمعرفة الأسعار بدقة، أو إخبارنا بالصنف الذي تبحث عنه.`;
-        } else if (queryLower.includes("توصيل") || queryLower.includes("ديلفري") || queryLower.includes("مكان")) {
+          reply = `وجدت لك هذه المنتجات المطابقة في منيو ${storeSettings.storeName || 'بيستاش دي ألب'}:\n` + matchedProducts.slice(0, 5).map(p => `▪️ **${p.name}** (${p.category}): السعر **${p.price || p.pricing?.kilo || 0} ${window.getCurrency()}**`).join("\n");
+          if(matchedProducts.length > 5) {
+            reply += `\n...ويوجد منتجات أخرى مشابهة، يمكنك البحث عنها في المنيو!`;
+          }
+        } else if (queryLower.includes("سعر") || queryLower.includes("بكم") || queryLower.includes("كام") || queryLower.includes("أسعار")) {
+          reply = `لدينا تشكيلة واسعة من الحلويات والطعام الطازج! أخبرني باسم الصنف الذي تسأل عنه (مثل: كنافة، بسبوسة، مكسرات، كبة) وسأعطيك سعره فوراً.`;
+        } else if (queryLower.includes("توصيل") || queryLower.includes("ديلفري") || queryLower.includes("مكان") || queryLower.includes("فرع")) {
           reply = `نعم، يتوفر لدينا توصيل لجميع المناطق، ويمكنك أيضاً اختيار الاستلام من الفرع مباشرة عند إتمام الطلب عبر السلة.`;
         } else {
-          reply = `أهلاً بك في ${storeSettings.storeName || 'بيستاش دي ألب'}! يمكنك تصفح أقسام المنيو أو استخدام خانة البحث بالأعلى للعثور على طلبك بسرعة. كيف يمكنني مساعدتك أكثر؟`;
+          reply = `أهلاً بك في ${storeSettings.storeName || 'بيستاش دي ألب'}! يمكنك إخباري بما تبحث عنه (مثلاً: كنافة، بقلاوة، معمول، وجبات يومية) وسأبحث لك عنه فوراً في المنيو.`;
         }
       }
 

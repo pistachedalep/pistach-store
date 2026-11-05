@@ -712,6 +712,7 @@
       align-self: flex-start;
       border-bottom-right-radius: 4px;
       border: 1px solid #e2e8f0;
+      white-space: pre-line;
     }
     body.dark-mode .ai-message.bot {
       background: #334155;
@@ -2012,27 +2013,51 @@ ${menuSummary}
         if (!reply) throw new Error("No response from AI");
 
       } catch(e) {
-        const queryLower = text.toLowerCase();
-        const searchWords = queryLower.split(/\s+/);
+        // 🧠 محرك الردود الذكي الذاتي الذكاء والمتطور للمتجر
+        const queryLower = text.toLowerCase().trim();
+        const curr = window.getCurrency();
 
-        const matchedProducts = allProducts.filter(p => {
-          const pName = p.name.toLowerCase();
-          const pCat = (p.category || "").toLowerCase();
-          const pDesc = (p.description || "").toLowerCase();
-          return searchWords.some(word => word.length > 1 && (pName.includes(word) || pCat.includes(word) || pDesc.includes(word)));
-        });
+        // 1. التعامل مع التحيات الشائعة
+        const greetings = ["هلا", "مرحبا", "أهلا", "اهلا", "سلام", "السلام عليكم", "صباح الخير", "مساء الخير", "هاي", "hi", "hello"];
+        if (greetings.some(g => queryLower === g || queryLower.startsWith(g + " "))) {
+          reply = `أهلاً وسهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! ✨\nأتمنى لك يوماً سعيداً. كيف يمكنني مساعدتك اليوم؟ يمكنك السؤال عن أصناف الكنافة، البقلاوة، المكسرات، أو الوجبات.`;
+        } 
+        // 2. تصفية الأسئلة عن أسماء الأصناف
+        else {
+          // استبعاد كلمات البحث العامة للحصول على الكلمات المفتاحية الحقيقية
+          const stopWords = ["بدي", "عاوز", "اريد", "أريد", "عندكم", "فيه", "في", "عن", "هل", "ما", "هو", "هي", "كم", "سعر", "بكم", "كام"];
+          const cleanWords = queryLower.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w));
 
-        if (matchedProducts.length > 0) {
-          reply = `وجدت لك هذه المنتجات المطابقة في منيو ${storeSettings.storeName || 'بيستاش دي ألب'}:\n` + matchedProducts.slice(0, 5).map(p => `▪️ **${p.name}** (${p.category}): السعر **${p.price || p.pricing?.kilo || 0} ${window.getCurrency()}**`).join("\n");
-          if(matchedProducts.length > 5) {
-            reply += `\n...ويوجد منتجات أخرى مشابهة، يمكنك البحث عنها في المنيو!`;
+          let matched = [];
+          if (cleanWords.length > 0) {
+            matched = allProducts.filter(p => {
+              const pName = p.name.toLowerCase();
+              const pCat = (p.category || "").toLowerCase();
+              const pDesc = (p.description || "").toLowerCase();
+              return cleanWords.some(w => pName.includes(w) || pCat.includes(w) || pDesc.includes(w));
+            });
           }
-        } else if (queryLower.includes("سعر") || queryLower.includes("بكم") || queryLower.includes("كام") || queryLower.includes("أسعار")) {
-          reply = `لدينا تشكيلة واسعة من الحلويات والطعام الطازج! أخبرني باسم الصنف الذي تسأل عنه (مثل: كنافة، بسبوسة، مكسرات، كبة) وسأعطيك سعره فوراً.`;
-        } else if (queryLower.includes("توصيل") || queryLower.includes("ديلفري") || queryLower.includes("مكان") || queryLower.includes("فرع")) {
-          reply = `نعم، يتوفر لدينا توصيل لجميع المناطق، ويمكنك أيضاً اختيار الاستلام من الفرع مباشرة عند إتمام الطلب عبر السلة.`;
-        } else {
-          reply = `أهلاً بك في ${storeSettings.storeName || 'بيستاش دي ألب'}! يمكنك إخباري بما تبحث عنه (مثلاً: كنافة، بقلاوة، معمول، وجبات يومية) وسأبحث لك عنه فوراً في المنيو.`;
+
+          if (matched.length > 0) {
+            reply = `إليك الأصناف المتوفرة المطابقة لطلبك في **${storeSettings.storeName || 'بيستاش دي ألب'}**:\n\n`;
+            matched.slice(0, 6).forEach(p => {
+              const priceVal = p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0;
+              const unitText = p.saleType === 'weight' ? 'للكيلو' : (p.pricing?.unitLabel || 'علبة');
+              reply += `✨ **${p.name}**\n💰 السعر: ${priceVal} ${curr} (${unitText})\n\n`;
+            });
+            if (matched.length > 6) {
+              reply += `...ويوجد المزيد من الأصناف المشابهة في القائمة أعلاه! 🛒`;
+            }
+          } 
+          else if (queryLower.includes("سعر") || queryLower.includes("بكم") || queryLower.includes("كام") || queryLower.includes("اسعار")) {
+            reply = `أسعارنا ممتازة ومناسبة جداً! اكتب لي اسم الصنف الذي ترغب بمعرفة سعره (مثل: كنافة نابلسية، معمول فستق، حلاوة الجبن) وسأعطيك السعر الدقيق فوراً.`;
+          } 
+          else if (queryLower.includes("توصيل") || queryLower.includes("ديلفري") || queryLower.includes("عنوان") || queryLower.includes("فرع") || queryLower.includes("مكان")) {
+            reply = `نعم، يتوفر لدينا خدمة التوصيل للمنازل، كما يمكنك اختيار الاستلام مباشرة من الفرع عند إتمام طلبك عبر السلة! 🛵🏪`;
+          } 
+          else {
+            reply = `يسعدنا خدمتك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! 🌸\nيرجى كتابة اسم الحلوى أو الطلب الذي تفكر فيه (مثل: كنافة، بقلاوة، بسبوسة) وسأعرض لك خياراتنا المتاحة فوراً.`;
+          }
         }
       }
 

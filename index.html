@@ -598,61 +598,104 @@
     }
     .cart-total-text { font-size: 9px; font-weight: 900; margin-top: 3px; color: #f8fafc; white-space: nowrap; }
 
-    /* أنماط المساعد الذكي العائم والقابل للسحب */
+    /* تأثير الوميض عند فتح المتجر لعدة مرات ثم يتوقف */
+    @keyframes entryPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+      50% { transform: scale(1.12); box-shadow: 0 0 20px 10px rgba(212, 175, 55, 0.5); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+    }
+    .pulse-animation {
+      animation: entryPulse 1.2s ease-in-out 3;
+    }
+
+    /* زر المساعد الذكي العائم وقابل للسحب */
     #aiFloatingBtn {
       position: fixed;
       bottom: 100px;
       left: 20px;
-      width: 60px;
-      height: 60px;
-      background: var(--primary);
+      width: 58px;
+      height: 58px;
+      background: linear-gradient(135deg, var(--primary), #1b3d2f);
       color: var(--accent);
       border-radius: 50%;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.35);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
+      font-size: 24px;
       cursor: grab;
       z-index: 998;
-      border: 2px solid var(--accent);
+      border: 2.5px solid var(--accent);
       user-select: none;
       touch-action: none;
-      transition: transform 0.2s;
+      transition: box-shadow 0.2s ease;
     }
-    #aiFloatingBtn:active { cursor: grabbing; transform: scale(0.95); }
+    #aiFloatingBtn:active { cursor: grabbing; }
 
+    /* منطقة الإخفاء بعلامة (X) التي تظهر عند سحب المساعد */
+    #aiDropZone {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      width: 55px;
+      height: 55px;
+      background: rgba(220, 38, 38, 0.85);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 900;
+      z-index: 997;
+      border: 2px dashed #fff;
+      box-shadow: 0 5px 20px rgba(220, 38, 38, 0.5);
+      transition: transform 0.25s ease, background 0.2s;
+    }
+    #aiDropZone.active-drop {
+      transform: translateX(-50%) scale(1);
+    }
+    #aiDropZone.highlight-drop {
+      background: #ef4444;
+      transform: translateX(-50%) scale(1.15);
+      border-style: solid;
+    }
+
+    /* نافذة الدردشة الدائرية الحديثة */
     .ai-chat-modal {
       position: fixed;
       bottom: 90px;
       left: 20px;
-      width: 350px;
-      max-width: calc(100vw - 40px);
-      height: 480px;
-      max-height: 70vh;
+      width: 340px;
+      max-width: calc(100vw - 30px);
+      height: 460px;
+      max-height: 68vh;
       background: var(--card-bg, #fff);
-      border-radius: 20px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+      border-radius: 24px;
+      box-shadow: 0 15px 45px rgba(0,0,0,0.3);
       border: 2px solid var(--accent);
       display: none;
       flex-direction: column;
       z-index: 1001;
       overflow: hidden;
-      animation: popUp 0.3s ease;
-      backdrop-filter: blur(10px);
+      animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      backdrop-filter: blur(12px);
     }
     .ai-chat-header {
       background: var(--primary);
       color: #fff;
-      padding: 14px 16px;
+      padding: 14px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-weight: 900;
+      font-size: 14px;
+      border-bottom: 2px solid var(--accent);
     }
     .ai-chat-body {
       flex: 1;
-      padding: 12px;
+      padding: 14px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -661,20 +704,23 @@
     }
     .ai-message {
       padding: 10px 14px;
-      border-radius: 12px;
-      max-width: 80%;
-      line-height: 1.4;
+      border-radius: 16px;
+      max-width: 85%;
+      line-height: 1.45;
       word-break: break-word;
+      font-weight: 600;
     }
     .ai-message.bot {
       background: #f1f5f9;
       color: #0f172a;
       align-self: flex-start;
       border-bottom-right-radius: 4px;
+      border: 1px solid #e2e8f0;
     }
     body.dark-mode .ai-message.bot {
       background: #334155;
       color: #f8fafc;
+      border-color: #475569;
     }
     .ai-message.user {
       background: var(--primary);
@@ -683,7 +729,7 @@
       border-bottom-left-radius: 4px;
     }
     .ai-chat-footer {
-      padding: 10px;
+      padding: 12px;
       background: #f8fafc;
       border-top: 1px solid #e2e8f0;
       display: flex;
@@ -695,20 +741,22 @@
     }
     .ai-chat-footer input {
       flex: 1;
-      padding: 10px 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
+      padding: 10px 14px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 14px;
       outline: none;
       font-size: 13px;
+      font-weight: 700;
     }
     .ai-chat-footer button {
       background: var(--primary);
       color: var(--accent);
-      border: none;
+      border: 1.5px solid var(--accent);
       padding: 0 16px;
-      border-radius: 10px;
+      border-radius: 14px;
       font-weight: 900;
       cursor: pointer;
+      font-size: 13px;
     }
 
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; display: none; justify-content: flex-end; backdrop-filter: blur(6px); }
@@ -775,15 +823,20 @@
     <div class="cart-total-text" id="cartTotal">0</div>
   </div>
 
-  <!-- زر المساعد الذكي العائم والقابل للسحب -->
-  <div id="aiFloatingBtn" onclick="toggleAIChat()" title="المساعد الذكي">
-    🤖
+  <!-- زر المساعد الذكي العائم مع ومض عند التحميل -->
+  <div id="aiFloatingBtn" class="pulse-animation" onclick="toggleAIChat()" title="المساعد الذكي">
+    <i class="fa-solid fa-headset"></i>
   </div>
 
-  <!-- نافذة محادثة المساعد الذكي التفاعلية -->
+  <!-- منطقة الإخفاء بعلامة (X) عند سحب الأيقونة -->
+  <div id="aiDropZone">
+    <i class="fa-solid fa-xmark"></i>
+  </div>
+
+  <!-- نافذة محادثة المساعد الذكي التفاعلية الدائرية -->
   <div class="ai-chat-modal" id="aiChatModal">
     <div class="ai-chat-header">
-      <span>🤖 مساعد المنيو الذكي</span>
+      <span><i class="fa-solid fa-robot"></i> مساعد المنيو الذكي</span>
       <button onclick="toggleAIChat()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">✕</button>
     </div>
     <div class="ai-chat-body" id="aiChatMessages">
@@ -1818,15 +1871,15 @@
       return clean;
     }
 
-    // --- منطق السحب والإفلات وعمل المساعد الذكي العائم ---
+    // --- منطق السحب والإفلات ومنطقة الإخفاء بعلامة (X) والرد الذكي ---
     const aiBtn = document.getElementById("aiFloatingBtn");
-    let isDragging = false, initialX, initialY;
+    const dropZone = document.getElementById("aiDropZone");
+    let isDragging = false, initialX, initialY, hasMoved = false;
 
     aiBtn.addEventListener("touchstart", dragStart, {passive: true});
     aiBtn.addEventListener("touchmove", drag, {passive: true});
     aiBtn.addEventListener("touchend", dragEnd);
 
-    // لدعم السحب بالماوس أيضاً على شاشات الكمبيوتر
     aiBtn.addEventListener("mousedown", dragStartMouse);
     document.addEventListener("mousemove", dragMouse);
     document.addEventListener("mouseup", dragEndMouse);
@@ -1835,10 +1888,13 @@
       initialX = e.touches[0].clientX - aiBtn.offsetLeft;
       initialY = e.touches[0].clientY - aiBtn.offsetTop;
       isDragging = true;
+      hasMoved = false;
+      dropZone.classList.add("active-drop");
     }
 
     function drag(e) {
       if (!isDragging) return;
+      hasMoved = true;
       let currentX = e.touches[0].clientX - initialX;
       let currentY = e.touches[0].clientY - initialY;
       
@@ -1849,18 +1905,27 @@
       aiBtn.style.top = currentY + "px";
       aiBtn.style.bottom = "auto";
       aiBtn.style.right = "auto";
+
+      checkDropZone(e.touches[0].clientX, e.touches[0].clientY);
     }
 
-    function dragEnd() { isDragging = false; }
+    function dragEnd(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      dropZone.classList.remove("active-drop", "highlight-drop");
+    }
 
     function dragStartMouse(e) {
       initialX = e.clientX - aiBtn.offsetLeft;
       initialY = e.clientY - aiBtn.offsetTop;
       isDragging = true;
+      hasMoved = false;
+      dropZone.classList.add("active-drop");
     }
 
     function dragMouse(e) {
       if (!isDragging) return;
+      hasMoved = true;
       let currentX = e.clientX - initialX;
       let currentY = e.clientY - initialY;
       
@@ -1871,11 +1936,37 @@
       aiBtn.style.top = currentY + "px";
       aiBtn.style.bottom = "auto";
       aiBtn.style.right = "auto";
+
+      checkDropZone(e.clientX, e.clientY);
     }
 
-    function dragEndMouse() { isDragging = false; }
+    function dragEndMouse(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      dropZone.classList.remove("active-drop", "highlight-drop");
+    }
+
+    function checkDropZone(clientX, clientY) {
+      const rect = dropZone.getBoundingClientRect();
+      if (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      ) {
+        dropZone.classList.add("highlight-drop");
+        // إخفاء الزر نهائياً إذا تم إسقاطه على علامة (X)
+        aiBtn.style.display = "none";
+        document.getElementById("aiChatModal").style.display = "none";
+        dropZone.classList.remove("active-drop", "highlight-drop");
+        isDragging = false;
+      } else {
+        dropZone.classList.remove("highlight-drop");
+      }
+    }
 
     window.toggleAIChat = () => {
+      if (hasMoved) return; // منع فتح الدردشة إذا كان المستخدم يقوم بسحب الزر فقط
       const modal = document.getElementById("aiChatModal");
       modal.style.display = modal.style.display === "flex" ? "none" : "flex";
     };
@@ -1891,15 +1982,15 @@
       msgContainer.scrollTop = msgContainer.scrollHeight;
 
       const loadingId = "loading_" + Date.now();
-      msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري التفكير... ⏳</div>`;
+      msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري البحث في المنيو... ⏳</div>`;
       msgContainer.scrollTop = msgContainer.scrollHeight;
+
+      let reply = "";
 
       try {
         const aiConf = storeSettings.aiConfig || {};
         if (aiConf.enabled === false) {
-          document.getElementById(loadingId).remove();
-          msgContainer.innerHTML += `<div class="ai-message bot">عذراً، المساعد الذكي معطل حالياً من إدارة المتجر.</div>`;
-          return;
+          throw new Error("AI disabled");
         }
 
         const apiKey = aiConf.apiKey || "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
@@ -1925,16 +2016,28 @@ ${menuSummary}
         });
 
         const data = await response.json();
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "عذراً، لم أستطع الإجابة في الوقت الحالي.";
+        reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-        document.getElementById(loadingId).remove();
-        msgContainer.innerHTML += `<div class="ai-message bot">${escapeHtml(reply)}</div>`;
-        msgContainer.scrollTop = msgContainer.scrollHeight;
+        if (!reply) throw new Error("No response from AI");
 
       } catch(e) {
-        document.getElementById(loadingId).remove();
-        msgContainer.innerHTML += `<div class="ai-message bot">عذراً، حدث خطأ في الاتصال بالمساعد الذكي.</div>`;
+        const queryLower = text.toLowerCase();
+        const matchedProducts = allProducts.filter(p => p.name.toLowerCase().includes(queryLower) || (p.category && p.category.toLowerCase().includes(queryLower)));
+
+        if (matchedProducts.length > 0) {
+          reply = `وجدت لك هذه المنتجات المطابقة في منيو ${storeSettings.storeName || 'بيستاش دي ألب'}:\n` + matchedProducts.map(p => `▪️ ${p.name} - السعر: ${p.price || p.pricing?.kilo || 0} ${window.getCurrency()}`).join("\n");
+        } else if (queryLower.includes("سعر") || queryLower.includes("بكم") || queryLower.includes("كام")) {
+          reply = `لدينا تشكيلة رائعة من الحلويات والمكسرات الطازجة! يمكنك تصفح المنتجات في المنيو أعلاه لمعرفة الأسعار بدقة، أو إخبارنا بالصنف الذي تبحث عنه.`;
+        } else if (queryLower.includes("توصيل") || queryLower.includes("ديلفري") || queryLower.includes("مكان")) {
+          reply = `نعم، يتوفر لدينا توصيل لجميع المناطق، ويمكنك أيضاً اختيار الاستلام من الفرع مباشرة عند إتمام الطلب عبر السلة.`;
+        } else {
+          reply = `أهلاً بك في ${storeSettings.storeName || 'بيستاش دي ألب'}! يمكنك تصفح أقسام المنيو أو استخدام خانة البحث بالأعلى للعثور على طلبك بسرعة. كيف يمكنني مساعدتك أكثر؟`;
+        }
       }
+
+      document.getElementById(loadingId).remove();
+      msgContainer.innerHTML += `<div class="ai-message bot">${escapeHtml(reply)}</div>`;
+      msgContainer.scrollTop = msgContainer.scrollHeight;
     };
 
     function escapeHtml(s) { return String(s||'').replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }

@@ -1316,6 +1316,17 @@
         localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
       }
 
+      // فحص حالة تشغيل/إيقاف المساعد الذكي من لوحة التحكم (الأدمن)
+      const aiConfig = storeSettings.aiConfig || {};
+      const aiBtnElem = document.getElementById("aiFloatingBtn");
+      const aiModalElem = document.getElementById("aiChatModal");
+      if (aiConfig.enabled === false) {
+        if (aiBtnElem) aiBtnElem.style.display = "none";
+        if (aiModalElem) aiModalElem.style.display = "none";
+      } else {
+        if (aiBtnElem) aiBtnElem.style.display = "flex";
+      }
+
       if(storeSettings.categoriesList || storeSettings.categories) {
         extractCategories(storeSettings.categoriesList ? storeSettings.categoriesList.filter(c => !c.hidden).map(c => c.name) : storeSettings.categories);
       } else {
@@ -1974,7 +1985,7 @@
       msgContainer.scrollTop = msgContainer.scrollHeight;
 
       const loadingId = "loading_" + Date.now();
-      msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري البحث في المنيو... ⏳</div>`;
+      msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري التفكير في أفضل خيار لك... ⏳</div>`;
       msgContainer.scrollTop = msgContainer.scrollHeight;
 
       let reply = "";
@@ -1986,18 +1997,25 @@
         }
 
         const apiKey = aiConf.apiKey || "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
-        const temp = aiConf.temperature !== undefined ? aiConf.temperature : 0.1;
+        const temp = aiConf.temperature !== undefined ? aiConf.temperature : 0.2;
         
-        const menuSummary = allProducts.map(p => `- ${p.name} (${p.category}): السعر ${p.price || p.pricing?.kilo || 0} ${window.getCurrency()}, الوصف: ${p.description || 'لا يوجد وصف'}`).join("\n");
+        const menuSummary = allProducts.map(p => `- ${p.name} (${p.category}): السعر ${p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0} ${window.getCurrency()}, الوصف: ${p.description || 'لا يوجد وصف'}`).join("\n");
 
-        const prompt = `أنت مساعد ذكي لمتجر حلويات ومكسرات فاخر اسمه "${storeSettings.storeName || 'بيستاش دي ألب'}".
-هذه هي قائمة المنتجات المتوفرة في المتجر حالياً:
+        const prompt = `أنت بائع ومساعد مبيعات خبير ولطيف جداً في متجر الحلويات الشامية والوجبات الحلبية الفاخر "${storeSettings.storeName || 'بيستاش دي ألب'}".
+
+قائمة منتجات المتجر المتوفرة فقط:
 ${menuSummary}
 
-أجب على سؤال الزبون التالي بدقة واختصار بناءً على المنتجات المذكورة فقط ولا تقترح أي شيء غير موجود:
+قواعد الإجابة:
+1. كن بائعاً فصيحاً ولطيفاً جداً، وأجب بأسلوب ترحيبي مشجع على الطلب دون إطالة.
+2. إذا سأل العميل عن توصية أو "أطيب شيء" أو "أفضل حلى"، رشّح له 2 إلى 3 أصناف شهية ومميزة من المنيو مع شرح مبسط ومشهٍ.
+3. إذا سأل العميل عن فئة عامة (مثل "حلويات باردة"، "شي للفطور"، "وجبات جاهزة"، "مكسرات")، اقترح له الأصناف المناسبة تماماً من القائمة.
+4. اذكر دائماً الأسعار بدقة مع العملة (${window.getCurrency()}).
+5. لا تذكر أو تقترح أي صنف غير موجود في المنيو أعلاه إطلاقاً.
+
 سؤال الزبون: "${text}"`;
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -2013,20 +2031,46 @@ ${menuSummary}
         if (!reply) throw new Error("No response from AI");
 
       } catch(e) {
-        // 🧠 محرك الردود الذكي الذاتي الذكاء والمتطور للمتجر
+        // 🧠 محرك محلي ذكي ومطور (مترادفات + ترشيح الأسعار والمنتجات)
         const queryLower = text.toLowerCase().trim();
         const curr = window.getCurrency();
 
-        // 1. التعامل مع التحيات الشائعة
+        const synonymMap = {
+          "كنافه": ["كنافة", "نابلسية", "مبرومة", "مفروكة"],
+          "حلو": ["حلاوة", "حلويات", "تارت", "هريسة", "بسبوسة"],
+          "شوكولاته": ["شوكولا", "توتكس", "اوريو"],
+          "قهوه": ["بن", "قهوة", "هال"],
+          "اكل": ["وجبات", "مطبخ", "منسف", "كبة", "شيخ المحشي", "داوود باشا", "مقلوبة"],
+          "ارخص": ["أرخص", "رخيص", "اقل سعر"],
+          "فطور": ["سميت", "زلابية", "كروسان", "شعيبيات", "مامونية"]
+        };
+
         const greetings = ["هلا", "مرحبا", "أهلا", "اهلا", "سلام", "السلام عليكم", "صباح الخير", "مساء الخير", "هاي", "hi", "hello"];
+        
         if (greetings.some(g => queryLower === g || queryLower.startsWith(g + " "))) {
-          reply = `أهلاً وسهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! ✨\nأتمنى لك يوماً سعيداً. كيف يمكنني مساعدتك اليوم؟ يمكنك السؤال عن أصناف الكنافة، البقلاوة، المكسرات، أو الوجبات.`;
+          reply = `أهلاً وسهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! ✨\nنحن يسعدنا خدمتك اليوم. هل تبحث عن أطيب الحلويات الشرقية، المكسرات، أم الوجبات الحلبية الشهية؟`;
         } 
-        // 2. تصفية الأسئلة عن أسماء الأصناف
+        else if (queryLower.includes("ارخص") || queryLower.includes("رخيص") || queryLower.includes("اقل سعر")) {
+          const sorted = [...allProducts].sort((a,b) => (a.price || a.pricing?.kilo || 0) - (b.price || b.pricing?.kilo || 0));
+          reply = `إليك أكثر الأصناف الاقتصادية والمميزة لدينا في **${storeSettings.storeName || 'بيستاش دي ألب'}**:\n\n`;
+          sorted.slice(0, 4).forEach(p => {
+            const priceVal = p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0;
+            reply += `✨ **${p.name}** بسعر **${priceVal} ${curr}** فقط!\n`;
+          });
+        }
         else {
-          // استبعاد كلمات البحث العامة للحصول على الكلمات المفتاحية الحقيقية
-          const stopWords = ["بدي", "عاوز", "اريد", "أريد", "عندكم", "فيه", "في", "عن", "هل", "ما", "هو", "هي", "كم", "سعر", "بكم", "كام"];
-          const cleanWords = queryLower.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w));
+          let searchTerms = queryLower.split(/\s+/);
+          let expandedTerms = [...searchTerms];
+          searchTerms.forEach(term => {
+            for (let key in synonymMap) {
+              if (term.includes(key) || key.includes(term)) {
+                expandedTerms.push(...synonymMap[key]);
+              }
+            }
+          });
+
+          const stopWords = ["بدي", "عاوز", "اريد", "أريد", "عندكم", "فيه", "في", "عن", "هل", "ما", "هو", "هي", "كم", "سعر", "بكم", "كام", "اطيب", "افضل", "أفضل", "أطيب", "شو"];
+          const cleanWords = expandedTerms.filter(w => w.length > 1 && !stopWords.includes(w));
 
           let matched = [];
           if (cleanWords.length > 0) {
@@ -2039,24 +2083,24 @@ ${menuSummary}
           }
 
           if (matched.length > 0) {
-            reply = `إليك الأصناف المتوفرة المطابقة لطلبك في **${storeSettings.storeName || 'بيستاش دي ألب'}**:\n\n`;
-            matched.slice(0, 6).forEach(p => {
+            reply = `أنصحك بتجربة هذه الأصناف المميزة المطابقة لطلبك من **${storeSettings.storeName || 'بيستاش دي ألب'}**:\n\n`;
+            matched.slice(0, 5).forEach(p => {
               const priceVal = p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0;
               const unitText = p.saleType === 'weight' ? 'للكيلو' : (p.pricing?.unitLabel || 'علبة');
               reply += `✨ **${p.name}**\n💰 السعر: ${priceVal} ${curr} (${unitText})\n\n`;
             });
-            if (matched.length > 6) {
-              reply += `...ويوجد المزيد من الأصناف المشابهة في القائمة أعلاه! 🛒`;
+            if (matched.length > 5) {
+              reply += `يمكنك استعراض المزيد من الخيارات المشابهة في القائمة الرئيسية! 🛒`;
             }
           } 
           else if (queryLower.includes("سعر") || queryLower.includes("بكم") || queryLower.includes("كام") || queryLower.includes("اسعار")) {
-            reply = `أسعارنا ممتازة ومناسبة جداً! اكتب لي اسم الصنف الذي ترغب بمعرفة سعره (مثل: كنافة نابلسية، معمول فستق، حلاوة الجبن) وسأعطيك السعر الدقيق فوراً.`;
+            reply = `تفضل بإخباري باسم الصنف الذي تود الاستفسار عنه (مثل: كنافة نابلسية، بسبوسة، معمول، كبة) وسأعطيك سعره وتفاصيله فوراً!`;
           } 
           else if (queryLower.includes("توصيل") || queryLower.includes("ديلفري") || queryLower.includes("عنوان") || queryLower.includes("فرع") || queryLower.includes("مكان")) {
-            reply = `نعم، يتوفر لدينا خدمة التوصيل للمنازل، كما يمكنك اختيار الاستلام مباشرة من الفرع عند إتمام طلبك عبر السلة! 🛵🏪`;
+            reply = `نعم، يتوفر لدينا خدمة التوصيل السريع للمنازل، كما يسعدنا استقبالكم للاستلام من الفرع مباشرة فور إتمام الطلب من السلة! 🛵🏪`;
           } 
           else {
-            reply = `يسعدنا خدمتك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! 🌸\nيرجى كتابة اسم الحلوى أو الطلب الذي تفكر فيه (مثل: كنافة، بقلاوة، بسبوسة) وسأعرض لك خياراتنا المتاحة فوراً.`;
+            reply = `أهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! 🌸\nيرجى كتابة ما تشتهيه اليوم (مثلاً: كنافة، بقلاوة، فطور جمعة، وجبات) وسأرشدك لأطيب الأصناف المتاحة فوراً.`;
           }
         }
       }

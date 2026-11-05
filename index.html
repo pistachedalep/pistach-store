@@ -834,7 +834,7 @@
       <button onclick="toggleAIChat()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">✕</button>
     </div>
     <div class="ai-chat-body" id="aiChatMessages">
-      <div class="ai-message bot">أهلاً بك في بيستاش دي ألب! كيف يمكنني مساعدتك اليوم في اختيار المكسرات والحلويات الحلبية؟ ✨</div>
+      <div class="ai-message bot">أهلاً بك في بيستاش دي ألب! كيف يمكنني مساعدتك اليوم في اختيار المكسرات والحلويات الحلبية الفاخرة؟ ✨</div>
     </div>
     <div class="ai-chat-footer">
       <input type="text" id="aiUserInput" placeholder="اكتب سؤالك أو طلبك هنا..." onkeypress="if(event.key==='Enter') sendAIMessage()">
@@ -1973,8 +1973,14 @@
     };
 
     // ==========================================
-    // المساعد الذكي المحلي - متجر بيستاش دي ألب
+    // المساعد الذكي التفاعلي المتكامل - بيستاش دي ألب
     // ==========================================
+    let aiConversationState = {
+      lastProduct: null,
+      lastCategory: null,
+      step: 'idle'
+    };
+
     window.sendAIMessage = async () => {
       const input = document.getElementById("aiUserInput");
       const msgContainer = document.getElementById("aiChatMessages");
@@ -1989,80 +1995,132 @@
 
       const loadingId = "loading_" + Date.now();
       if(msgContainer) {
-        msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري البحث في المنيو... ⏳</div>`;
+        msgContainer.innerHTML += `<div class="ai-message bot" id="${loadingId}">جاري التجهيز... ⏳</div>`;
         msgContainer.scrollTop = msgContainer.scrollHeight;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 250));
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       let reply = "";
-      const t = text.toLowerCase();
+      const raw = text.toLowerCase();
 
-      // دالة توحيد الحروف لتجاوز الأخطاء الإملائية (الهاء والتاء، الألفات)
-      const normalizeArabic = (str) => {
+      const normalize = (str) => {
         if (!str) return "";
         return str
           .replace(/[إأآا]/g, "ا")
           .replace(/ة/g, "ه")
           .replace(/ى/g, "ي")
           .replace(/ؤ/g, "و")
-          .replace(/ئ/g, "ي");
+          .replace(/ئ/g, "ي")
+          .replace(/[\u064b-\u065f]/g, "");
       };
 
-      const cleanText = normalizeArabic(t);
-      const userWords = cleanText.split(/\s+/).filter(w => w.length > 1);
+      const cleanQuery = normalize(raw);
+      const queryWords = cleanQuery.split(/\s+/).filter(w => w.length > 1);
 
-      // البحث الذكي في منتجات المنيو الحقيقي (allProducts)
-      let foundProducts = [];
+      // 1. نظام النقاط الذكي للمنتجات
+      let scoredProducts = [];
       if (typeof allProducts !== 'undefined' && Array.isArray(allProducts)) {
-        foundProducts = allProducts.filter(p => {
-          const pName = normalizeArabic((p.name || "").toLowerCase());
-          const pDesc = normalizeArabic((p.desc || "").toLowerCase());
-          
-          return userWords.some(word => {
-            const baseWord = word.length > 3 ? word.substring(0, word.length - 1) : word;
-            return pName.includes(word) || pName.includes(baseWord) || pDesc.includes(word);
+        scoredProducts = allProducts.map(p => {
+          let score = 0;
+          const pName = normalize((p.name || "").toLowerCase());
+          const pDesc = normalize((p.desc || "").toLowerCase());
+          const pCat = normalize((p.category || "").toLowerCase());
+
+          queryWords.forEach(word => {
+            if (pName.includes(word)) score += 10;
+            if (pCat.includes(word)) score += 5;
+            if (pDesc.includes(word)) score += 2;
           });
-        });
+
+          return { product: p, score };
+        }).filter(item => item.score > 0);
+
+        scoredProducts.sort((a, b) => b.score - a.score);
       }
 
-      // تحليل نية الزبون وصياغة الرد المناسب
-      if (userWords.some(w => ["طلب", "اطلب", "اشتري", "شراء", "عايز", "بدي"].some(k => w.includes(k))) && foundProducts.length > 0) {
-        const curr = typeof window.getCurrency === 'function' ? window.getCurrency() : "جنيه";
-        const items = foundProducts.slice(0, 3).map(p => {
-          const price = p.price || p.pricing?.kilo || p.pricing?.unitPrice || "حسب الطلب";
-          return `🔹 <b>${p.name}</b> - السعر: ${price} ${curr}`;
-        }).join("<br>");
+      const bestMatches = scoredProducts.map(item => item.product);
+      const curr = typeof window.getCurrency === 'function' ? window.getCurrency() : "جنيه";
 
-        reply = `تكرم عينك! لتأكيد طلبك للأصناف التالية:<br><br>${items}<br><br>🛒 اضغط على زر <b>"إضافة للسلة"</b> الموجود تحت المنتج في الصفحة الرئيسية، ثم افتح السلة لإرسال الطلب فوراً عبر الواتساب! 📦`;
+      // 2. تحليل النوايا
+      const isAffirmative = queryWords.some(w => ["تمام", "اه", "ايوة", "نعم", "خلص", "اي", "اوك", "ماشي", "حلو", "ممتاز"].some(k => w.includes(k)));
+      const isNegative = queryWords.some(w => ["لا", "بس", "يكفي", "خلصت", "مش عايز", "لا شكرا", "يكفي هيك"].some(k => w.includes(k)));
+      const isOrder = queryWords.some(w => ["طلب", "اطلب", "اشتري", "شراء", "عايز", "بدي", "اريد", "هات"].some(k => w.includes(k)));
+      const isDelivery = queryWords.some(w => ["توصيل", "وين", "مكان", "عنوان", "رحاب", "قاهره", "محل", "فرع"].some(k => w.includes(k)));
+      const isBestSellers = queryWords.some(w => ["اقترح", "مقترح", "افضل", "مبيع", "اكثر", "مشهور", "شايع", "قائمة", "منيو", "اختر"].some(k => w.includes(k)));
 
-      } else if (foundProducts.length > 0) {
-        const curr = typeof window.getCurrency === 'function' ? window.getCurrency() : "جنيه";
-        const items = foundProducts.slice(0, 3).map(p => {
-          const price = p.price || p.pricing?.kilo || p.pricing?.unitPrice || "حسب الطلب";
-          return `🔹 <b>${p.name}</b> - السعر: ${price} ${curr}`;
-        }).join("<br>");
-
-        reply = `لقد وجدت لك في منيو بيستاش دي ألب:<br><br>${items}<br><br>🛒 تقدر تضيفه للسلة مباشرة من المتجر وتطلب بكل سهولة، أو قل لي <b>"بدي أطلب"</b>!`;
-
-      } else if (userWords.some(w => ["توصيل", "وين", "مكان", "عنوان", "رحاب", "قاهره", "محل", "فرع"].some(k => w.includes(k)))) {
-        reply = "📍 محلنا ومطبخنا في <b>القاهرة - الرحاب</b>. نوفر توصيل سريع لجميع مناطق وضواحي القاهرة. تفضل بطلبك من المتجر وسيصلك لحد باب البيت!";
-
-      } else if (userWords.some(w => ["مرحب", "سلام", "اهل", "هلا", "هاى", "صباح", "مساء"].some(k => w.includes(k)))) {
-        reply = "أهلاً بك في <b>بيستاش دي ألب (Pistache D'Alep)</b> للمكسرات والحلويات الحلبية في الرحاب 🌰✨ كيف أقدر أساعدك اليوم بالمنيو أو الأسعار؟";
-
-      } else if (userWords.some(w => ["سعر", "بكم", "قائم", "منيو", "اسعار", "بكام"].some(k => w.includes(k)))) {
-        let sampleProducts = "";
-        if (typeof allProducts !== 'undefined' && allProducts.length > 0) {
-          sampleProducts = allProducts.slice(0, 4).map(p => `- ${p.name}`).join("<br>");
+      // دالة استخراج ملاحظة التوفر أو الطلب المسبق إن وجدت في الصنف
+      const getAvailabilityBadge = (p) => {
+        const desc = (p.description || p.desc || "").toLowerCase();
+        if (desc.includes("طلب مسبق") || desc.includes("حجز مسبق") || p.isPreOrder) {
+          return " ⏳ (متاح بطلب مسبق)";
         }
-        reply = `نقدم أطيب المكسرات والحلويات الحلبية الفاخرة! يمكنك تصفح الأقسام والأسعار مباشرة من المتجر، ومن أبرز منتجاتنا:<br><br>${sampleProducts || "المكسرات والحلويات الفاخرة"}<br><br>عن أي صنف تحب تسأل بالتحديد؟ 🌰`;
+        if (desc.includes("ايام") || desc.includes("أيام") || desc.includes("يوم") || p.availableDays) {
+          return " 📅 (متوفر بأيام محددة)";
+        }
+        return "";
+      };
 
-      } else if (userWords.some(w => ["شكر", "تسلم", "يعطيك", "تمام", "عافية"].some(k => w.includes(k)))) {
-        reply = "عفواً يا غالي! يسعدنا خدمتكم دائماً في بيستاش دي ألب 🤍";
+      // 3. مسار المحادثة والمبيعات التفاعلية
+      if (aiConversationState.step === 'awaiting_more') {
+        if (isNegative || cleanQuery.includes("لا") || cleanQuery.includes("بس هيك") || cleanQuery.includes("اكتفيت")) {
+          aiConversationState.step = 'ready_to_checkout';
+          reply = `عراسي يا غالي! هيك صار طلبك جاهز تماماً. 🛒<br><br>اضغط الآن على **أيقونة السلة بالأسفل** لتعبئة بياناتك وإرسال الطلب فوراً عبر الواتساب! 📲✨`;
+        } else if (isAffirmative || isOrder) {
+          aiConversationState.step = 'idle';
+          
+          let topSellers = "";
+          if (Array.isArray(allProducts) && allProducts.length > 0) {
+            topSellers = allProducts.slice(0, 3).map(p => `🔹 <b>${p.name}</b>${getAvailabilityBadge(p)} - ${p.price || p.pricing?.kilo || 0} ${curr}`).join("<br>");
+          }
+          
+          reply = `تكرم عينك! إليك أبرز الأصناف المطلوبة عنا:<br><br>${topSellers}<br><br>أي صنف تحب أضيفه لك للسلة؟ 🌰✨`;
+        } else {
+          if (bestMatches.length > 0) {
+            const p = bestMatches[0];
+            aiConversationState.lastProduct = p;
+            aiConversationState.step = 'awaiting_more';
+            const price = p.price || p.pricing?.kilo || p.pricing?.unitPrice || "حسب الطلب";
+            const badge = getAvailabilityBadge(p);
+            reply = `وجدت لك <b>${p.name}</b>${badge} بسعر ${price} ${curr}. 🔹<br><br>هل تحب أضيف شي ثاني (مثل مكسرات أو حلويات حلبية) ولا ننتقل لتأكيد السلة؟ 🛒`;
+          } else {
+            reply = `عيوني لك! هل تحب تكتفي بهذا الطلب ونروح على السلة، ولا حابب تتفرج على أصناف ثانية؟ 🌰`;
+          }
+        }
+      } else if (bestMatches.length > 0) {
+        const p = bestMatches[0];
+        aiConversationState.lastProduct = p;
+        aiConversationState.step = 'awaiting_more';
+        
+        const price = p.price || p.pricing?.kilo || p.pricing?.unitPrice || "حسب الطلب";
+        const badge = getAvailabilityBadge(p);
+        
+        let suggestionText = "";
+        if (Array.isArray(allProducts)) {
+          const suggestions = allProducts.filter(item => item.id !== p.id && item.category === p.category);
+          if (suggestions.length > 0) {
+            const randomSug = suggestions[Math.floor(Math.random() * suggestions.length)];
+            const sugBadge = getAvailabilityBadge(randomSug);
+            suggestionText = `<br><br>💡 <i>مقترح إضافي يناسب طلبك:</i> <b>${randomSug.name}</b>${sugBadge} (${randomSug.price || randomSug.pricing?.kilo || 0} ${curr})`;
+          }
+        }
+
+        reply = `وجدت طلبك بكل سرور:<br><br>🔹 <b>${p.name}</b>${badge}<br>💰 السعر: ${price} ${curr}${suggestionText}<br><br>🛒 أضفه للسلة من المتجر بالأعلى. هل تحب أفرجيص أصناف ثانية ولا نكتفي بهذا الطلب ونروح للسلة؟`;
+
+      } else if (isBestSellers || isOrder || cleanQuery === "" || cleanQuery.length < 2) {
+        let topSellers = "";
+        if (Array.isArray(allProducts) && allProducts.length > 0) {
+          topSellers = allProducts.slice(0, 4).map(p => `🔥 <b>${p.name}</b>${getAvailabilityBadge(p)} - ${p.price || p.pricing?.kilo || 0} ${curr}`).join("<br>");
+        }
+
+        aiConversationState.step = 'awaiting_more';
+        reply = `أهلاً بك في **بيستاش دي ألب**! 🌰✨<br><br>إليك أكثر أصنافنا طلباً وشهرة (بعضها متاح بالطلب المسبق أو بأيام محددة):<br><br>${topSellers || "المكسرات والحلويات الحلبية الفاخرة"}<br><br>أي من هذه الأصناف تحب أن أضيفه لك للسلة؟ 🛒`;
+
+      } else if (isDelivery) {
+        reply = "📍 محلنا ومطبخنا في **القاهرة - الرحاب**، ونوفر توصيل سريع لكل مناطق القاهرة وضواحيها لحد باب البيت! 🛵✨";
 
       } else {
-        reply = `أهلاً بك يا غالي! أقدر أساعدك بمعرفة أسعار المكسرات والحلويات أو طريقة الطلب. يمكنك تصفح المنتجات بالأعلى أو كتابة اسم الصنف الذي تبحث عنه 🌰✨`;
+        reply = `أهلاً بك يا غالي! لم أتمكن من إيجاد صنف مطابق تماماً، لكن يمكنك تصفح الأقسام بالأعلى أو كتابة اسم الصنف الذي ترغب به 🌰✨`;
       }
 
       document.getElementById(loadingId)?.remove();

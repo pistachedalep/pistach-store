@@ -944,6 +944,9 @@
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
 
+    // مصفوفة لتخزين تاريخ المحادثة لضمان استمرارية السياق وعدم تكرار الترحيب
+    let chatHistory = [];
+
     const translationCache = JSON.parse(localStorage.getItem('pista_trans_cache') || '{}');
 
     async function autoTranslate(text) {
@@ -1316,7 +1319,6 @@
         localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
       }
 
-      // فحص حالة تشغيل/إيقاف المساعد الذكي من لوحة التحكم (الأدمن)
       const aiConfig = storeSettings.aiConfig || {};
       const aiBtnElem = document.getElementById("aiFloatingBtn");
       const aiModalElem = document.getElementById("aiChatModal");
@@ -1645,7 +1647,6 @@
       }
 
       const storeName = storeSettings.storeName || "بيستاش دي ألب";
-      
       const baseUrl = window.location.origin + window.location.pathname;
       const productUrl = `${baseUrl}#p_${pId}`;
 
@@ -1974,11 +1975,18 @@
       modal.style.display = modal.style.display === "flex" ? "none" : "flex";
     };
 
+    // الدالة الذكية المحدثة للاستعلام عبر Gemini API مع تمرير المنيو وتاريخ المحادثة ودعم درجات حرارة دقيقة 0.1
     window.sendAIMessage = async () => {
       const input = document.getElementById("aiUserInput");
       const msgContainer = document.getElementById("aiChatMessages");
       const text = input.value.trim();
       if(!text) return;
+
+      // إضافة رسالة العميل الحالية للسجل
+      chatHistory.push({
+        role: "user",
+        parts: [{ text: text }]
+      });
 
       msgContainer.innerHTML += `<div class="ai-message user">${escapeHtml(text)}</div>`;
       input.value = "";
@@ -1997,30 +2005,32 @@
         }
 
         const apiKey = aiConf.apiKey || "AIzaSyBNy3ZPbr_cVJC2ZUzBVf8jxWdFlABYIiw";
-        const temp = aiConf.temperature !== undefined ? aiConf.temperature : 0.2;
+        const temp = 0.1; // حرارة منخفضة لضمان الالتزام الدقيق بالمنيو والأسعار بدون أي تأليف
         
-        const menuSummary = allProducts.map(p => `- ${p.name} (${p.category}): السعر ${p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0} ${window.getCurrency()}, الوصف: ${p.description || 'لا يوجد وصف'}`).join("\n");
+        // استخراج المنيو كاملة من بيانات المتجر المحملة تلقائياً
+        const menuSummary = allProducts.map(p => `- ${p.name} (${p.category || 'أصناف'}): السعر ${p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0} ${window.getCurrency()}, الوصف: ${p.description || 'لا يوجد وصف'}`).join("\n");
 
-        const prompt = `أنت بائع ومساعد مبيعات خبير ولطيف جداً في متجر الحلويات الشامية والوجبات الحلبية الفاخر "${storeSettings.storeName || 'بيستاش دي ألب'}".
+        const systemInstruction = `
+أنت مساعد المبيعات الذكي والودود لمتجر "بيستاش دي ألب" (Pistache D'Alep) للمكسرات والحلويات الحلبية الفاخرة.
 
-قائمة منتجات المتجر المتوفرة فقط:
+📋 قائمة منتجات وأسعار متجرك الحالية:
 ${menuSummary}
 
-قواعد الإجابة:
-1. كن بائعاً فصيحاً ولطيفاً جداً، وأجب بأسلوب ترحيبي مشجع على الطلب دون إطالة.
-2. إذا سأل العميل عن توصية أو "أطيب شيء" أو "أفضل حلى"، رشّح له 2 إلى 3 أصناف شهية ومميزة من المنيو مع شرح مبسط ومشهٍ.
-3. إذا سأل العميل عن فئة عامة (مثل "حلويات باردة"، "شي للفطور"، "وجبات جاهزة"، "مكسرات")، اقترح له الأصناف المناسبة تماماً من القائمة.
-4. اذكر دائماً الأسعار بدقة مع العملة (${window.getCurrency()}).
-5. لا تذكر أو تقترح أي صنف غير موجود في المنيو أعلاه إطلاقاً.
-
-سؤال الزبون: "${text}"`;
+🎯 قواعد سلوكك:
+1. استخدم الأسماء والأسعار المذكورة في المنيو أعلاه بدقة تامة. ممنوع منعاً باتاً اختراع أو تأليف أسعار أو منتجات غير موجودة.
+2. كن بائعاً ذكياً ومحترفاً، وبعد إجابة الزبون وإعطائه تفاصيل الصنف، اطرح عليه سؤالاً تفاعلياً للمتابعة (مثل: "حبوب، تحب أوزن لك كيلو ولا نصف كيلو؟" أو "هل أضيفه لك لسلة التسوق؟").
+3. تذكر سياق المحادثة السابقة ولا تكرر عبارات الترحيب الطويلة بلا داعٍ.
+`;
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            system_instruction: {
+              parts: [{ text: systemInstruction }]
+            },
+            contents: chatHistory, // تمرير سجل المحادثة بالكامل لضمان التسلسل والذاكرة المتصلة
             generationConfig: { temperature: temp }
           })
         });
@@ -2031,79 +2041,39 @@ ${menuSummary}
         if (!reply) throw new Error("No response from AI");
 
       } catch(e) {
-        // 🧠 محرك محلي ذكي ومطور (مترادفات + ترشيح الأسعار والمنتجات)
+        // بديل احتياطي ذكي في حال انقطاع الإنترنت أو خطأ الـ API يعتمد على البحث داخل المنتجات الفعلية
         const queryLower = text.toLowerCase().trim();
         const curr = window.getCurrency();
-
-        const synonymMap = {
-          "كنافه": ["كنافة", "نابلسية", "مبرومة", "مفروكة"],
-          "حلو": ["حلاوة", "حلويات", "تارت", "هريسة", "بسبوسة"],
-          "شوكولاته": ["شوكولا", "توتكس", "اوريو"],
-          "قهوه": ["بن", "قهوة", "هال"],
-          "اكل": ["وجبات", "مطبخ", "منسف", "كبة", "شيخ المحشي", "داوود باشا", "مقلوبة"],
-          "ارخص": ["أرخص", "رخيص", "اقل سعر"],
-          "فطور": ["سميت", "زلابية", "كروسان", "شعيبيات", "مامونية"]
-        };
 
         const greetings = ["هلا", "مرحبا", "أهلا", "اهلا", "سلام", "السلام عليكم", "صباح الخير", "مساء الخير", "هاي", "hi", "hello"];
         
         if (greetings.some(g => queryLower === g || queryLower.startsWith(g + " "))) {
-          reply = `أهلاً وسهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! ✨\nنحن يسعدنا خدمتك اليوم. هل تبحث عن أطيب الحلويات الشرقية، المكسرات، أم الوجبات الحلبية الشهية؟`;
-        } 
-        else if (queryLower.includes("ارخص") || queryLower.includes("رخيص") || queryLower.includes("اقل سعر")) {
-          const sorted = [...allProducts].sort((a,b) => (a.price || a.pricing?.kilo || 0) - (b.price || b.pricing?.kilo || 0));
-          reply = `إليك أكثر الأصناف الاقتصادية والمميزة لدينا في **${storeSettings.storeName || 'بيستاش دي ألب'}**:\n\n`;
-          sorted.slice(0, 4).forEach(p => {
-            const priceVal = p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0;
-            reply += `✨ **${p.name}** بسعر **${priceVal} ${curr}** فقط!\n`;
+          reply = `أهلاً وسهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! ✨\nما الذي تود طلبه اليوم من حلوياتنا ومكسراتنا الفاخرة؟`;
+        } else {
+          let matched = allProducts.filter(p => {
+            const pName = p.name.toLowerCase();
+            const pCat = (p.category || "").toLowerCase();
+            return pName.includes(queryLower) || pCat.includes(queryLower);
           });
-        }
-        else {
-          let searchTerms = queryLower.split(/\s+/);
-          let expandedTerms = [...searchTerms];
-          searchTerms.forEach(term => {
-            for (let key in synonymMap) {
-              if (term.includes(key) || key.includes(term)) {
-                expandedTerms.push(...synonymMap[key]);
-              }
-            }
-          });
-
-          const stopWords = ["بدي", "عاوز", "اريد", "أريد", "عندكم", "فيه", "في", "عن", "هل", "ما", "هو", "هي", "كم", "سعر", "بكم", "كام", "اطيب", "افضل", "أفضل", "أطيب", "شو"];
-          const cleanWords = expandedTerms.filter(w => w.length > 1 && !stopWords.includes(w));
-
-          let matched = [];
-          if (cleanWords.length > 0) {
-            matched = allProducts.filter(p => {
-              const pName = p.name.toLowerCase();
-              const pCat = (p.category || "").toLowerCase();
-              const pDesc = (p.description || "").toLowerCase();
-              return cleanWords.some(w => pName.includes(w) || pCat.includes(w) || pDesc.includes(w));
-            });
-          }
 
           if (matched.length > 0) {
-            reply = `أنصحك بتجربة هذه الأصناف المميزة المطابقة لطلبك من **${storeSettings.storeName || 'بيستاش دي ألب'}**:\n\n`;
-            matched.slice(0, 5).forEach(p => {
+            reply = `وجدت لك هذه الأصناف المطابقة لطلبك:\n\n`;
+            matched.slice(0, 4).forEach(p => {
               const priceVal = p.price || p.pricing?.kilo || p.pricing?.unitPrice || 0;
-              const unitText = p.saleType === 'weight' ? 'للكيلو' : (p.pricing?.unitLabel || 'علبة');
-              reply += `✨ **${p.name}**\n💰 السعر: ${priceVal} ${curr} (${unitText})\n\n`;
+              reply += `✨ **${p.name}** - السعر: ${priceVal} ${curr}\n`;
             });
-            if (matched.length > 5) {
-              reply += `يمكنك استعراض المزيد من الخيارات المشابهة في القائمة الرئيسية! 🛒`;
-            }
-          } 
-          else if (queryLower.includes("سعر") || queryLower.includes("بكم") || queryLower.includes("كام") || queryLower.includes("اسعار")) {
-            reply = `تفضل بإخباري باسم الصنف الذي تود الاستفسار عنه (مثل: كنافة نابلسية، بسبوسة، معمول، كبة) وسأعطيك سعره وتفاصيله فوراً!`;
-          } 
-          else if (queryLower.includes("توصيل") || queryLower.includes("ديلفري") || queryLower.includes("عنوان") || queryLower.includes("فرع") || queryLower.includes("مكان")) {
-            reply = `نعم، يتوفر لدينا خدمة التوصيل السريع للمنازل، كما يسعدنا استقبالكم للاستلام من الفرع مباشرة فور إتمام الطلب من السلة! 🛵🏪`;
-          } 
-          else {
-            reply = `أهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! 🌸\nيرجى كتابة ما تشتهيه اليوم (مثلاً: كنافة، بقلاوة، فطور جمعة، وجبات) وسأرشدك لأطيب الأصناف المتاحة فوراً.`;
+            reply += `\nهل تحب أن أساعدك بإضافة أي منها لسلتك؟`;
+          } else {
+            reply = `أهلاً بك في **${storeSettings.storeName || 'بيستاش دي ألب'}**! تفضل بإخباري بالصنف الذي تبحث عنه (مثل: كنافة، بقلاوة، فطور جمعة، وجبات) وسأرشدك إليه فوراً.`;
           }
         }
       }
+
+      // تخزين رد المساعد في سجل المحادثة لضمان استمرارية الذاكرة
+      chatHistory.push({
+        role: "model",
+        parts: [{ text: reply }]
+      });
 
       document.getElementById(loadingId).remove();
       msgContainer.innerHTML += `<div class="ai-message bot">${escapeHtml(reply)}</div>`;

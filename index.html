@@ -820,6 +820,7 @@
     <div class="cart-total-text" id="cartTotal">0</div>
   </div>
 
+  <!-- زر المساعد الذكي -->
   <div id="aiFloatingBtn" class="pulse-animation" onclick="toggleAIChat()" title="المساعد الذكي">
     <i class="fa-solid fa-headset"></i>
   </div>
@@ -828,6 +829,7 @@
     <i class="fa-solid fa-xmark"></i>
   </div>
 
+  <!-- نافذة الشات الذكي -->
   <div class="ai-chat-modal" id="aiChatModal">
     <div class="ai-chat-header">
       <span><i class="fa-solid fa-robot"></i> مساعد المنيو الذكي</span>
@@ -1316,10 +1318,12 @@
         localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
       }
 
+      // 🔄 فحص دقيق لحالة التشغيل والإيقاف من لوحة التحكم (Firebase -> settings/store -> aiConfig.enabled)
       const aiConfig = storeSettings.aiConfig || {};
       const aiBtnElem = document.getElementById("aiFloatingBtn");
       const aiModalElem = document.getElementById("aiChatModal");
-      if (aiConfig.enabled === false) {
+      
+      if (aiConfig.enabled === false || aiConfig.enabled === "false" || aiConfig.enabled === 0) {
         if (aiBtnElem) aiBtnElem.style.display = "none";
         if (aiModalElem) aiModalElem.style.display = "none";
       } else {
@@ -1973,11 +1977,9 @@
     };
 
     // ==========================================
-    // المساعد الذكي التفاعلي المتكامل - بيستاش دي ألب
+    // المساعد الذكي التفاعلي المتطور (بدون تكرار أو إزعاج)
     // ==========================================
     let aiConversationState = {
-      lastProduct: null,
-      lastCategory: null,
       step: 'idle'
     };
 
@@ -1999,7 +2001,7 @@
         msgContainer.scrollTop = msgContainer.scrollHeight;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 150));
 
       let reply = "";
       const raw = text.toLowerCase();
@@ -2017,110 +2019,52 @@
 
       const cleanQuery = normalize(raw);
       const queryWords = cleanQuery.split(/\s+/).filter(w => w.length > 1);
-
-      // 1. نظام النقاط الذكي للمنتجات
-      let scoredProducts = [];
-      if (typeof allProducts !== 'undefined' && Array.isArray(allProducts)) {
-        scoredProducts = allProducts.map(p => {
-          let score = 0;
-          const pName = normalize((p.name || "").toLowerCase());
-          const pDesc = normalize((p.desc || "").toLowerCase());
-          const pCat = normalize((p.category || "").toLowerCase());
-
-          queryWords.forEach(word => {
-            if (pName.includes(word)) score += 10;
-            if (pCat.includes(word)) score += 5;
-            if (pDesc.includes(word)) score += 2;
-          });
-
-          return { product: p, score };
-        }).filter(item => item.score > 0);
-
-        scoredProducts.sort((a, b) => b.score - a.score);
-      }
-
-      const bestMatches = scoredProducts.map(item => item.product);
       const curr = typeof window.getCurrency === 'function' ? window.getCurrency() : "جنيه";
 
-      // 2. تحليل النوايا
-      const isAffirmative = queryWords.some(w => ["تمام", "اه", "ايوة", "نعم", "خلص", "اي", "اوك", "ماشي", "حلو", "ممتاز"].some(k => w.includes(k)));
-      const isNegative = queryWords.some(w => ["لا", "بس", "يكفي", "خلصت", "مش عايز", "لا شكرا", "يكفي هيك"].some(k => w.includes(k)));
-      const isOrder = queryWords.some(w => ["طلب", "اطلب", "اشتري", "شراء", "عايز", "بدي", "اريد", "هات"].some(k => w.includes(k)));
+      const isFinishing = queryWords.some(w => ["بس", "يكفي", "خلص", "تمام", "ايوة", "نعم", "لا", "اضفت", "ضفت", "حطيت", "سلة", "اكتفيت"].some(k => w.includes(k)));
       const isDelivery = queryWords.some(w => ["توصيل", "وين", "مكان", "عنوان", "رحاب", "قاهره", "محل", "فرع"].some(k => w.includes(k)));
-      const isBestSellers = queryWords.some(w => ["اقترح", "مقترح", "افضل", "مبيع", "اكثر", "مشهور", "شايع", "قائمة", "منيو", "اختر"].some(k => w.includes(k)));
 
-      // دالة استخراج ملاحظة التوفر أو الطلب المسبق إن وجدت في الصنف
       const getAvailabilityBadge = (p) => {
         const desc = (p.description || p.desc || "").toLowerCase();
-        if (desc.includes("طلب مسبق") || desc.includes("حجز مسبق") || p.isPreOrder) {
-          return " ⏳ (متاح بطلب مسبق)";
-        }
-        if (desc.includes("ايام") || desc.includes("أيام") || desc.includes("يوم") || p.availableDays) {
-          return " 📅 (متوفر بأيام محددة)";
-        }
+        if (desc.includes("طلب مسبق") || desc.includes("حجز مسبق") || p.isPreOrder) return " ⏳ (متاح بطلب مسبق)";
+        if (desc.includes("ايام") || desc.includes("أيام") || desc.includes("يوم") || p.availableDays) return " 📅 (متوفر بأيام محددة)";
         return "";
       };
 
-      // 3. مسار المحادثة والمبيعات التفاعلية
-      if (aiConversationState.step === 'awaiting_more') {
-        if (isNegative || cleanQuery.includes("لا") || cleanQuery.includes("بس هيك") || cleanQuery.includes("اكتفيت")) {
-          aiConversationState.step = 'ready_to_checkout';
-          reply = `عراسي يا غالي! هيك صار طلبك جاهز تماماً. 🛒<br><br>اضغط الآن على **أيقونة السلة بالأسفل** لتعبئة بياناتك وإرسال الطلب فوراً عبر الواتساب! 📲✨`;
-        } else if (isAffirmative || isOrder) {
-          aiConversationState.step = 'idle';
-          
-          let topSellers = "";
-          if (Array.isArray(allProducts) && allProducts.length > 0) {
-            topSellers = allProducts.slice(0, 3).map(p => `🔹 <b>${p.name}</b>${getAvailabilityBadge(p)} - ${p.price || p.pricing?.kilo || 0} ${curr}`).join("<br>");
-          }
-          
-          reply = `تكرم عينك! إليك أبرز الأصناف المطلوبة عنا:<br><br>${topSellers}<br><br>أي صنف تحب أضيفه لك للسلة؟ 🌰✨`;
-        } else {
-          if (bestMatches.length > 0) {
-            const p = bestMatches[0];
-            aiConversationState.lastProduct = p;
-            aiConversationState.step = 'awaiting_more';
-            const price = p.price || p.pricing?.kilo || p.pricing?.unitPrice || "حسب الطلب";
-            const badge = getAvailabilityBadge(p);
-            reply = `وجدت لك <b>${p.name}</b>${badge} بسعر ${price} ${curr}. 🔹<br><br>هل تحب أضيف شي ثاني (مثل مكسرات أو حلويات حلبية) ولا ننتقل لتأكيد السلة؟ 🛒`;
-          } else {
-            reply = `عيوني لك! هل تحب تكتفي بهذا الطلب ونروح على السلة، ولا حابب تتفرج على أصناف ثانية؟ 🌰`;
-          }
-        }
-      } else if (bestMatches.length > 0) {
-        const p = bestMatches[0];
-        aiConversationState.lastProduct = p;
-        aiConversationState.step = 'awaiting_more';
-        
-        const price = p.price || p.pricing?.kilo || p.pricing?.unitPrice || "حسب الطلب";
-        const badge = getAvailabilityBadge(p);
-        
-        let suggestionText = "";
-        if (Array.isArray(allProducts)) {
-          const suggestions = allProducts.filter(item => item.id !== p.id && item.category === p.category);
-          if (suggestions.length > 0) {
-            const randomSug = suggestions[Math.floor(Math.random() * suggestions.length)];
-            const sugBadge = getAvailabilityBadge(randomSug);
-            suggestionText = `<br><br>💡 <i>مقترح إضافي يناسب طلبك:</i> <b>${randomSug.name}</b>${sugBadge} (${randomSug.price || randomSug.pricing?.kilo || 0} ${curr})`;
-          }
-        }
-
-        reply = `وجدت طلبك بكل سرور:<br><br>🔹 <b>${p.name}</b>${badge}<br>💰 السعر: ${price} ${curr}${suggestionText}<br><br>🛒 أضفه للسلة من المتجر بالأعلى. هل تحب أفرجيص أصناف ثانية ولا نكتفي بهذا الطلب ونروح للسلة؟`;
-
-      } else if (isBestSellers || isOrder || cleanQuery === "" || cleanQuery.length < 2) {
-        let topSellers = "";
-        if (Array.isArray(allProducts) && allProducts.length > 0) {
-          topSellers = allProducts.slice(0, 4).map(p => `🔥 <b>${p.name}</b>${getAvailabilityBadge(p)} - ${p.price || p.pricing?.kilo || 0} ${curr}`).join("<br>");
-        }
-
-        aiConversationState.step = 'awaiting_more';
-        reply = `أهلاً بك في **بيستاش دي ألب**! 🌰✨<br><br>إليك أكثر أصنافنا طلباً وشهرة (بعضها متاح بالطلب المسبق أو بأيام محددة):<br><br>${topSellers || "المكسرات والحلويات الحلبية الفاخرة"}<br><br>أي من هذه الأصناف تحب أن أضيفه لك للسلة؟ 🛒`;
-
+      if (aiConversationState.step === 'product_shown' && isFinishing) {
+        aiConversationState.step = 'idle';
+        reply = `عراسي يا غالي! هيك صار طلبك جاهز تماماً. 🛒<br><br>اضغط الآن على **أيقونة السلة بالأسفل** لتعبئة بياناتك وإرسال الطلب فوراً عبر الواتساب! 📲✨`;
       } else if (isDelivery) {
         reply = "📍 محلنا ومطبخنا في **القاهرة - الرحاب**، ونوفر توصيل سريع لكل مناطق القاهرة وضواحيها لحد باب البيت! 🛵✨";
-
       } else {
-        reply = `أهلاً بك يا غالي! لم أتمكن من إيجاد صنف مطابق تماماً، لكن يمكنك تصفح الأقسام بالأعلى أو كتابة اسم الصنف الذي ترغب به 🌰✨`;
+        let bestMatch = null;
+        if (typeof allProducts !== 'undefined' && Array.isArray(allProducts)) {
+          let scored = allProducts.map(p => {
+            let score = 0;
+            const pName = normalize((p.name || "").toLowerCase());
+            const pCat = normalize((p.category || "").toLowerCase());
+
+            queryWords.forEach(word => {
+              if (pName.includes(word)) score += 15;
+              if (pCat.includes(word)) score += 5;
+            });
+            return { product: p, score };
+          }).filter(item => item.score > 0);
+
+          scored.sort((a, b) => b.score - a.score);
+          if (scored.length > 0) bestMatch = scored[0].product;
+        }
+
+        if (bestMatch) {
+          aiConversationState.step = 'product_shown';
+          const price = bestMatch.price || bestMatch.pricing?.kilo || bestMatch.pricing?.unitPrice || "حسب الطلب";
+          const badge = getAvailabilityBadge(bestMatch);
+          
+          reply = `وجدت طلبك بكل سرور:<br><br>🔹 <b>${bestMatch.name}</b>${badge}<br>💰 السعر: ${price} ${curr}<br><br>🛒 أضفه للسلة من المتجر بالأعلى، ولو خلصت قولي **"تمام"** أو اضغط على السلة!`;
+        } else {
+          aiConversationState.step = 'idle';
+          reply = `أهلاً بك يا غالي! لم أتمكن من إيجاد صنف مطابق تماماً، يمكنك كتابة اسم الصنف بوضوح (مثل كنافة، حلاوة جبن) أو تصفح الأقسام بالأعلى 🌰✨`;
+        }
       }
 
       document.getElementById(loadingId)?.remove();

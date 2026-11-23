@@ -1204,6 +1204,7 @@
       try {
         const safeName = (storeName && storeName.trim()) || "بيستاش دي ألب";
         const safeIcon = (iconUrl && iconUrl.trim()) || "https://cdn-icons-png.flaticon.com/512/906/906343.png";
+        const fixedUrl = window.location.origin + window.location.pathname;
 
         const appleIconEl = document.getElementById("appleTouchIcon");
         if (appleIconEl) appleIconEl.href = safeIcon;
@@ -1214,16 +1215,12 @@
         const manualIconEl = document.getElementById("manualInstallIcon");
         if (manualIconEl) manualIconEl.src = safeIcon;
 
-        const installNonce = Date.now();
-        const uniqueScope = window.location.origin + window.location.pathname + '?inst_v=' + installNonce;
-        const uniqueStartUrl = window.location.origin + window.location.pathname + '?inst_v=' + installNonce;
-
         const manifestData = {
           name: safeName,
           short_name: safeName,
           description: "تطبيق المتجر - " + safeName,
-          start_url: uniqueStartUrl,
-          scope: uniqueScope,
+          start_url: fixedUrl,
+          scope: fixedUrl,
           display: "standalone",
           background_color: "#11261d",
           theme_color: "#11261d",

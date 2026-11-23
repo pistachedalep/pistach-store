@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="بيستاش دي ألب">
+  <link id="appleTouchIcon" rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/906/906343.png">
   <link id="dynamicFontLink" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -19,10 +20,25 @@
   <script>
     (function() {
       try {
-        localStorage.removeItem('cached_store_theme');
+        const cachedTheme = localStorage.getItem('cached_store_theme');
         const cachedName = localStorage.getItem('cached_store_name');
-        const root = document.documentElement;
-        root.style.setProperty('--menu-bg-image', 'none');
+        
+        if (cachedTheme) {
+          const theme = JSON.parse(cachedTheme);
+          const root = document.documentElement;
+          
+          if(theme.primaryColor) root.style.setProperty('--primary', theme.primaryColor);
+          if(theme.accentColor) root.style.setProperty('--accent', theme.accentColor);
+          if(theme.bgColor) root.style.setProperty('--menu-bg-color', theme.bgColor);
+          if(theme.headerBgColor) root.style.setProperty('--header-bg', theme.headerBgColor);
+          if(theme.cardBgColor) root.style.setProperty('--card-bg', theme.cardBgColor);
+          if(theme.cardTextColor) root.style.setProperty('--card-text', theme.cardTextColor);
+          if(theme.catBgColor) root.style.setProperty('--cat-bg', theme.catBgColor);
+          if(theme.catTextColor) root.style.setProperty('--cat-text', theme.catTextColor);
+          if(theme.catActiveBg) root.style.setProperty('--cat-active-bg', theme.catActiveBg);
+          if(theme.catActiveText) root.style.setProperty('--cat-active-text', theme.catActiveText);
+          if(theme.menuBgImage) root.style.setProperty('--menu-bg-image', "url('" + theme.menuBgImage + "')");
+        }
 
         if (cachedName) {
           window.addEventListener('DOMContentLoaded', () => {
@@ -69,8 +85,12 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); -webkit-tap-highlight-color: transparent; }
     
     body { 
-      background-color: var(--menu-bg-color, #11261d) !important; 
-      background-image: none !important;
+      background-color: var(--menu-bg-color); 
+      background-image: var(--menu-bg-image);
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
       color: var(--text-main); 
       direction: rtl; 
       height: 100vh;
@@ -163,6 +183,90 @@
       transition: all 0.3s ease;
     }
     .control-btn:hover { background: rgba(255, 255, 255, 0.15) !important; border-color: var(--accent); }
+
+    .install-app-btn {
+      background: var(--accent) !important;
+      border: 1.5px solid var(--accent);
+      color: #0f172a;
+      padding: 6px 10px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      font-weight: 900;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+    .install-app-btn:hover { filter: brightness(1.08); }
+
+    /* رسالة تثبيت التطبيق المؤقتة التي تظهر وتختفي تلقائياً */
+    .install-toast-banner {
+      position: fixed;
+      bottom: 22px;
+      right: 50%;
+      transform: translateX(50%) translateY(24px);
+      background: var(--primary);
+      color: #ffffff;
+      border: 2px solid var(--accent);
+      border-radius: 18px;
+      padding: 10px 14px;
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45);
+      z-index: 2500;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      max-width: calc(100vw - 110px);
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .install-toast-banner.show {
+      display: flex;
+      opacity: 1;
+      transform: translateX(50%) translateY(0);
+    }
+    .install-toast-banner img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--accent);
+      flex-shrink: 0;
+    }
+    .install-toast-text {
+      font-size: 12.5px;
+      font-weight: 900;
+      white-space: nowrap;
+      color: #fff;
+    }
+    .install-toast-cta {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      border-radius: 11px;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .install-toast-close {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
 
     .whatsapp-header-btn {
       background: transparent !important;
@@ -765,79 +869,9 @@
     .btn-telegram { background: #229ed9; }
     .btn-tiktok { background: #000000; border: 1px solid #333; }
 
-    .announcement-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); z-index: 3000; display: none !important; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
+    .announcement-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
     .announcement-card { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2.5px solid var(--accent); animation: popUp 0.35s ease; position: relative; color: #0f172a; }
-
-    .app-promo-toast {
-      position: fixed;
-      bottom: 95px;
-      right: 16px;
-      left: 16px;
-      max-width: 420px;
-      margin: 0 auto;
-      background: var(--card-bg, #ffffff);
-      color: var(--card-text, #0f172a);
-      border: 2px solid var(--accent, #d4af37);
-      border-radius: 18px;
-      padding: 12px 14px;
-      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
-      z-index: 2500;
-      display: none;
-      align-items: center;
-      gap: 12px;
-      animation: popUp 0.3s ease;
-    }
-    body.dark-mode .app-promo-toast {
-      background: #1e293b;
-      color: #f8fafc;
-    }
-    .app-promo-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      object-fit: cover;
-      border: 1.5px solid var(--accent, #d4af37);
-      flex-shrink: 0;
-    }
-    .app-promo-content {
-      flex: 1;
-      min-width: 0;
-    }
-    .app-promo-title {
-      font-size: 13.5px;
-      font-weight: 900;
-      margin-bottom: 2px;
-    }
-    .app-promo-sub {
-      font-size: 11.5px;
-      opacity: 0.85;
-      font-weight: 700;
-    }
-    .app-promo-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-    .app-promo-install-btn {
-      background: var(--primary, #11261d);
-      color: var(--accent, #d4af37);
-      border: 1.5px solid var(--accent, #d4af37);
-      padding: 6px 11px;
-      border-radius: 10px;
-      font-size: 11.5px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-    .app-promo-close-btn {
-      background: transparent;
-      color: inherit;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      padding: 4px 6px;
-      opacity: 0.7;
-    }
+    .push-banner-icon { width: 52px; height: 52px; border-radius: 14px; object-fit: cover; margin: 0 auto 12px auto; display: none; border: 1.5px solid var(--accent); }
   </style>
 </head>
 <body>
@@ -849,13 +883,20 @@
         <input type="text" id="searchInput" placeholder="ابحث عن حلوياتك..." oninput="window.filterProducts()">
       </div>
       <div class="header-actions">
-        <button class="control-btn" id="installStoreAppBtn" style="display: none; border-color: var(--accent); color: var(--accent);">📲 التطبيق</button>
+        <button class="install-app-btn" id="installStoreAppBtn" style="display: none;">📲 تثبيت التطبيق</button>
         <button class="control-btn" onclick="window.toggleDarkMode()" id="darkModeBtn">🌙 الداكن</button>
         <button class="control-btn" onclick="window.toggleLanguage()" id="langSwitchBtn">English 🌐</button>
         <button class="whatsapp-header-btn" id="contactBtn" onclick="window.openSocialModal()">💬 تواصل معنا</button>
       </div>
     </div>
   </header>
+
+  <div class="install-toast-banner" id="installToastBanner">
+    <img id="installToastIcon" src="https://cdn-icons-png.flaticon.com/512/906/906343.png" alt="أيقونة التطبيق">
+    <span class="install-toast-text" id="installToastText">📲 ثبّت التطبيق على هاتفك</span>
+    <button class="install-toast-cta" id="installToastCta">تثبيت</button>
+    <button class="install-toast-close" id="installToastClose" aria-label="إغلاق">×</button>
+  </div>
 
   <div class="main-layout">
     <div class="categories-bar" id="categoriesBar">
@@ -910,8 +951,10 @@
     </div>
   </div>
 
-  <div class="announcement-overlay" id="announcementModal" style="display: none !important;">
+  <div class="announcement-overlay" id="announcementModal">
     <div class="announcement-card" id="announcementCardContent">
+      <img id="announcementIconImg" class="push-banner-icon" src="" alt="أيقونة">
+      <div id="announcementTitle" style="font-size: 17px; font-weight: 900; color: var(--primary); margin-bottom: 8px; display: none;"></div>
       <div id="announcementText" style="font-size: 15px; font-weight: 800; line-height: 1.6; margin-bottom: 20px; white-space: pre-line;"></div>
       <button id="announcementCloseBtn" onclick="window.closeAnnouncement()" class="btn-submit" style="background: var(--primary);">حسناً</button>
     </div>
@@ -981,19 +1024,6 @@
     </div>
   </div>
 
-  <!-- إشعار توفر التطبيق للزبون غير المثبّت -->
-  <div class="app-promo-toast" id="appInstallPromoToast">
-    <img class="app-promo-icon" id="promoAppIconImg" src="" alt="أيقونة التطبيق">
-    <div class="app-promo-content">
-      <div class="app-promo-title">📲 التطبيق متوفر الآن!</div>
-      <div class="app-promo-sub">أضف متجرنا إلى شاشتك الرئيسية لطلب أسرع.</div>
-    </div>
-    <div class="app-promo-actions">
-      <button class="app-promo-install-btn" id="promoInstallNowBtn">تثبيت</button>
-      <button class="app-promo-close-btn" id="promoDismissBtn" title="إغلاق">✕</button>
-    </div>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
     import { getFirestore, collection, doc, getDoc, addDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -1015,173 +1045,118 @@
     let isScrollingProgrammatically = false;
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
+    let deferredStorePrompt = null;
+    let currentManifestUrl = null;
+    let installToastTimer = null;
 
-    const INSTALLED_FLAG_KEY = "pista_app_installed_v1";
-    const PROMO_DISMISSED_KEY = "pista_app_promo_dismissed_at_v1";
-    const PROMO_COOLDOWN_MS = 12 * 60 * 60 * 1000;
-    const CLIENT_CACHE_TTL_MS = 10 * 60 * 1000;
-    const CLIENT_CACHE_SETTINGS_KEY = "pista_client_settings_cache_v1";
-    const CLIENT_CACHE_PRODUCTS_KEY = "pista_client_products_cache_v1";
-    const CLIENT_CACHE_TIME_KEY = "pista_client_cache_time_v1";
-
-    const isIosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent || "");
-
-    function showIosInstallGuide() {
-      alert(
-        "لتثبيت التطبيق على الآيفون (iPhone):\n" +
-        "1. اضغط على زر المشاركة (مربع يخرج منه سهم للأعلى) في متصفح Safari.\n" +
-        "2. مرّر للأسفل واختر: (إضافة إلى الشاشة الرئيسية / Add to Home Screen).\n" +
-        "3. اضغط (إضافة / Add) في الزاوية العلوية."
-      );
-    }
-
-    function isAppAlreadyInstalled() {
-      const isStandalone =
-        window.navigator.standalone === true ||
-        (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
-        (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches);
-
-      const savedInstalled = localStorage.getItem(INSTALLED_FLAG_KEY) === "true";
-      return Boolean(isStandalone || savedInstalled);
-    }
-
-    function markAppAsInstalled() {
-      localStorage.setItem(INSTALLED_FLAG_KEY, "true");
-      const headerBtn = document.getElementById("installStoreAppBtn");
-      const promoToast = document.getElementById("appInstallPromoToast");
-      if (headerBtn) headerBtn.style.display = "none";
-      if (promoToast) promoToast.style.display = "none";
-    }
-
-    window.addEventListener("appinstalled", () => {
-      markAppAsInstalled();
-    });
-
-    function applyCustomAppIcon(iconUrl) {
-      const finalIcon = (iconUrl && iconUrl.trim())
-        ? iconUrl.trim()
-        : (storeSettings.defaultImage && storeSettings.defaultImage.trim())
-          ? storeSettings.defaultImage.trim()
-          : (localStorage.getItem("cached_app_icon_url") || "https://cdn-icons-png.flaticon.com/512/3081/3081559.png");
-
-      localStorage.setItem("cached_app_icon_url", finalIcon);
-
-      const promoImg = document.getElementById("promoAppIconImg");
-      if (promoImg) promoImg.src = finalIcon;
-
-      const storeManifestData = {
-        name: storeSettings.storeName || localStorage.getItem("cached_store_name") || "بيستاش دي ألب | Pistache D'Alep",
-        short_name: storeSettings.storeName || localStorage.getItem("cached_store_name") || "بيستاش دي ألب",
-        description: "تطبيق طلب الحلويات والمكسرات الفاخرة",
-        start_url: window.location.href,
-        scope: window.location.href,
-        display: "standalone",
-        background_color: "#11261d",
-        theme_color: "#11261d",
-        dir: "rtl",
-        lang: "ar",
-        icons: [
-          { src: finalIcon, sizes: "192x192", type: "image/png" },
-          { src: finalIcon, sizes: "512x512", type: "image/png" }
-        ]
-      };
-
-      const existingManifest = document.querySelector('link[rel="manifest"]');
-      if (existingManifest && existingManifest.href.startsWith("blob:")) {
-        URL.revokeObjectURL(existingManifest.href);
+    function hideInstallToast() {
+      const toast = document.getElementById("installToastBanner");
+      if (installToastTimer) {
+        clearTimeout(installToastTimer);
+        installToastTimer = null;
       }
-      const manifestBlob = new Blob([JSON.stringify(storeManifestData)], { type: "application/manifest+json" });
-      const manifestUrl = URL.createObjectURL(manifestBlob);
-      const linkEl = existingManifest || document.createElement("link");
-      linkEl.rel = "manifest";
-      linkEl.href = manifestUrl;
-      if (!existingManifest) document.head.appendChild(linkEl);
+      if (!toast) return;
+      toast.classList.remove("show");
+      setTimeout(() => {
+        if (!toast.classList.contains("show")) toast.style.display = "none";
+      }, 350);
     }
 
-    let deferredStorePrompt;
+    function showInstallToast(storeName, iconUrl) {
+      const toast = document.getElementById("installToastBanner");
+      const textEl = document.getElementById("installToastText");
+      const iconEl = document.getElementById("installToastIcon");
+      if (!toast || !deferredStorePrompt) return;
+
+      const safeName = (storeName && storeName.trim()) || "التطبيق";
+      if (textEl) textEl.innerText = `📲 ثبّت تطبيق ${safeName}`;
+      if (iconEl && iconUrl) iconEl.src = iconUrl;
+
+      toast.style.display = "flex";
+      requestAnimationFrame(() => toast.classList.add("show"));
+
+      if (installToastTimer) clearTimeout(installToastTimer);
+      installToastTimer = setTimeout(() => {
+        hideInstallToast();
+      }, 8000);
+    }
+
+    async function triggerStoreInstall() {
+      if (!deferredStorePrompt) return;
+      hideInstallToast();
+      deferredStorePrompt.prompt();
+      const { outcome } = await deferredStorePrompt.userChoice;
+      if (outcome === "accepted") {
+        if (installStoreBtn) installStoreBtn.style.display = "none";
+      }
+      deferredStorePrompt = null;
+    }
+
+    function applyInlineManifest(storeName, iconUrl) {
+      try {
+        const safeName = (storeName && storeName.trim()) || "بيستاش دي ألب";
+        const safeIcon = (iconUrl && iconUrl.trim()) || "https://cdn-icons-png.flaticon.com/512/906/906343.png";
+
+        const appleIconEl = document.getElementById("appleTouchIcon");
+        if (appleIconEl) appleIconEl.href = safeIcon;
+
+        const toastIconEl = document.getElementById("installToastIcon");
+        if (toastIconEl) toastIconEl.src = safeIcon;
+
+        const manifestData = {
+          name: safeName,
+          short_name: safeName,
+          description: "تطبيق المتجر - " + safeName,
+          start_url: window.location.href,
+          scope: window.location.href,
+          display: "standalone",
+          background_color: "#11261d",
+          theme_color: "#11261d",
+          dir: "rtl",
+          lang: "ar",
+          icons: [
+            { src: safeIcon, sizes: "192x192", type: "image/png" },
+            { src: safeIcon, sizes: "512x512", type: "image/png" }
+          ]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: "application/manifest+json" });
+        const nextUrl = URL.createObjectURL(manifestBlob);
+        let linkEl = document.getElementById("dynamicStoreManifest");
+        if (!linkEl) {
+          linkEl = document.createElement("link");
+          linkEl.id = "dynamicStoreManifest";
+          linkEl.rel = "manifest";
+          document.head.appendChild(linkEl);
+        }
+        linkEl.href = nextUrl;
+        if (currentManifestUrl) URL.revokeObjectURL(currentManifestUrl);
+        currentManifestUrl = nextUrl;
+      } catch (e) { console.log("Inline store manifest notice"); }
+    }
+
+    applyInlineManifest("بيستاش دي ألب", "https://cdn-icons-png.flaticon.com/512/906/906343.png");
+
     const installStoreBtn = document.getElementById("installStoreAppBtn");
-
-    function syncInstallButtonState() {
-      if (!installStoreBtn) return;
-      if (isAppAlreadyInstalled()) {
-        installStoreBtn.style.display = "none";
-      } else if (deferredStorePrompt || isIosDevice) {
-        installStoreBtn.style.display = "inline-flex";
-      }
-    }
-
-    if (installStoreBtn) {
-      syncInstallButtonState();
-      installStoreBtn.addEventListener("click", async () => {
-        if (isAppAlreadyInstalled()) {
-          markAppAsInstalled();
-          return;
-        }
-
-        if (deferredStorePrompt) {
-          deferredStorePrompt.prompt();
-          const { outcome } = await deferredStorePrompt.userChoice;
-          if (outcome === "accepted") {
-            markAppAsInstalled();
-          }
-          deferredStorePrompt = null;
-          return;
-        }
-
-        if (isIosDevice) {
-          showIosInstallGuide();
-        } else {
-          alert("لتثبيت التطبيق: اختر 'تثبيت التطبيق' أو 'إضافة إلى الشاشة الرئيسية' من قائمة المتصفح.");
-        }
-      });
-    }
+    const installToastCta = document.getElementById("installToastCta");
+    const installToastClose = document.getElementById("installToastClose");
 
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
-      if (isAppAlreadyInstalled()) {
-        if (installStoreBtn) installStoreBtn.style.display = "none";
-        return;
-      }
       deferredStorePrompt = e;
-      syncInstallButtonState();
+      if (installStoreBtn) installStoreBtn.style.display = "inline-flex";
+      showInstallToast(storeSettings.storeName, storeSettings.appIconUrl);
     });
 
-    function showAppPromoOnce() {
-      const toast = document.getElementById("appInstallPromoToast");
-      if (!toast || isAppAlreadyInstalled()) return;
-
-      const dismissedAt = Number(localStorage.getItem(PROMO_DISMISSED_KEY) || 0);
-      if (dismissedAt > 0 && Date.now() - dismissedAt < PROMO_COOLDOWN_MS) return;
-
-      const cachedIcon =
-        localStorage.getItem("cached_app_icon_url") ||
-        storeSettings.appIconUrl ||
-        storeSettings.defaultImage ||
-        "https://cdn-icons-png.flaticon.com/512/3081/3081559.png";
-      const promoImg = document.getElementById("promoAppIconImg");
-      if (promoImg) promoImg.src = cachedIcon;
-
-      toast.style.display = "flex";
-
-      const dismiss = () => {
-        localStorage.setItem(PROMO_DISMISSED_KEY, String(Date.now()));
-        toast.style.display = "none";
-      };
-
-      document.getElementById("promoDismissBtn")?.addEventListener("click", dismiss, { once: true });
-      document.getElementById("promoInstallNowBtn")?.addEventListener("click", async () => {
-        dismiss();
-        if (installStoreBtn && installStoreBtn.style.display !== "none") {
-          installStoreBtn.click();
-        } else if (isIosDevice) {
-          showIosInstallGuide();
-        } else {
-          alert("لتثبيت التطبيق: اختر 'تثبيت التطبيق' أو 'إضافة إلى الشاشة الرئيسية' من قائمة المتصفح.");
-        }
-      }, { once: true });
+    if (installStoreBtn) {
+      installStoreBtn.addEventListener("click", triggerStoreInstall);
     }
-
-    applyCustomAppIcon(localStorage.getItem("cached_app_icon_url") || "");
+    if (installToastCta) {
+      installToastCta.addEventListener("click", triggerStoreInstall);
+    }
+    if (installToastClose) {
+      installToastClose.addEventListener("click", hideInstallToast);
+    }
 
     const translationCache = JSON.parse(localStorage.getItem('pista_trans_cache') || '{}');
 
@@ -1413,6 +1388,57 @@
       applyStaticTranslations();
     });
 
+    function checkAndShowAnnouncement() {
+      const modal = document.getElementById("announcementModal");
+      const iconElem = document.getElementById("announcementIconImg");
+      const titleElem = document.getElementById("announcementTitle");
+      const textElem = document.getElementById("announcementText");
+      const btnElem = document.getElementById("announcementCloseBtn");
+
+      if (storeSettings.appIconUrl && iconElem) {
+        iconElem.src = storeSettings.appIconUrl;
+        iconElem.style.display = "block";
+      } else if (iconElem) {
+        iconElem.style.display = "none";
+      }
+
+      const pushNotif = storeSettings.latestPushNotification;
+      const seenNotifId = localStorage.getItem("seen_push_notif_id");
+      const hasUnreadPush = pushNotif && pushNotif.title && String(pushNotif.id) !== String(seenNotifId);
+
+      if (hasUnreadPush) {
+        localStorage.setItem("seen_push_notif_id", String(pushNotif.id));
+        if (titleElem) {
+          titleElem.innerText = pushNotif.title;
+          titleElem.style.display = "block";
+        }
+        textElem.innerText = pushNotif.body || "";
+        btnElem.style.display = "block";
+        modal.style.display = "flex";
+        return;
+      }
+
+      if (titleElem) titleElem.style.display = "none";
+
+      if (storeSettings.announcement && storeSettings.announcement.trim() !== "") {
+        textElem.innerText = storeSettings.announcement;
+        
+        const closeType = storeSettings.announcementCloseType || "button";
+        if(closeType === "auto") {
+          btnElem.style.display = "none";
+          const seconds = Number(storeSettings.announcementSeconds || 5) * 1000;
+          if(announcementTimer) clearTimeout(announcementTimer);
+          announcementTimer = setTimeout(() => {
+            window.closeAnnouncement();
+          }, seconds);
+        } else {
+          btnElem.style.display = "block";
+        }
+        
+        modal.style.display = "flex";
+      }
+    }
+
     window.closeAnnouncement = () => {
       document.getElementById("announcementModal").style.display = "none";
       if(announcementTimer) clearTimeout(announcementTimer);
@@ -1487,66 +1513,41 @@
       }
     }
 
-    async function loadStoreDataLowRead() {
-      renderSkeletons();
-
-      const now = Date.now();
-      const cachedTime = Number(localStorage.getItem(CLIENT_CACHE_TIME_KEY) || 0);
-      const cachedSettingsRaw = localStorage.getItem(CLIENT_CACHE_SETTINGS_KEY);
-      const cachedProductsRaw = localStorage.getItem(CLIENT_CACHE_PRODUCTS_KEY);
-
-      const hasValidCache =
-        cachedTime > 0 &&
-        now - cachedTime < CLIENT_CACHE_TTL_MS &&
-        cachedSettingsRaw &&
-        cachedProductsRaw;
-
-      if (hasValidCache) {
-        try {
-          storeSettings = JSON.parse(cachedSettingsRaw);
-          allProducts = JSON.parse(cachedProductsRaw);
-          processLoadedData(true);
-          return;
-        } catch (e) {}
-      }
-
+    async function fetchStoreData() {
       try {
-        const [settingsSnap, bundleSnap] = await Promise.all([
-          getDoc(doc(db, "settings", "store")),
-          getDoc(doc(db, "settings", "products_bundle"))
-        ]);
-
+        renderSkeletons();
+        
+        const settingsSnap = await getDoc(doc(db, "settings", "store"));
         if (settingsSnap.exists()) {
           storeSettings = settingsSnap.data();
-          localStorage.setItem(CLIENT_CACHE_SETTINGS_KEY, JSON.stringify(storeSettings));
         }
 
-        if (bundleSnap.exists() && Array.isArray(bundleSnap.data().productsArray)) {
+        const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
+        if (bundleSnap.exists() && bundleSnap.data().productsArray) {
           allProducts = bundleSnap.data().productsArray;
-          localStorage.setItem(CLIENT_CACHE_PRODUCTS_KEY, JSON.stringify(allProducts));
         } else {
           allProducts = [];
         }
 
-        localStorage.setItem(CLIENT_CACHE_TIME_KEY, String(Date.now()));
-        processLoadedData(false);
+        processLoadedData();
         trackVisitor();
-      } catch (error) {
+
+      } catch(error) {
         console.error("خطأ في جلب البيانات:", error);
-        document.getElementById("productsScrollArea").innerHTML =
-          '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
+        document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
       }
     }
 
-    function processLoadedData(fromCache = false) {
+    function processLoadedData() {
       if(storeSettings.storeName) {
         document.getElementById("storeTitleLogo").innerText = " " + storeSettings.storeName;
         document.getElementById("pageTitle").innerText = storeSettings.storeName;
+        const appleTitleEl = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+        if (appleTitleEl) appleTitleEl.setAttribute("content", storeSettings.storeName);
         localStorage.setItem('cached_store_name', storeSettings.storeName);
       }
 
-      applyCustomAppIcon(storeSettings.appIconUrl);
-      syncInstallButtonState();
+      applyInlineManifest(storeSettings.storeName, storeSettings.appIconUrl);
 
       if(storeSettings.deliveryZones) {
         deliveryZones = storeSettings.deliveryZones;
@@ -1557,6 +1558,7 @@
 
       if(storeSettings.theme) {
         applyDynamicTheme(storeSettings.theme);
+        localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
       }
 
       const aiConfig = storeSettings.aiConfig || {};
@@ -1578,13 +1580,10 @@
 
       renderProducts();
       initScrollSpy();
-      showAppPromoOnce();
-      if (!fromCache) {
-        updateCartUI();
-      }
+      checkAndShowAnnouncement();
     }
 
-    loadStoreDataLowRead();
+    fetchStoreData();
 
     function applyDynamicTheme(theme) {
       const root = document.documentElement;
@@ -1601,8 +1600,11 @@
       if(theme.catActiveBg) root.style.setProperty('--cat-active-bg', theme.catActiveBg);
       if(theme.catActiveText) root.style.setProperty('--cat-active-text', theme.catActiveText);
 
-      // إزالة صورة الخلفية ومنع ظهورها عند الفتح
-      root.style.setProperty('--menu-bg-image', 'none');
+      if(theme.menuBgImage) {
+        root.style.setProperty('--menu-bg-image', `url('${theme.menuBgImage}')`);
+      } else {
+        root.style.setProperty('--menu-bg-image', 'none');
+      }
 
       if(theme.fontFamily) {
         const fontLink = document.getElementById("dynamicFontLink");

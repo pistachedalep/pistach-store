@@ -269,16 +269,20 @@
     }
 
     /* نافذة شرح التثبيت اليدوي */
+    #manualInstallModal .social-modal-card {
+      background: var(--card-bg);
+      color: var(--card-text);
+    }
     .manual-guide-box {
       text-align: right;
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1.5px solid rgba(17, 38, 29, 0.16);
       border-radius: 14px;
       padding: 14px;
       margin: 12px 0 16px 0;
       font-size: 13px;
       line-height: 1.65;
-      color: #0f172a;
+      color: var(--card-text);
     }
     body.dark-mode .manual-guide-box {
       background: #0f172a;
@@ -931,6 +935,7 @@
       </div>
       <div class="header-actions">
         <button class="install-app-btn" id="installStoreAppBtn">📲 تثبيت التطبيق</button>
+        <button class="control-btn" onclick="window.forceRefreshStore()" id="refreshStoreBtn" title="تحديث">🔄</button>
         <button class="control-btn" onclick="window.toggleDarkMode()" id="darkModeBtn">🌙 الداكن</button>
         <button class="control-btn" onclick="window.toggleLanguage()" id="langSwitchBtn">English 🌐</button>
         <button class="whatsapp-header-btn" id="contactBtn" onclick="window.openSocialModal()">💬 تواصل معنا</button>
@@ -1124,6 +1129,7 @@
     let deferredStorePrompt = null;
     let currentManifestUrl = null;
     let installToastTimer = null;
+    let lastSeenUpdateId = 0;
 
     window.openManualInstallModal = () => {
       const safeName = (storeSettings.storeName && storeSettings.storeName.trim()) || "بيستاش دي ألب";
@@ -1208,12 +1214,16 @@
         const manualIconEl = document.getElementById("manualInstallIcon");
         if (manualIconEl) manualIconEl.src = safeIcon;
 
+        const installNonce = Date.now();
+        const uniqueScope = window.location.origin + window.location.pathname + '?inst_v=' + installNonce;
+        const uniqueStartUrl = window.location.origin + window.location.pathname + '?inst_v=' + installNonce;
+
         const manifestData = {
           name: safeName,
           short_name: safeName,
           description: "تطبيق المتجر - " + safeName,
-          start_url: window.location.href,
-          scope: window.location.href,
+          start_url: uniqueStartUrl,
+          scope: uniqueScope,
           display: "standalone",
           background_color: "#11261d",
           theme_color: "#11261d",
@@ -1618,6 +1628,29 @@
       }
     }
 
+    function syncCartPricesWithLatestProducts() {
+      if (!Array.isArray(allProducts) || !allProducts.length || !Array.isArray(cart) || !cart.length) return;
+      cart.forEach(item => {
+        const latestProduct = allProducts.find(p => p.id === item.id);
+        if (!latestProduct) return;
+        let updatedPrice = item.price;
+        if (latestProduct.saleType === 'weight') {
+          if (item.option === dict.ar.kilo || item.option === dict.en.kilo) {
+            updatedPrice = Number(latestProduct.pricing?.kilo || latestProduct.price || item.price);
+          } else if (item.option === dict.ar.half || item.option === dict.en.half) {
+            updatedPrice = Number(latestProduct.pricing?.half || (latestProduct.price ? latestProduct.price / 2 : item.price));
+          } else if (item.option === dict.ar.quarter || item.option === dict.en.quarter) {
+            updatedPrice = Number(latestProduct.pricing?.quarter || (latestProduct.price ? latestProduct.price / 4 : item.price));
+          }
+        } else {
+          updatedPrice = Number(latestProduct.pricing?.unitPrice || latestProduct.price || item.price);
+        }
+        item.price = updatedPrice;
+      });
+      window.updateDeliveryFee();
+      updateCartUI();
+    }
+
     async function fetchStoreData() {
       try {
         renderSkeletons();
@@ -1625,6 +1658,7 @@
         const settingsSnap = await getDoc(doc(db, "settings", "store"));
         if (settingsSnap.exists()) {
           storeSettings = settingsSnap.data();
+          lastSeenUpdateId = Number(storeSettings.lastUpdatedAt || lastSeenUpdateId || 0);
         }
 
         const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
@@ -1635,6 +1669,7 @@
         }
 
         processLoadedData();
+        syncCartPricesWithLatestProducts();
         trackVisitor();
 
       } catch(error) {
@@ -1642,6 +1677,46 @@
         document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
       }
     }
+
+    async function forceRefreshStore() {
+      try {
+        localStorage.removeItem('pista_trans_cache');
+        await fetchStoreData();
+      } catch (e) {
+        console.log("Refresh notice");
+      }
+    }
+
+    window.forceRefreshStore = forceRefreshStore;
+
+    async function syncFromAdminUpdates() {
+      try {
+        const snap = await getDoc(doc(db, "settings", "store"));
+        if (!snap.exists()) return;
+        const latestData = snap.data();
+        const remoteStamp = Number(latestData.lastUpdatedAt || 0);
+        const localStamp = Number(storeSettings.lastUpdatedAt || lastSeenUpdateId || 0);
+
+        if (remoteStamp > 0 && remoteStamp !== localStamp) {
+          lastSeenUpdateId = remoteStamp;
+          await forceRefreshStore();
+        }
+      } catch (e) {
+        console.log("Admin sync check notice");
+      }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        syncFromAdminUpdates();
+      }
+    });
+
+    setInterval(() => {
+      if (document.visibilityState === "visible") {
+        syncFromAdminUpdates();
+      }
+    }, 30000);
 
     function processLoadedData() {
       if(storeSettings.storeName) {

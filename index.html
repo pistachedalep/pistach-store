@@ -786,6 +786,77 @@
 
     .announcement-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
     .announcement-card { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2.5px solid var(--accent); animation: popUp 0.35s ease; position: relative; color: #0f172a; }
+
+    .app-promo-toast {
+      position: fixed;
+      bottom: 95px;
+      right: 16px;
+      left: 16px;
+      max-width: 420px;
+      margin: 0 auto;
+      background: var(--card-bg, #ffffff);
+      color: var(--card-text, #0f172a);
+      border: 2px solid var(--accent, #d4af37);
+      border-radius: 18px;
+      padding: 12px 14px;
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+      z-index: 2500;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      animation: popUp 0.3s ease;
+    }
+    body.dark-mode .app-promo-toast {
+      background: #1e293b;
+      color: #f8fafc;
+    }
+    .app-promo-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1.5px solid var(--accent, #d4af37);
+      flex-shrink: 0;
+    }
+    .app-promo-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .app-promo-title {
+      font-size: 13.5px;
+      font-weight: 900;
+      margin-bottom: 2px;
+    }
+    .app-promo-sub {
+      font-size: 11.5px;
+      opacity: 0.85;
+      font-weight: 700;
+    }
+    .app-promo-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .app-promo-install-btn {
+      background: var(--primary, #11261d);
+      color: var(--accent, #d4af37);
+      border: 1.5px solid var(--accent, #d4af37);
+      padding: 6px 11px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .app-promo-close-btn {
+      background: transparent;
+      color: inherit;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px 6px;
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
@@ -929,6 +1000,19 @@
     </div>
   </div>
 
+  <!-- إشعار توفر التطبيق لمرة واحدة فقط -->
+  <div class="app-promo-toast" id="appInstallPromoToast">
+    <img class="app-promo-icon" id="promoAppIconImg" src="" alt="أيقونة التطبيق">
+    <div class="app-promo-content">
+      <div class="app-promo-title">📲 التطبيق متوفر الآن!</div>
+      <div class="app-promo-sub">أضف متجرنا إلى شاشتك الرئيسية لطلب أسرع.</div>
+    </div>
+    <div class="app-promo-actions">
+      <button class="app-promo-install-btn" id="promoInstallNowBtn">تثبيت</button>
+      <button class="app-promo-close-btn" id="promoDismissBtn" title="إغلاق">✕</button>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
     import { getFirestore, collection, doc, getDoc, addDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -945,11 +1029,55 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // توليد manifest تطبيق الزبائن داخلياً دون أي ملفات إضافية
-    try {
+    let allProducts = [], cart = [], deliveryZones = [], storeSettings = {};
+    let selectedCat = "الكل", currentFee = 0, dynamicCategories = [];
+    let isScrollingProgrammatically = false;
+    let currentLang = localStorage.getItem("storeLang") || "ar";
+    let announcementTimer = null;
+
+    const INSTALLED_FLAG_KEY = "pista_app_installed_v1";
+    const CLIENT_CACHE_TTL_MS = 10 * 60 * 1000; // 10 دقائق كاش لتخفيف القراءات
+    const CLIENT_CACHE_SETTINGS_KEY = "pista_client_settings_cache_v1";
+    const CLIENT_CACHE_PRODUCTS_KEY = "pista_client_products_cache_v1";
+    const CLIENT_CACHE_TIME_KEY = "pista_client_cache_time_v1";
+
+    function isAppAlreadyInstalled() {
+      const isStandalone =
+        window.navigator.standalone === true ||
+        (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+        (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches);
+
+      const savedInstalled = localStorage.getItem(INSTALLED_FLAG_KEY) === "true";
+      return Boolean(isStandalone || savedInstalled);
+    }
+
+    function markAppAsInstalled() {
+      localStorage.setItem(INSTALLED_FLAG_KEY, "true");
+      const headerBtn = document.getElementById("installStoreAppBtn");
+      const promoToast = document.getElementById("appInstallPromoToast");
+      if (headerBtn) headerBtn.style.display = "none";
+      if (promoToast) promoToast.style.display = "none";
+    }
+
+    window.addEventListener("appinstalled", () => {
+      markAppAsInstalled();
+    });
+
+    function applyCustomAppIcon(iconUrl) {
+      const finalIcon = (iconUrl && iconUrl.trim())
+        ? iconUrl.trim()
+        : (storeSettings.defaultImage && storeSettings.defaultImage.trim())
+          ? storeSettings.defaultImage.trim()
+          : (localStorage.getItem("cached_app_icon_url") || "https://cdn-icons-png.flaticon.com/512/3081/3081559.png");
+
+      localStorage.setItem("cached_app_icon_url", finalIcon);
+
+      const promoImg = document.getElementById("promoAppIconImg");
+      if (promoImg) promoImg.src = finalIcon;
+
       const storeManifestData = {
-        name: localStorage.getItem('cached_store_name') || "بيستاش دي ألب | Pistache D'Alep",
-        short_name: localStorage.getItem('cached_store_name') || "بيستاش دي ألب",
+        name: storeSettings.storeName || localStorage.getItem("cached_store_name") || "بيستاش دي ألب | Pistache D'Alep",
+        short_name: storeSettings.storeName || localStorage.getItem("cached_store_name") || "بيستاش دي ألب",
         description: "تطبيق طلب الحلويات والمكسرات الفاخرة",
         start_url: window.location.href,
         scope: window.location.href,
@@ -959,48 +1087,87 @@
         dir: "rtl",
         lang: "ar",
         icons: [
-          {
-            src: "https://cdn-icons-png.flaticon.com/512/3081/3081559.png",
-            sizes: "192x192",
-            type: "image/png"
-          },
-          {
-            src: "https://cdn-icons-png.flaticon.com/512/3081/3081559.png",
-            sizes: "512x512",
-            type: "image/png"
-          }
+          { src: finalIcon, sizes: "192x192", type: "image/png" },
+          { src: finalIcon, sizes: "512x512", type: "image/png" }
         ]
       };
+
+      const existingManifest = document.querySelector('link[rel="manifest"]');
+      if (existingManifest && existingManifest.href.startsWith("blob:")) {
+        URL.revokeObjectURL(existingManifest.href);
+      }
       const manifestBlob = new Blob([JSON.stringify(storeManifestData)], { type: "application/manifest+json" });
       const manifestUrl = URL.createObjectURL(manifestBlob);
-      const linkEl = document.createElement("link");
+      const linkEl = existingManifest || document.createElement("link");
       linkEl.rel = "manifest";
       linkEl.href = manifestUrl;
-      document.head.appendChild(linkEl);
-    } catch (e) {}
+      if (!existingManifest) document.head.appendChild(linkEl);
+    }
 
-    // زر تثبيت تطبيق الزبائن عند توفره على جهاز المستخدم
+    function showAppPromoOnce() {
+      const promoKey = "pista_app_promo_shown_v1";
+      const toast = document.getElementById("appInstallPromoToast");
+      if (!toast || isAppAlreadyInstalled() || localStorage.getItem(promoKey) === "true") return;
+
+      const cachedIcon =
+        localStorage.getItem("cached_app_icon_url") ||
+        storeSettings.appIconUrl ||
+        storeSettings.defaultImage ||
+        "https://cdn-icons-png.flaticon.com/512/3081/3081559.png";
+      const promoImg = document.getElementById("promoAppIconImg");
+      if (promoImg) promoImg.src = cachedIcon;
+
+      localStorage.setItem(promoKey, "true");
+      toast.style.display = "flex";
+
+      const dismiss = () => {
+        toast.style.display = "none";
+      };
+      document.getElementById("promoDismissBtn")?.addEventListener("click", dismiss, { once: true });
+      document.getElementById("promoInstallNowBtn")?.addEventListener("click", async () => {
+        dismiss();
+        const headerInstallBtn = document.getElementById("installStoreAppBtn");
+        if (headerInstallBtn && headerInstallBtn.style.display !== "none") {
+          headerInstallBtn.click();
+        } else if (!isAppAlreadyInstalled()) {
+          alert("لتثبيت التطبيق:\n• على أندرويد: اختر 'تثبيت التطبيق' أو 'إضافة إلى الشاشة الرئيسية' من قائمة المتصفح.\n• على الآيفون (Safari): اضغط 'مشاركة' ثم 'إضافة إلى الشاشة الرئيسية'.");
+        }
+      }, { once: true });
+    }
+
+    applyCustomAppIcon(localStorage.getItem("cached_app_icon_url") || "");
+
     let deferredStorePrompt;
     const installStoreBtn = document.getElementById("installStoreAppBtn");
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
+      if (isAppAlreadyInstalled()) {
+        if (installStoreBtn) installStoreBtn.style.display = 'none';
+        return;
+      }
       deferredStorePrompt = e;
       if (installStoreBtn) installStoreBtn.style.display = 'inline-flex';
     });
 
     if (installStoreBtn) {
+      if (isAppAlreadyInstalled()) {
+        installStoreBtn.style.display = 'none';
+      }
       installStoreBtn.addEventListener('click', async () => {
+        if (isAppAlreadyInstalled()) {
+          markAppAsInstalled();
+          return;
+        }
         if (!deferredStorePrompt) return;
         deferredStorePrompt.prompt();
         const { outcome } = await deferredStorePrompt.userChoice;
         if (outcome === 'accepted') {
-          installStoreBtn.style.display = 'none';
+          markAppAsInstalled();
         }
         deferredStorePrompt = null;
       });
     }
 
-    // استقبال وعرض إشعارات المتجر المرسلة من لوحة التحكم
     async function checkLatestPushNotification(notifObj) {
       if (!notifObj || !notifObj.id || !notifObj.title) return;
       const lastSeenId = localStorage.getItem("pista_last_seen_notif_id");
@@ -1012,14 +1179,14 @@
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification(notifObj.title, {
             body: notifObj.body || "",
-            icon: storeSettings.defaultImage || "https://cdn-icons-png.flaticon.com/512/3081/3081559.png"
+            icon: storeSettings.appIconUrl || storeSettings.defaultImage || "https://cdn-icons-png.flaticon.com/512/3081/3081559.png"
           });
         } else if ("Notification" in window && Notification.permission === "default") {
           Notification.requestPermission().then(perm => {
             if (perm === "granted") {
               new Notification(notifObj.title, {
                 body: notifObj.body || "",
-                icon: storeSettings.defaultImage || "https://cdn-icons-png.flaticon.com/512/3081/3081559.png"
+                icon: storeSettings.appIconUrl || storeSettings.defaultImage || "https://cdn-icons-png.flaticon.com/512/3081/3081559.png"
               });
             }
           }).catch(() => {});
@@ -1037,12 +1204,6 @@
         }
       }
     }
-
-    let allProducts = [], cart = [], deliveryZones = [], storeSettings = {};
-    let selectedCat = "الكل", currentFee = 0, dynamicCategories = [];
-    let isScrollingProgrammatically = false;
-    let currentLang = localStorage.getItem("storeLang") || "ar";
-    let announcementTimer = null;
 
     const translationCache = JSON.parse(localStorage.getItem('pista_trans_cache') || '{}');
 
@@ -1372,37 +1533,65 @@
       }
     }
 
-    async function fetchStoreData() {
+    async function loadStoreDataLowRead() {
+      renderSkeletons();
+
+      const now = Date.now();
+      const cachedTime = Number(localStorage.getItem(CLIENT_CACHE_TIME_KEY) || 0);
+      const cachedSettingsRaw = localStorage.getItem(CLIENT_CACHE_SETTINGS_KEY);
+      const cachedProductsRaw = localStorage.getItem(CLIENT_CACHE_PRODUCTS_KEY);
+
+      const hasValidCache =
+        cachedTime > 0 &&
+        now - cachedTime < CLIENT_CACHE_TTL_MS &&
+        cachedSettingsRaw &&
+        cachedProductsRaw;
+
+      if (hasValidCache) {
+        try {
+          storeSettings = JSON.parse(cachedSettingsRaw);
+          allProducts = JSON.parse(cachedProductsRaw);
+          processLoadedData(true);
+          return;
+        } catch (e) {}
+      }
+
       try {
-        renderSkeletons();
-        
-        const settingsSnap = await getDoc(doc(db, "settings", "store"));
+        const [settingsSnap, bundleSnap] = await Promise.all([
+          getDoc(doc(db, "settings", "store")),
+          getDoc(doc(db, "settings", "products_bundle"))
+        ]);
+
         if (settingsSnap.exists()) {
           storeSettings = settingsSnap.data();
+          localStorage.setItem(CLIENT_CACHE_SETTINGS_KEY, JSON.stringify(storeSettings));
         }
 
-        const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
-        if (bundleSnap.exists() && bundleSnap.data().productsArray) {
+        if (bundleSnap.exists() && Array.isArray(bundleSnap.data().productsArray)) {
           allProducts = bundleSnap.data().productsArray;
+          localStorage.setItem(CLIENT_CACHE_PRODUCTS_KEY, JSON.stringify(allProducts));
         } else {
           allProducts = [];
         }
 
-        processLoadedData();
+        localStorage.setItem(CLIENT_CACHE_TIME_KEY, String(Date.now()));
+        processLoadedData(false);
         trackVisitor();
-
-      } catch(error) {
+      } catch (error) {
         console.error("خطأ في جلب البيانات:", error);
-        document.getElementById("productsScrollArea").innerHTML = '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
+        document.getElementById("productsScrollArea").innerHTML =
+          '<div style="text-align: center; padding: 50px; color: #ffffff; font-weight:800;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</div>';
       }
     }
 
-    function processLoadedData() {
+    function processLoadedData(fromCache = false) {
       if(storeSettings.storeName) {
         document.getElementById("storeTitleLogo").innerText = " " + storeSettings.storeName;
         document.getElementById("pageTitle").innerText = storeSettings.storeName;
         localStorage.setItem('cached_store_name', storeSettings.storeName);
       }
+
+      applyCustomAppIcon(storeSettings.appIconUrl);
 
       if(storeSettings.deliveryZones) {
         deliveryZones = storeSettings.deliveryZones;
@@ -1439,9 +1628,13 @@
       if (storeSettings.latestPushNotification) {
         checkLatestPushNotification(storeSettings.latestPushNotification);
       }
+      showAppPromoOnce();
+      if (!fromCache) {
+        updateCartUI();
+      }
     }
 
-    fetchStoreData();
+    loadStoreDataLowRead();
 
     function applyDynamicTheme(theme) {
       const root = document.documentElement;

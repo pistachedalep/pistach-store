@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title id="pageTitle">بيستاش دي ألب | Pistache D'Alep</title>
+  <meta name="theme-color" content="#11261d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="بيستاش دي ألب">
+  <link rel="apple-touch-icon" id="storeAppleIcon" href="https://cdn-icons-png.flaticon.com/512/3081/3081840.png">
+  <link rel="manifest" id="storeManifestLink">
   <link id="dynamicFontLink" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800;900&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -39,8 +46,10 @@
           window.addEventListener('DOMContentLoaded', () => {
             const logo = document.getElementById("storeTitleLogo");
             const pageTitle = document.getElementById("pageTitle");
+            const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
             if(logo) logo.innerText = " " + cachedName;
             if(pageTitle) pageTitle.innerText = cachedName;
+            if(appleTitle) appleTitle.setAttribute("content", cachedName);
           });
         }
       } catch(e) {}
@@ -793,6 +802,7 @@
         <input type="text" id="searchInput" placeholder="ابحث عن حلوياتك..." oninput="window.filterProducts()">
       </div>
       <div class="header-actions">
+        <button class="control-btn" id="installStoreAppBtn" style="display: none;">📲 تثبيت التطبيق</button>
         <button class="control-btn" onclick="window.toggleDarkMode()" id="darkModeBtn">🌙 الداكن</button>
         <button class="control-btn" onclick="window.toggleLanguage()" id="langSwitchBtn">English 🌐</button>
         <button class="whatsapp-header-btn" id="contactBtn" onclick="window.openSocialModal()">💬 تواصل معنا</button>
@@ -945,6 +955,68 @@
     let isScrollingProgrammatically = false;
     let currentLang = localStorage.getItem("storeLang") || "ar";
     let announcementTimer = null;
+    let lastKnownStoreUpdated = 0;
+
+    // إعداد تطبيق الويب (Manifest + زر التثبيت)
+    function updateStoreAppManifest() {
+      try {
+        const storeName = storeSettings.storeName || localStorage.getItem("cached_store_name") || "بيستاش دي ألب";
+        const rawIcon = storeSettings.appIconUrl || storeSettings.defaultImage || "";
+        const iconUrl = (rawIcon && !rawIcon.startsWith("data:image"))
+          ? rawIcon
+          : "https://cdn-icons-png.flaticon.com/512/3081/3081840.png";
+
+        const appleIconEl = document.getElementById("storeAppleIcon");
+        if (appleIconEl) appleIconEl.href = iconUrl;
+
+        const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+        if (appleTitle) appleTitle.setAttribute("content", storeName);
+
+        const manifestData = {
+          name: storeName,
+          short_name: storeName,
+          description: "منيو وطلبات الحلويات والمكسرات",
+          start_url: window.location.href,
+          scope: window.location.href,
+          display: "standalone",
+          background_color: storeSettings.theme?.bgColor || "#11261d",
+          theme_color: storeSettings.theme?.primaryColor || "#11261d",
+          dir: currentLang === "ar" ? "rtl" : "ltr",
+          lang: currentLang,
+          icons: [
+            { src: iconUrl, sizes: "192x192", type: "image/png" },
+            { src: iconUrl, sizes: "512x512", type: "image/png" }
+          ]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: "application/manifest+json" });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        const linkEl = document.getElementById("storeManifestLink");
+        if (linkEl) linkEl.href = manifestUrl;
+      } catch (e) { console.log("Store manifest notice"); }
+    }
+
+    updateStoreAppManifest();
+
+    let deferredStorePrompt;
+    const installStoreBtn = document.getElementById("installStoreAppBtn");
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredStorePrompt = e;
+      if (installStoreBtn) installStoreBtn.style.display = "inline-flex";
+    });
+
+    if (installStoreBtn) {
+      installStoreBtn.addEventListener("click", async () => {
+        if (!deferredStorePrompt) return;
+        deferredStorePrompt.prompt();
+        const { outcome } = await deferredStorePrompt.userChoice;
+        if (outcome === "accepted") {
+          installStoreBtn.style.display = "none";
+        }
+        deferredStorePrompt = null;
+      });
+    }
 
     const translationCache = JSON.parse(localStorage.getItem('pista_trans_cache') || '{}');
 
@@ -1128,6 +1200,7 @@
       document.documentElement.setAttribute("lang", currentLang);
       
       applyStaticTranslations();
+      updateStoreAppManifest();
       await renderCategories(dynamicCategories);
       await renderProducts();
       renderZonesSelect();
@@ -1281,6 +1354,7 @@
         const settingsSnap = await getDoc(doc(db, "settings", "store"));
         if (settingsSnap.exists()) {
           storeSettings = settingsSnap.data();
+          lastKnownStoreUpdated = Number(storeSettings.lastUpdated || 0);
         }
 
         const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
@@ -1299,12 +1373,55 @@
       }
     }
 
-    function processLoadedData() {
+    // تحديث تلقائي موفر للقراءات عند تغير lastUpdated في settings/store
+    async function syncStoreIfUpdated() {
+      try {
+        if (document.visibilityState !== "visible") return;
+        const storeSnap = await getDoc(doc(db, "settings", "store"));
+        if (!storeSnap.exists()) return;
+
+        const latestStore = storeSnap.data();
+        const serverUpdated = Number(latestStore.lastUpdated || 0);
+
+        if (lastKnownStoreUpdated === 0) {
+          lastKnownStoreUpdated = serverUpdated;
+          return;
+        }
+
+        if (serverUpdated > lastKnownStoreUpdated) {
+          lastKnownStoreUpdated = serverUpdated;
+          storeSettings = latestStore;
+
+          const bundleSnap = await getDoc(doc(db, "settings", "products_bundle"));
+          if (bundleSnap.exists() && Array.isArray(bundleSnap.data().productsArray)) {
+            allProducts = bundleSnap.data().productsArray;
+          }
+
+          processLoadedData({ skipAnnouncement: true });
+        }
+      } catch (err) {
+        console.error("خطأ في فحص التحديثات:", err);
+      }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        syncStoreIfUpdated();
+      }
+    });
+
+    setInterval(() => {
+      syncStoreIfUpdated();
+    }, 60000);
+
+    function processLoadedData(options = {}) {
       if(storeSettings.storeName) {
         document.getElementById("storeTitleLogo").innerText = " " + storeSettings.storeName;
         document.getElementById("pageTitle").innerText = storeSettings.storeName;
         localStorage.setItem('cached_store_name', storeSettings.storeName);
       }
+
+      updateStoreAppManifest();
 
       if(storeSettings.deliveryZones) {
         deliveryZones = storeSettings.deliveryZones;
@@ -1318,7 +1435,6 @@
         localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
       }
 
-      // 🔄 فحص دقيق لحالة التشغيل والإيقاف من لوحة التحكم (Firebase -> settings/store -> aiConfig.enabled)
       const aiConfig = storeSettings.aiConfig || {};
       const aiBtnElem = document.getElementById("aiFloatingBtn");
       const aiModalElem = document.getElementById("aiChatModal");
@@ -1338,7 +1454,9 @@
 
       renderProducts();
       initScrollSpy();
-      checkAndShowAnnouncement();
+      if (!options.skipAnnouncement) {
+        checkAndShowAnnouncement();
+      }
     }
 
     fetchStoreData();

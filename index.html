@@ -19,25 +19,10 @@
   <script>
     (function() {
       try {
-        const cachedTheme = localStorage.getItem('cached_store_theme');
+        localStorage.removeItem('cached_store_theme');
         const cachedName = localStorage.getItem('cached_store_name');
-        
-        if (cachedTheme) {
-          const theme = JSON.parse(cachedTheme);
-          const root = document.documentElement;
-          
-          if(theme.primaryColor) root.style.setProperty('--primary', theme.primaryColor);
-          if(theme.accentColor) root.style.setProperty('--accent', theme.accentColor);
-          if(theme.bgColor) root.style.setProperty('--menu-bg-color', theme.bgColor);
-          if(theme.headerBgColor) root.style.setProperty('--header-bg', theme.headerBgColor);
-          if(theme.cardBgColor) root.style.setProperty('--card-bg', theme.cardBgColor);
-          if(theme.cardTextColor) root.style.setProperty('--card-text', theme.cardTextColor);
-          if(theme.catBgColor) root.style.setProperty('--cat-bg', theme.catBgColor);
-          if(theme.catTextColor) root.style.setProperty('--cat-text', theme.catTextColor);
-          if(theme.catActiveBg) root.style.setProperty('--cat-active-bg', theme.catActiveBg);
-          if(theme.catActiveText) root.style.setProperty('--cat-active-text', theme.catActiveText);
-          if(theme.menuBgImage) root.style.setProperty('--menu-bg-image', "url('" + theme.menuBgImage + "')");
-        }
+        const root = document.documentElement;
+        root.style.setProperty('--menu-bg-image', 'none');
 
         if (cachedName) {
           window.addEventListener('DOMContentLoaded', () => {
@@ -84,12 +69,8 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); -webkit-tap-highlight-color: transparent; }
     
     body { 
-      background-color: var(--menu-bg-color); 
-      background-image: var(--menu-bg-image);
-      background-size: cover;
-      background-position: center center;
-      background-attachment: fixed;
-      background-repeat: no-repeat;
+      background-color: var(--menu-bg-color, #11261d) !important; 
+      background-image: none !important;
       color: var(--text-main); 
       direction: rtl; 
       height: 100vh;
@@ -784,7 +765,7 @@
     .btn-telegram { background: #229ed9; }
     .btn-tiktok { background: #000000; border: 1px solid #333; }
 
-    .announcement-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
+    .announcement-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); z-index: 3000; display: none !important; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
     .announcement-card { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2.5px solid var(--accent); animation: popUp 0.35s ease; position: relative; color: #0f172a; }
 
     .app-promo-toast {
@@ -929,7 +910,7 @@
     </div>
   </div>
 
-  <div class="announcement-overlay" id="announcementModal">
+  <div class="announcement-overlay" id="announcementModal" style="display: none !important;">
     <div class="announcement-card" id="announcementCardContent">
       <div id="announcementText" style="font-size: 15px; font-weight: 800; line-height: 1.6; margin-bottom: 20px; white-space: pre-line;"></div>
       <button id="announcementCloseBtn" onclick="window.closeAnnouncement()" class="btn-submit" style="background: var(--primary);">حسناً</button>
@@ -1000,7 +981,7 @@
     </div>
   </div>
 
-  <!-- إشعار توفر التطبيق لمرة واحدة فقط -->
+  <!-- إشعار توفر التطبيق للزبون غير المثبّت -->
   <div class="app-promo-toast" id="appInstallPromoToast">
     <img class="app-promo-icon" id="promoAppIconImg" src="" alt="أيقونة التطبيق">
     <div class="app-promo-content">
@@ -1036,10 +1017,23 @@
     let announcementTimer = null;
 
     const INSTALLED_FLAG_KEY = "pista_app_installed_v1";
-    const CLIENT_CACHE_TTL_MS = 10 * 60 * 1000; // 10 دقائق كاش لتخفيف القراءات
+    const PROMO_DISMISSED_KEY = "pista_app_promo_dismissed_at_v1";
+    const PROMO_COOLDOWN_MS = 12 * 60 * 60 * 1000;
+    const CLIENT_CACHE_TTL_MS = 10 * 60 * 1000;
     const CLIENT_CACHE_SETTINGS_KEY = "pista_client_settings_cache_v1";
     const CLIENT_CACHE_PRODUCTS_KEY = "pista_client_products_cache_v1";
     const CLIENT_CACHE_TIME_KEY = "pista_client_cache_time_v1";
+
+    const isIosDevice = /iphone|ipad|ipod/i.test(navigator.userAgent || "");
+
+    function showIosInstallGuide() {
+      alert(
+        "لتثبيت التطبيق على الآيفون (iPhone):\n" +
+        "1. اضغط على زر المشاركة (مربع يخرج منه سهم للأعلى) في متصفح Safari.\n" +
+        "2. مرّر للأسفل واختر: (إضافة إلى الشاشة الرئيسية / Add to Home Screen).\n" +
+        "3. اضغط (إضافة / Add) في الزاوية العلوية."
+      );
+    }
 
     function isAppAlreadyInstalled() {
       const isStandalone =
@@ -1104,10 +1098,60 @@
       if (!existingManifest) document.head.appendChild(linkEl);
     }
 
+    let deferredStorePrompt;
+    const installStoreBtn = document.getElementById("installStoreAppBtn");
+
+    function syncInstallButtonState() {
+      if (!installStoreBtn) return;
+      if (isAppAlreadyInstalled()) {
+        installStoreBtn.style.display = "none";
+      } else if (deferredStorePrompt || isIosDevice) {
+        installStoreBtn.style.display = "inline-flex";
+      }
+    }
+
+    if (installStoreBtn) {
+      syncInstallButtonState();
+      installStoreBtn.addEventListener("click", async () => {
+        if (isAppAlreadyInstalled()) {
+          markAppAsInstalled();
+          return;
+        }
+
+        if (deferredStorePrompt) {
+          deferredStorePrompt.prompt();
+          const { outcome } = await deferredStorePrompt.userChoice;
+          if (outcome === "accepted") {
+            markAppAsInstalled();
+          }
+          deferredStorePrompt = null;
+          return;
+        }
+
+        if (isIosDevice) {
+          showIosInstallGuide();
+        } else {
+          alert("لتثبيت التطبيق: اختر 'تثبيت التطبيق' أو 'إضافة إلى الشاشة الرئيسية' من قائمة المتصفح.");
+        }
+      });
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      if (isAppAlreadyInstalled()) {
+        if (installStoreBtn) installStoreBtn.style.display = "none";
+        return;
+      }
+      deferredStorePrompt = e;
+      syncInstallButtonState();
+    });
+
     function showAppPromoOnce() {
-      const promoKey = "pista_app_promo_shown_v1";
       const toast = document.getElementById("appInstallPromoToast");
-      if (!toast || isAppAlreadyInstalled() || localStorage.getItem(promoKey) === "true") return;
+      if (!toast || isAppAlreadyInstalled()) return;
+
+      const dismissedAt = Number(localStorage.getItem(PROMO_DISMISSED_KEY) || 0);
+      if (dismissedAt > 0 && Date.now() - dismissedAt < PROMO_COOLDOWN_MS) return;
 
       const cachedIcon =
         localStorage.getItem("cached_app_icon_url") ||
@@ -1117,93 +1161,27 @@
       const promoImg = document.getElementById("promoAppIconImg");
       if (promoImg) promoImg.src = cachedIcon;
 
-      localStorage.setItem(promoKey, "true");
       toast.style.display = "flex";
 
       const dismiss = () => {
+        localStorage.setItem(PROMO_DISMISSED_KEY, String(Date.now()));
         toast.style.display = "none";
       };
+
       document.getElementById("promoDismissBtn")?.addEventListener("click", dismiss, { once: true });
       document.getElementById("promoInstallNowBtn")?.addEventListener("click", async () => {
         dismiss();
-        const headerInstallBtn = document.getElementById("installStoreAppBtn");
-        if (headerInstallBtn && headerInstallBtn.style.display !== "none") {
-          headerInstallBtn.click();
-        } else if (!isAppAlreadyInstalled()) {
-          alert("لتثبيت التطبيق:\n• على أندرويد: اختر 'تثبيت التطبيق' أو 'إضافة إلى الشاشة الرئيسية' من قائمة المتصفح.\n• على الآيفون (Safari): اضغط 'مشاركة' ثم 'إضافة إلى الشاشة الرئيسية'.");
+        if (installStoreBtn && installStoreBtn.style.display !== "none") {
+          installStoreBtn.click();
+        } else if (isIosDevice) {
+          showIosInstallGuide();
+        } else {
+          alert("لتثبيت التطبيق: اختر 'تثبيت التطبيق' أو 'إضافة إلى الشاشة الرئيسية' من قائمة المتصفح.");
         }
       }, { once: true });
     }
 
     applyCustomAppIcon(localStorage.getItem("cached_app_icon_url") || "");
-
-    let deferredStorePrompt;
-    const installStoreBtn = document.getElementById("installStoreAppBtn");
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      if (isAppAlreadyInstalled()) {
-        if (installStoreBtn) installStoreBtn.style.display = 'none';
-        return;
-      }
-      deferredStorePrompt = e;
-      if (installStoreBtn) installStoreBtn.style.display = 'inline-flex';
-    });
-
-    if (installStoreBtn) {
-      if (isAppAlreadyInstalled()) {
-        installStoreBtn.style.display = 'none';
-      }
-      installStoreBtn.addEventListener('click', async () => {
-        if (isAppAlreadyInstalled()) {
-          markAppAsInstalled();
-          return;
-        }
-        if (!deferredStorePrompt) return;
-        deferredStorePrompt.prompt();
-        const { outcome } = await deferredStorePrompt.userChoice;
-        if (outcome === 'accepted') {
-          markAppAsInstalled();
-        }
-        deferredStorePrompt = null;
-      });
-    }
-
-    async function checkLatestPushNotification(notifObj) {
-      if (!notifObj || !notifObj.id || !notifObj.title) return;
-      const lastSeenId = localStorage.getItem("pista_last_seen_notif_id");
-      if (String(notifObj.id) === String(lastSeenId)) return;
-
-      localStorage.setItem("pista_last_seen_notif_id", String(notifObj.id));
-
-      try {
-        if ("Notification" in window && Notification.permission === "granted") {
-          new Notification(notifObj.title, {
-            body: notifObj.body || "",
-            icon: storeSettings.appIconUrl || storeSettings.defaultImage || "https://cdn-icons-png.flaticon.com/512/3081/3081559.png"
-          });
-        } else if ("Notification" in window && Notification.permission === "default") {
-          Notification.requestPermission().then(perm => {
-            if (perm === "granted") {
-              new Notification(notifObj.title, {
-                body: notifObj.body || "",
-                icon: storeSettings.appIconUrl || storeSettings.defaultImage || "https://cdn-icons-png.flaticon.com/512/3081/3081559.png"
-              });
-            }
-          }).catch(() => {});
-        }
-      } catch (e) {}
-
-      if (!storeSettings.announcement || storeSettings.announcement.trim() === "") {
-        const modal = document.getElementById("announcementModal");
-        const textElem = document.getElementById("announcementText");
-        const btnElem = document.getElementById("announcementCloseBtn");
-        if (modal && textElem && btnElem) {
-          textElem.innerText = `🔔 ${notifObj.title}\n\n${notifObj.body || ""}`;
-          btnElem.style.display = "block";
-          modal.style.display = "flex";
-        }
-      }
-    }
 
     const translationCache = JSON.parse(localStorage.getItem('pista_trans_cache') || '{}');
 
@@ -1435,30 +1413,6 @@
       applyStaticTranslations();
     });
 
-    function checkAndShowAnnouncement() {
-      if (storeSettings.announcement && storeSettings.announcement.trim() !== "") {
-        const modal = document.getElementById("announcementModal");
-        const textElem = document.getElementById("announcementText");
-        const btnElem = document.getElementById("announcementCloseBtn");
-        
-        textElem.innerText = storeSettings.announcement;
-        
-        const closeType = storeSettings.announcementCloseType || "button";
-        if(closeType === "auto") {
-          btnElem.style.display = "none";
-          const seconds = Number(storeSettings.announcementSeconds || 5) * 1000;
-          if(announcementTimer) clearTimeout(announcementTimer);
-          announcementTimer = setTimeout(() => {
-            window.closeAnnouncement();
-          }, seconds);
-        } else {
-          btnElem.style.display = "block";
-        }
-        
-        modal.style.display = "flex";
-      }
-    }
-
     window.closeAnnouncement = () => {
       document.getElementById("announcementModal").style.display = "none";
       if(announcementTimer) clearTimeout(announcementTimer);
@@ -1592,6 +1546,7 @@
       }
 
       applyCustomAppIcon(storeSettings.appIconUrl);
+      syncInstallButtonState();
 
       if(storeSettings.deliveryZones) {
         deliveryZones = storeSettings.deliveryZones;
@@ -1602,7 +1557,6 @@
 
       if(storeSettings.theme) {
         applyDynamicTheme(storeSettings.theme);
-        localStorage.setItem('cached_store_theme', JSON.stringify(storeSettings.theme));
       }
 
       const aiConfig = storeSettings.aiConfig || {};
@@ -1624,10 +1578,6 @@
 
       renderProducts();
       initScrollSpy();
-      checkAndShowAnnouncement();
-      if (storeSettings.latestPushNotification) {
-        checkLatestPushNotification(storeSettings.latestPushNotification);
-      }
       showAppPromoOnce();
       if (!fromCache) {
         updateCartUI();
@@ -1651,11 +1601,8 @@
       if(theme.catActiveBg) root.style.setProperty('--cat-active-bg', theme.catActiveBg);
       if(theme.catActiveText) root.style.setProperty('--cat-active-text', theme.catActiveText);
 
-      if(theme.menuBgImage) {
-        root.style.setProperty('--menu-bg-image', `url('${theme.menuBgImage}')`);
-      } else {
-        root.style.setProperty('--menu-bg-image', 'none');
-      }
+      // إزالة صورة الخلفية ومنع ظهورها عند الفتح
+      root.style.setProperty('--menu-bg-image', 'none');
 
       if(theme.fontFamily) {
         const fontLink = document.getElementById("dynamicFontLink");

@@ -274,6 +274,36 @@ input:checked + .slider:before { transform: translateX(24px); }
         <h2>⚙️ الإعدادات العامة وسائل التواصل والمساعد الذكي</h2>
 
         <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; margin-bottom: 20px;">
+          <h3 style="margin-top: 0; font-size: 15px; color: var(--primary);">🖼️ صورة أيقونة التطبيق للزبون (App Icon URL)</h3>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>رابط صورة الأيقونة المباشر (مربع واضح):</label>
+            <input type="url" id="appIconUrlInput" placeholder="https://example.com/icon.png">
+          </div>
+          <div class="form-group">
+            <label>أو ارفع صورة أيقونة لتُضغط وتُحفظ تلقائياً:</label>
+            <input type="file" id="appIconFileInput" accept="image/*" style="padding: 5px; background: #fff;">
+            <div id="appIconStatus" style="font-size: 12px; color: #10b981; font-weight: bold; margin-top: 5px;"></div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+            <img id="appIconPreviewImg" src="" alt="معاينة الأيقونة" style="width: 54px; height: 54px; border-radius: 12px; object-fit: cover; border: 1.5px solid #cbd5e1; display: none;">
+            <small style="color: #64748b;">تظهر للزبون في تنبيه/أيقونة التطبيق في `index.html` عند تحديث بيانات المتجر.</small>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; margin-bottom: 20px;">
+          <h3 style="margin-top: 0; font-size: 15px; color: var(--primary);">🔔 إشعار فوري للزبون عند فتح المتجر</h3>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>عنوان الإشعار للزبون:</label>
+            <input type="text" id="customerNotifTitleInput" placeholder="مثال: وصلتنا تشكيلة طازجة اليوم ✨">
+          </div>
+          <div class="form-group">
+            <label>نص الإشعار للزبون:</label>
+            <textarea id="customerNotifBodyInput" rows="2" placeholder="اكتب تفاصيل العرض أو التنبيه الذي سيظهر للزبون..."></textarea>
+          </div>
+          <small style="color: #64748b;">كلما غيّرت العنوان أو النص وحفظت، يتم إنشاء إشعار جديد يظهر للزبون عند تحديث/جلب بيانات المتجر.</small>
+        </div>
+
+        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1.5px solid #e2e8f0; margin-bottom: 20px;">
           <h3 style="margin-top: 0; font-size: 15px; color: var(--primary);">🤖 إعدادات ومفاتيح المساعد الذكي (AI Assistant Controls)</h3>
           
           <!-- مفتاح تشغيل/إيقاف المساعد الذكي -->
@@ -515,9 +545,49 @@ input:checked + .slider:before { transform: translateX(24px); }
   } catch(e) { console.log("Supabase init optional notice"); }
 
   let currentDefaultImage = "";
-  let products = [], orders = [], categoriesList = [], branchesList = [], uploadedBase64Image = "", storeSettingsData = {};
+  let products = [], orders = [], categoriesList = [], branchesList = [], uploadedBase64Image = "", uploadedAppIconBase64 = "", storeSettingsData = {};
   let currentDeliveryZones = [];
   let currentProductImages = [];
+
+  function updateAppIconPreview(src) {
+    const imgEl = document.getElementById("appIconPreviewImg");
+    if (!imgEl) return;
+    if (src && src.trim()) {
+      imgEl.src = src.trim();
+      imgEl.style.display = "block";
+    } else {
+      imgEl.style.display = "none";
+    }
+  }
+
+  document.getElementById("appIconUrlInput").addEventListener("input", (e) => {
+    uploadedAppIconBase64 = "";
+    updateAppIconPreview(e.target.value);
+  });
+
+  document.getElementById("appIconFileInput").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+      try {
+        const compressedIcon = await compressImage(file, 512, 0.85);
+        const compReader = new FileReader();
+        compReader.onload = function(ev) {
+          uploadedAppIconBase64 = ev.target.result;
+          document.getElementById("appIconUrlInput").value = "";
+          document.getElementById("appIconStatus").innerText = "✔ تم تجهيز وضغط الأيقونة بنجاح!";
+          updateAppIconPreview(uploadedAppIconBase64);
+        };
+        compReader.readAsDataURL(compressedIcon);
+      } catch (err) {
+        uploadedAppIconBase64 = event.target.result;
+        document.getElementById("appIconStatus").innerText = "✔ تم تجهيز الأيقونة!";
+        updateAppIconPreview(uploadedAppIconBase64);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
 
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = document.getElementById("adminEmail").value.trim();
@@ -588,6 +658,20 @@ input:checked + .slider:before { transform: translateX(24px); }
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
         if(data.currencySymbol) document.getElementById("currencyInput").value = data.currencySymbol;
         if(data.fcmVapidKey) document.getElementById("fcmVapidKeyInput").value = data.fcmVapidKey;
+
+        if(data.appIconUrl) {
+          if (data.appIconUrl.startsWith("data:image")) {
+            uploadedAppIconBase64 = data.appIconUrl;
+          } else {
+            document.getElementById("appIconUrlInput").value = data.appIconUrl;
+          }
+          updateAppIconPreview(data.appIconUrl);
+        }
+
+        if(data.latestPushNotification) {
+          document.getElementById("customerNotifTitleInput").value = data.latestPushNotification.title || "";
+          document.getElementById("customerNotifBodyInput").value = data.latestPushNotification.body || "";
+        }
         
         if(data.aiConfig) {
           document.getElementById("aiEnabledToggle").checked = data.aiConfig.enabled !== false;
@@ -688,8 +772,13 @@ input:checked + .slider:before { transform: translateX(24px); }
         storeName: storeSettingsData.storeName || "المتجر"
       });
 
+      const latestPushNotification = { id: timestamp, title, body, timestamp };
+      storeSettingsData.latestPushNotification = latestPushNotification;
+      document.getElementById("customerNotifTitleInput").value = title;
+      document.getElementById("customerNotifBodyInput").value = body;
+
       await setDoc(doc(db, "settings", "store"), {
-        latestPushNotification: { id: timestamp, title, body, timestamp },
+        latestPushNotification,
         fcmVapidKey: vapidKey || storeSettingsData.fcmVapidKey || "",
         lastUpdated: timestamp
       }, { merge: true });
@@ -1061,6 +1150,24 @@ input:checked + .slider:before { transform: translateX(24px); }
     const whatsappNumber = document.getElementById("whatsappInput").value.trim();
     const currencySymbol = document.getElementById("currencyInput").value.trim() || "ج";
     const defaultImage = document.getElementById("defaultImageInput").value.trim();
+    const appIconUrlInputVal = document.getElementById("appIconUrlInput").value.trim();
+    const appIconUrl = uploadedAppIconBase64 || appIconUrlInputVal || "";
+
+    const customerNotifTitle = document.getElementById("customerNotifTitleInput").value.trim();
+    const customerNotifBody = document.getElementById("customerNotifBodyInput").value.trim();
+    const prevNotif = storeSettingsData.latestPushNotification || {};
+    const notifChanged =
+      customerNotifTitle !== (prevNotif.title || "") ||
+      customerNotifBody !== (prevNotif.body || "");
+
+    const latestPushNotification = customerNotifTitle
+      ? {
+          id: notifChanged || !prevNotif.id ? Date.now() : prevNotif.id,
+          title: customerNotifTitle,
+          body: customerNotifBody,
+          timestamp: notifChanged || !prevNotif.timestamp ? Date.now() : prevNotif.timestamp
+        }
+      : null;
     
     const aiEnabled = document.getElementById("aiEnabledToggle").checked;
     const aiApiKey = document.getElementById("aiApiKeyInput").value.trim();
@@ -1080,6 +1187,8 @@ input:checked + .slider:before { transform: translateX(24px); }
     storeSettingsData.whatsappNumber = whatsappNumber;
     storeSettingsData.currencySymbol = currencySymbol;
     storeSettingsData.defaultImage = defaultImage;
+    storeSettingsData.appIconUrl = appIconUrl;
+    storeSettingsData.latestPushNotification = latestPushNotification;
     storeSettingsData.aiConfig = { enabled: aiEnabled, apiKey: aiApiKey, temperature: aiTemperature };
     storeSettingsData.announcement = announcement;
     storeSettingsData.announcementCloseType = announcementCloseType;
@@ -1089,7 +1198,9 @@ input:checked + .slider:before { transform: translateX(24px); }
     await setDoc(doc(db, "settings", "store"), { 
       whatsappNumber, 
       currencySymbol, 
-      defaultImage, 
+      defaultImage,
+      appIconUrl,
+      latestPushNotification,
       aiConfig: { enabled: aiEnabled, apiKey: aiApiKey, temperature: aiTemperature },
       announcement,
       announcementCloseType,
@@ -1099,7 +1210,7 @@ input:checked + .slider:before { transform: translateX(24px); }
     }, { merge: true });
     
     renderReports();
-    alert("✨ تم حفظ كافة الإعدادات ومفاتيح التحكم بنجاح!");
+    alert("✨ تم حفظ كافة الإعدادات والأيقونة والإشعارات بنجاح!");
   });
 
   window.addNewCategory = async () => {

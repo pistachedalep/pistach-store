@@ -268,6 +268,53 @@
       flex-shrink: 0;
     }
 
+    /* نافذة شرح التثبيت اليدوي */
+    .manual-guide-box {
+      text-align: right;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px;
+      margin: 12px 0 16px 0;
+      font-size: 13px;
+      line-height: 1.65;
+      color: #0f172a;
+    }
+    body.dark-mode .manual-guide-box {
+      background: #0f172a;
+      border-color: #334155;
+      color: #f8fafc;
+    }
+    .manual-guide-title {
+      font-weight: 900;
+      font-size: 13.5px;
+      color: var(--primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    body.dark-mode .manual-guide-title {
+      color: var(--accent);
+    }
+    .manual-guide-steps {
+      padding-right: 18px;
+      font-weight: 700;
+    }
+    .manual-guide-steps li {
+      margin-bottom: 5px;
+    }
+    .manual-url-chip {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(212, 175, 55, 0.14);
+      border: 1px dashed var(--accent);
+      font-size: 11.5px;
+      font-weight: 800;
+      word-break: break-all;
+    }
+
     .whatsapp-header-btn {
       background: transparent !important;
       border: 1.5px solid #25d366; 
@@ -883,7 +930,7 @@
         <input type="text" id="searchInput" placeholder="ابحث عن حلوياتك..." oninput="window.filterProducts()">
       </div>
       <div class="header-actions">
-        <button class="install-app-btn" id="installStoreAppBtn" style="display: none;">📲 تثبيت التطبيق</button>
+        <button class="install-app-btn" id="installStoreAppBtn">📲 تثبيت التطبيق</button>
         <button class="control-btn" onclick="window.toggleDarkMode()" id="darkModeBtn">🌙 الداكن</button>
         <button class="control-btn" onclick="window.toggleLanguage()" id="langSwitchBtn">English 🌐</button>
         <button class="whatsapp-header-btn" id="contactBtn" onclick="window.openSocialModal()">💬 تواصل معنا</button>
@@ -896,6 +943,35 @@
     <span class="install-toast-text" id="installToastText">📲 ثبّت التطبيق على هاتفك</span>
     <button class="install-toast-cta" id="installToastCta">تثبيت</button>
     <button class="install-toast-close" id="installToastClose" aria-label="إغلاق">×</button>
+  </div>
+
+  <!-- نافذة شرح التثبيت اليدوي عندما لا يظهر prompt التثبيت التلقائي -->
+  <div class="social-modal-overlay" id="manualInstallModal" onclick="window.closeManualInstallModal()">
+    <div class="social-modal-card" onclick="event.stopPropagation()">
+      <img id="manualInstallIcon" src="https://cdn-icons-png.flaticon.com/512/906/906343.png" alt="أيقونة التطبيق" style="width:54px; height:54px; border-radius:14px; object-fit:cover; margin:0 auto 10px auto; border:1.5px solid var(--accent);">
+      <h3 id="manualInstallTitle" style="font-weight:900; color:var(--primary); font-size:18px; margin-bottom:4px;">📲 تثبيت تطبيق المتجر</h3>
+      <p id="manualInstallSub" style="color:#64748b; font-size:12px;">إذا لم تظهر نافذة التثبيت التلقائية، اتبع الخطوات اليدوية التالية:</p>
+
+      <div class="manual-guide-box">
+        <div class="manual-guide-title"><i class="fa-brands fa-android"></i> أندرويد (Chrome / متصفح الهاتف):</div>
+        <ol class="manual-guide-steps">
+          <li>افتح الرابط في متصفح <strong>Google Chrome</strong>.</li>
+          <li>اضغط على قائمة النقاط الثلاث <strong>(⋮)</strong> بالأعلى.</li>
+          <li>اختر <strong>تثبيت التطبيق</strong> أو <strong>إضافة إلى الشاشة الرئيسية</strong>.</li>
+        </ol>
+
+        <div class="manual-guide-title" style="margin-top:10px;"><i class="fa-brands fa-apple"></i> آيفون (Safari):</div>
+        <ol class="manual-guide-steps">
+          <li>افتح الرابط في متصفح <strong>Safari</strong>.</li>
+          <li>اضغط على زر المشاركة <strong>(مربع وبداخله سهم للأعلى)</strong>.</li>
+          <li>اختر <strong>إضافة إلى الشاشة الرئيسية</strong> ثم اضغط <strong>إضافة</strong>.</li>
+        </ol>
+
+        <div class="manual-url-chip" id="manualInstallUrlText"></div>
+      </div>
+
+      <button type="button" onclick="window.closeManualInstallModal()" class="btn-submit" style="background:var(--primary);">فهمت، إغلاق</button>
+    </div>
   </div>
 
   <div class="main-layout">
@@ -1049,6 +1125,27 @@
     let currentManifestUrl = null;
     let installToastTimer = null;
 
+    window.openManualInstallModal = () => {
+      const safeName = (storeSettings.storeName && storeSettings.storeName.trim()) || "بيستاش دي ألب";
+      const safeIcon = (storeSettings.appIconUrl && storeSettings.appIconUrl.trim()) || "https://cdn-icons-png.flaticon.com/512/906/906343.png";
+
+      const titleEl = document.getElementById("manualInstallTitle");
+      const iconEl = document.getElementById("manualInstallIcon");
+      const urlEl = document.getElementById("manualInstallUrlText");
+
+      if (titleEl) titleEl.innerText = `📲 تثبيت تطبيق ${safeName}`;
+      if (iconEl) iconEl.src = safeIcon;
+      if (urlEl) urlEl.innerText = `الرابط: ${window.location.href}`;
+
+      const modal = document.getElementById("manualInstallModal");
+      if (modal) modal.style.display = "flex";
+    };
+
+    window.closeManualInstallModal = () => {
+      const modal = document.getElementById("manualInstallModal");
+      if (modal) modal.style.display = "none";
+    };
+
     function hideInstallToast() {
       const toast = document.getElementById("installToastBanner");
       if (installToastTimer) {
@@ -1066,7 +1163,7 @@
       const toast = document.getElementById("installToastBanner");
       const textEl = document.getElementById("installToastText");
       const iconEl = document.getElementById("installToastIcon");
-      if (!toast || !deferredStorePrompt) return;
+      if (!toast) return;
 
       const safeName = (storeName && storeName.trim()) || "التطبيق";
       if (textEl) textEl.innerText = `📲 ثبّت تطبيق ${safeName}`;
@@ -1082,12 +1179,17 @@
     }
 
     async function triggerStoreInstall() {
-      if (!deferredStorePrompt) return;
       hideInstallToast();
+      if (!deferredStorePrompt) {
+        window.openManualInstallModal();
+        return;
+      }
       deferredStorePrompt.prompt();
       const { outcome } = await deferredStorePrompt.userChoice;
       if (outcome === "accepted") {
         if (installStoreBtn) installStoreBtn.style.display = "none";
+      } else {
+        window.openManualInstallModal();
       }
       deferredStorePrompt = null;
     }
@@ -1102,6 +1204,9 @@
 
         const toastIconEl = document.getElementById("installToastIcon");
         if (toastIconEl) toastIconEl.src = safeIcon;
+
+        const manualIconEl = document.getElementById("manualInstallIcon");
+        if (manualIconEl) manualIconEl.src = safeIcon;
 
         const manifestData = {
           name: safeName,

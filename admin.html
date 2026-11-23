@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة التحكم - المتجر</title>
+<meta name="theme-color" content="#122b20">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="لوحة التحكم">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 <!-- تضمين مكتبة Supabase للتخزين السحابي المجاني -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -81,7 +85,8 @@ input:checked + .slider:before { transform: translateX(24px); }
   <div id="dashboardPanel" style="display: none;">
     <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
       <h1 style="margin: 0; color: var(--primary); font-size: 22px; font-weight:900;" id="dashboardTitle">لوحة التحكم</h1>
-      <div style="display: flex; gap: 8px;">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn btn-primary" id="installAdminAppBtn" style="display: none; background: #1e293b;">📲 تثبيت تطبيق الإدارة</button>
         <button class="btn btn-warning" id="forceRefreshBtn" style="background: #f59e0b; color: #fff;">🔄 نشر التحديثات للزبائن</button>
         <button class="btn btn-danger" id="logoutBtn">تسجيل الخروج</button>
       </div>
@@ -92,6 +97,7 @@ input:checked + .slider:before { transform: translateX(24px); }
       <button onclick="switchTab('catTab', this)">🏷️ الأقسام</button>
       <button onclick="switchTab('themeTab', this)">🎨 الأبعاد والألوان</button>
       <button onclick="switchTab('oTab', this)">📋 الطلبات</button>
+      <button onclick="switchTab('notifTab', this)">🔔 الإشعارات</button>
       <button onclick="switchTab('dTab', this)">🛵 التوصيل والفروع</button>
       <button onclick="switchTab('sTab', this)">⚙️ الإعدادات والمساعد</button>
       <button onclick="switchTab('rTab', this)">📊 التقارير</button>
@@ -203,6 +209,40 @@ input:checked + .slider:before { transform: translateX(24px); }
         <div id="ordersContainer" style="text-align: center; padding: 25px; color: #64748b; font-weight: bold;">
           اضغط على زر "تحميل/تحديث الطلبات" أعلاه لجلب أحدث الطلبات وتوفير استهلاك القراءات.
         </div>
+      </div>
+    </div>
+
+    <!-- قسم الإشعارات المضاف -->
+    <div id="notifTab" class="tab-section">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+          <h2 style="margin:0;">🔔 إرسال إشعارات فورية للعملاء (Push Notifications)</h2>
+          <button class="btn btn-secondary" onclick="checkSubscribersCount()">🔄 تحديث عدد المشتركين</button>
+        </div>
+
+        <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #cbd5e1; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: bold; font-size: 14px;">📱 عدد الأجهزة المفعّلة للإشعارات:</span>
+          <strong id="subscribersCountDisplay" style="color: #10b981; font-size: 18px;">اضغط للتحديث</strong>
+        </div>
+
+        <div class="form-group">
+          <label>عنوان الإشعار *</label>
+          <input type="text" id="notifTitle" placeholder="مثال: عرض خاص لفترة محدودة! 🎉">
+        </div>
+        <div class="form-group">
+          <label>نص الرسالة *</label>
+          <textarea id="notifBody" rows="3" placeholder="مثال: خصم 20% على جميع أصناف البقلاوة والمعمول اليوم فقط..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>مفتاح الخادم السحابي (FCM Server Key / VAPID Key - اختياري للإرسال المباشر):</label>
+          <input type="text" id="fcmVapidKeyInput" placeholder="أدخل مفتاح VAPID العام من إعدادات Cloud Messaging في فايربيس">
+        </div>
+
+        <button class="btn btn-success" style="width: 100%; padding: 14px; font-size: 15px;" id="sendPushNotifBtn">🚀 نشر وإرسال الإشعار للعملاء</button>
+
+        <hr style="margin: 22px 0; border:none; border-top:1px solid #e2e8f0;">
+        <h3 style="font-size: 15px; margin-bottom: 10px;">📜 سجل آخر الإشعارات المرسلة:</h3>
+        <div id="notifHistoryContainer" style="color: #64748b; font-size: 13px;">لم يتم تحميل السجل بعد.</div>
       </div>
     </div>
 
@@ -410,6 +450,61 @@ input:checked + .slider:before { transform: translateX(24px); }
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // توليد تعريف تطبيق الإدارة داخلياً دون إنشاء ملفات خارجية
+  try {
+    const adminManifestData = {
+      name: "إدارة المتجر - لوحة التحكم",
+      short_name: "لوحة التحكم",
+      description: "تطبيق إدارة المتجر والمنتجات والطلبات",
+      start_url: window.location.href,
+      scope: window.location.href,
+      display: "standalone",
+      background_color: "#122b20",
+      theme_color: "#122b20",
+      dir: "rtl",
+      lang: "ar",
+      icons: [
+        {
+          src: "https://cdn-icons-png.flaticon.com/512/906/906343.png",
+          sizes: "192x192",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn-icons-png.flaticon.com/512/906/906343.png",
+          sizes: "512x512",
+          type: "image/png"
+        }
+      ]
+    };
+    const manifestBlob = new Blob([JSON.stringify(adminManifestData)], { type: "application/manifest+json" });
+    const manifestUrl = URL.createObjectURL(manifestBlob);
+    const linkEl = document.createElement("link");
+    linkEl.rel = "manifest";
+    linkEl.href = manifestUrl;
+    document.head.appendChild(linkEl);
+  } catch (e) { console.log("Inline manifest notice"); }
+
+  // إدارة زر تثبيت تطبيق الإدارة المستقل
+  let deferredAdminPrompt;
+  const installAdminBtn = document.getElementById("installAdminAppBtn");
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredAdminPrompt = e;
+    if (installAdminBtn) installAdminBtn.style.display = 'inline-flex';
+  });
+
+  if (installAdminBtn) {
+    installAdminBtn.addEventListener('click', async () => {
+      if (!deferredAdminPrompt) return;
+      deferredAdminPrompt.prompt();
+      const { outcome } = await deferredAdminPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installAdminBtn.style.display = 'none';
+      }
+      deferredAdminPrompt = null;
+    });
+  }
+
   const SUPABASE_URL = "https://your-project.supabase.co";
   const SUPABASE_ANON_KEY = "your-anon-key"; 
   let supabaseClient = null;
@@ -492,6 +587,7 @@ input:checked + .slider:before { transform: translateX(24px); }
         storeSettingsData = data;
         if(data.whatsappNumber) document.getElementById("whatsappInput").value = data.whatsappNumber;
         if(data.currencySymbol) document.getElementById("currencyInput").value = data.currencySymbol;
+        if(data.fcmVapidKey) document.getElementById("fcmVapidKeyInput").value = data.fcmVapidKey;
         
         if(data.aiConfig) {
           document.getElementById("aiEnabledToggle").checked = data.aiConfig.enabled !== false;
@@ -563,6 +659,57 @@ input:checked + .slider:before { transform: translateX(24px); }
       console.error("خطأ في جلب البيانات:", err);
     }
   }
+
+  // دوال الإشعارات المضافة
+  window.checkSubscribersCount = async () => {
+    const el = document.getElementById("subscribersCountDisplay");
+    el.innerText = "جاري الفحص...";
+    try {
+      const snap = await getDocs(collection(db, "fcm_tokens"));
+      el.innerText = snap.size + " جهاز";
+    } catch (e) {
+      el.innerText = "0 جهاز";
+    }
+  };
+
+  document.getElementById("sendPushNotifBtn").addEventListener("click", async () => {
+    const title = document.getElementById("notifTitle").value.trim();
+    const body = document.getElementById("notifBody").value.trim();
+    const vapidKey = document.getElementById("fcmVapidKeyInput").value.trim();
+
+    if (!title || !body) return alert("يرجى إدخال عنوان ونص الإشعار!");
+
+    try {
+      const timestamp = Date.now();
+      await addDoc(collection(db, "notifications"), {
+        title,
+        body,
+        createdAt: timestamp,
+        storeName: storeSettingsData.storeName || "المتجر"
+      });
+
+      await setDoc(doc(db, "settings", "store"), {
+        latestPushNotification: { id: timestamp, title, body, timestamp },
+        fcmVapidKey: vapidKey || storeSettingsData.fcmVapidKey || "",
+        lastUpdated: timestamp
+      }, { merge: true });
+
+      document.getElementById("notifTitle").value = "";
+      document.getElementById("notifBody").value = "";
+      
+      const hist = document.getElementById("notifHistoryContainer");
+      hist.innerHTML = `<div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:6px;">
+        <strong>${escapeHtml(title)}</strong><br>
+        <span>${escapeHtml(body)}</span><br>
+        <small style="color:#10b981;">✔ تم النشر بنجاح (${new Date(timestamp).toLocaleTimeString('ar-EG')})</small>
+      </div>` + (hist.innerHTML.includes("لم يتم") ? "" : hist.innerHTML);
+
+      alert("🚀 تم نشر وإرسال الإشعار بنجاح لجميع العملاء!");
+    } catch (e) {
+      console.error(e);
+      alert("حدث خطأ أثناء إرسال الإشعار.");
+    }
+  });
 
   window.fetchOrdersManual = async function() {
     const container = document.getElementById("ordersContainer");
@@ -721,7 +868,6 @@ input:checked + .slider:before { transform: translateX(24px); }
     for (let i = 0; i < files.length; i++) {
       let file = files[i];
       try {
-        // ضغط الصورة برمجياً أولاً لتوفير الحجم
         file = await compressImage(file, 1000, 0.75);
 
         if (!supabaseClient) {
@@ -870,7 +1016,6 @@ input:checked + .slider:before { transform: translateX(24px); }
     if (file) {
       const reader = new FileReader();
       reader.onload = async function(event) {
-        // ضغط خلفية المتجر أيضاً تلقائياً
         try {
           const compressedBg = await compressImage(file, 1200, 0.75);
           const compReader = new FileReader();
